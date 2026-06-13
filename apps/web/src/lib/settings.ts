@@ -73,7 +73,7 @@ export async function getSystemSettings(host?: string): Promise<SystemSettings> 
  
     return {
       appName: map.appName || defaultApp,
-      appLogo: map.appLogo || "",
+      appLogo: map.appLogo || "/logo.png",
       appEmail: map.appEmail || defaultEmail,
       upiId: map.upiId || "pogakula@ybl",
       landingHeroTitle: map.landingHeroTitle || "Build polished websites with AI in one flow.",
@@ -109,7 +109,7 @@ export async function getSystemSettings(host?: string): Promise<SystemSettings> 
     console.error("Error reading system settings from DB:", error);
     return {
       appName: defaultApp,
-      appLogo: "",
+      appLogo: "/logo.png",
       appEmail: defaultEmail,
       upiId: "pogakula@ybl",
       landingHeroTitle: "Build polished websites with AI in one flow.",

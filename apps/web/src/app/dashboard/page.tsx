@@ -131,7 +131,11 @@ export default async function DashboardPage() {
       <div className="app-shell">
         <header className="site-nav">
           <a className="brand" href="/">
-            <span className="brand-mark"><Sparkles size={18} /></span>
+            {systemSettings?.appLogo ? (
+              <img src={systemSettings.appLogo} alt={systemSettings?.appName || fallbackAppName} style={{ height: "24px", maxWidth: "120px", objectFit: "contain", marginRight: "0.25rem" }} />
+            ) : (
+              <span className="brand-mark"><Sparkles size={18} /></span>
+            )}
             {systemSettings?.appName || fallbackAppName}
           </a>
           <div className="nav-actions">

@@ -6,7 +6,7 @@ import { Sparkles, KeyRound, Globe, CheckCircle2, AlertTriangle, ShieldCheck } f
 
 export default function SetupPage() {
   const router = useRouter();
-  const [appName, setAppName] = useState("Webbing");
+  const [appName, setAppName] = useState("CursorWebs");
   const [adminName, setAdminName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
@@ -112,8 +112,8 @@ export default function SetupPage() {
         {/* Left Side: Copy and Steps */}
         <div style={{ flex: 1, minWidth: "280px", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           <a className="brand" href="/" style={{ fontSize: "1.4rem", fontWeight: 800, textDecoration: "none", color: "#fff", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span className="brand-mark" style={{ background: "linear-gradient(to right, #6366f1, #a855f7)", padding: "0.35rem", borderRadius: "0.375rem", display: "flex", color: "#fff" }}><Sparkles size={16} /></span>
-            {appName || "Webbing"}
+            <img src="/logo.png" alt="Logo" style={{ height: "28px", maxWidth: "120px", objectFit: "contain" }} />
+            {appName || "CursorWebs"}
           </a>
           <h1 style={{ fontSize: "2.5rem", fontWeight: 900, lineHeight: 1.1, margin: 0 }}>Install & Configure Your SaaS</h1>
           <p style={{ color: "#9ca3af", fontSize: "0.95rem", lineHeight: 1.6, margin: 0 }}>
