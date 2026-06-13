@@ -1,0 +1,385 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+enum Role {
+  USER
+  TEAM_MEMBER
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
+enum ProjectStatus {
+  DRAFT
+  GENERATING
+  FAILED
+  PUBLISHED
+}
+
+enum LlmProvider {
+  OPENAI
+  GEMINI
+  CLAUDE
+  DEEPSEEK
+  MINIMAX
+  KIMI
+  MISTRAL
+  GROQ
+  COHERE
+  OPENROUTER
+  CUSTOM
+}
+
+enum LlmKeyScope {
+  GLOBAL
+  USER
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String?
+  passwordHash  String?
+  image         String?
+  role          Role           @default(USER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  // Affiliate & Referrals
+  affiliateCode String?        @unique
+  referredBy    String?
+  referredByUser User?         @relation("ReferralRelation", fields: [referredBy], references: [id])
+  referrals     User[]         @relation("ReferralRelation")
+  commissions   AffiliateCommission[] @relation("ReferrerCommissions")
+  payoutRequests PayoutRequest[]
+
+  // Tenant / Team relationships
+  tenantId      String
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  memberships   TeamMember[]
+  apiKeys       ApiKey[]
+  projects      Project[]
+}
+
+model Tenant {
+  id                   String             @id @default(uuid())
+  name                 String
+  slug                 String             @unique // Subdomain e.g. "tenant.webbing.io"
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  
+  // Relations
+  users                User[]
+  projects             Project[]
+  subscription         Subscription?
+  usageMetrics         UsageMetric[]
+  teamMembers          TeamMember[]
+  paymentRequests      PaymentRequest[]
+  refundRequests       RefundRequest[]
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @default(TEAM_MEMBER)
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, userId])
+}
+
+model Subscription {
+  id                 String             @id @default(uuid())
+  tenantId           String             @unique
+  tenant             Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  planId             String             // stripe/razorpay price ID
+  status             SubscriptionStatus
+  stripeCustomerId   String?            @unique
+  stripeSubscriptionId String?          @unique
+  razorpaySubscriptionId String?        @unique
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean            @default(false)
+  creditsLimit       Int                @default(10) // Monthly allocation
+  creditsUsed        Int                @default(0)
+
+  // Configurable options
+  withLlm            Boolean            @default(true)
+  hostingType        String             @default("OURS") // "OURS", "THEIRS", "BOTH"
+  domainType         String             @default("SUBDOMAIN") // "SUBDOMAIN", "CUSTOM"
+
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+}
+
+model Project {
+  id            String        @id @default(uuid())
+  name          String
+  description   String?
+  subdomain     String        @unique
+  status        ProjectStatus @default(DRAFT)
+  theme         Json          // { primary: "#000", font: "Inter", etc. }
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Tenant reference
+  tenantId      String
+  tenant        Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Creator reference
+  userId        String?
+  user          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  // Custom Domain Mapping
+  customDomain  CustomDomain?
+  selfHosted    Boolean       @default(false)
+  
+  // Pages and Assets
+  pages         Page[]
+  assets        Asset[]
+  ecomStore     EcomStore?
+  contactSubmissions ContactSubmission[]
+}
+
+model Page {
+  id            String    @id @default(uuid())
+  projectId     String
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  slug          String    // e.g. "about", "contact"
+  title         String
+  description   String?
+  seoMetadata   Json?     // { title: "...", description: "...", keywords: [] }
+  sections      Section[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([projectId, slug])
+}
+
+model Section {
+  id            String   @id @default(uuid())
+  pageId        String
+  page          Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  type          String   // e.g. "HERO", "FEATURES", "FOOTER"
+  order         Int
+  content       Json     // Raw structured block content (headers, copy, CTA URLs)
+  styles        Json     // Section-specific Tailwind override classes or CSS variables
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model CustomDomain {
+  id            String   @id @default(uuid())
+  projectId     String   @unique
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  hostname      String   @unique // e.g. "customerdomain.com"
+  verified      Boolean  @default(false)
+  dnsToken      String   // TXT record value for validation
+  sslStatus     String   @default("PENDING") // PENDING, ACTIVE, FAILED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Asset {
+  id            String   @id @default(uuid())
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  url           String
+  key           String   // R2 Object key
+  fileSize      Int
+  mimeType      String
+  createdAt     DateTime @default(now())
+}
+
+model UsageMetric {
+  id            String   @id @default(uuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  actionType    String   // e.g. "AI_GENERATION", "IMAGE_OPTIMIZATION"
+  tokenCount    Int      @default(0)
+  creditsCost   Int      @default(1)
+  createdAt     DateTime @default(now())
+}
+
+model EcomStore {
+  id            String    @id @default(uuid())
+  projectId     String    @unique
+  project       Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  currency      String    @default("USD")
+  products      Product[]
+  orders        Order[]
+}
+
+model Product {
+  id            String    @id @default(uuid())
+  storeId       String
+  store         EcomStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  name          String
+  description   String
+  price         Decimal   @db.Decimal(10, 2)
+  images        String[]
+  inventory     Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Order {
+  id            String    @id @default(uuid())
+  storeId       String
+  store         EcomStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  customerEmail String
+  customerName  String
+  items         Json      // [{ productId, quantity, price }]
+  total         Decimal   @db.Decimal(10, 2)
+  status        String    @default("PENDING") // PENDING, PAID, SHIPPED, REFUNDED
+  paymentId     String?   // Stripe/Razorpay charge ID
+  createdAt     DateTime  @default(now())
+}
+
+model ApiKey {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key           String   @unique
+  createdAt     DateTime @default(now())
+}
+
+model LlmApiKey {
+  id            String       @id @default(uuid())
+  provider      LlmProvider
+  label         String
+  secret        String
+  maskedKey     String
+  baseUrl       String?
+  model         String?
+  scope         LlmKeyScope  @default(USER)
+  ownerUserId   String?
+  createdById   String?
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([scope])
+  @@index([ownerUserId])
+  @@index([provider])
+}
+
+model Plan {
+  id           String   @id @default(uuid())
+  name         String   @unique
+  price        Int      // Price in INR
+  creditsLimit Int      // Credit limit
+  features     String   // Comma-separated list of features
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SystemSetting {
+  key   String @id
+  value String
+}
+
+model PaymentRequest {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  planId      String
+  amount      Int
+  utr         String   @unique
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  commissions AffiliateCommission[]
+  refundRequest RefundRequest?
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  tenantId  String
+  userId    String
+  userEmail String
+  type      String   // BUG or FEEDBACK
+  title     String
+  message   String   @db.Text
+  status    String   @default("OPEN") // OPEN, RESOLVED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ContactSubmission {
+  id          String   @id @default(uuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name        String
+  email       String
+  message     String   @db.Text
+  createdAt   DateTime @default(now())
+}
+
+model AffiliateCommission {
+  id               String         @id @default(uuid())
+  referrerId       String
+  referrer         User           @relation("ReferrerCommissions", fields: [referrerId], references: [id], onDelete: Cascade)
+  refereeId        String
+  amount           Int            // Commission in INR
+  paymentRequestId String
+  paymentRequest   PaymentRequest @relation(fields: [paymentRequestId], references: [id], onDelete: Cascade)
+  status           String         @default("PENDING") // PENDING, AVAILABLE, WITHDRAWN, CANCELLED
+  availableAt      DateTime       // Mature date (createdAt + 10 days)
+  createdAt        DateTime       @default(now())
+}
+
+model PayoutRequest {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  upiId      String   // PhonePe/GPay number or ID
+  amount     Int      // Amount requested in INR
+  status     String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model RefundRequest {
+  id               String         @id @default(uuid())
+  tenantId         String
+  tenant           Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  paymentRequestId String         @unique
+  paymentRequest   PaymentRequest @relation(fields: [paymentRequestId], references: [id], onDelete: Cascade)
+  amountPaid       Int
+  creditsUsed      Int
+  refundAmount     Int
+  status           String         @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model CentralLicense {
+  id           String   @id @default(uuid())
+  licenseKey   String   @unique
+  status       String   @default("ACTIVE") // ACTIVE, REVOKED
+  type         String   @default("CUSTOM") // CUSTOM, ENVATO
+  domain       String?  // The domain name where it is currently activated (to enforce single-domain use)
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+
+
