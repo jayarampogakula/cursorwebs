@@ -1423,8 +1423,8 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                     {!selectedUpgradePlan ? (
                       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                         
-                        {/* Tab Selector: Only show if user can buy credits and is NOT on agency plan (since Agency has only credits purchase anyway) */}
-                        {canBuyCredits && !isAgency && (
+                        {/* Tab Selector: Show for everyone to toggle between plans and credit packs */}
+                        {canBuyCredits && (
                           <div style={{ display: "flex", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "0.5rem", padding: "0.25rem" }}>
                             <button 
                               type="button"
