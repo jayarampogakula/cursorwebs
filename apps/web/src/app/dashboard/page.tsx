@@ -158,7 +158,7 @@ export default async function DashboardPage() {
   }
 
   if (!tenant) {
-    return <div className="app-shell"><main className="app-main"><div className="form-alert">Workspace not found. Please contact support.</div></main></div>;
+    redirect("/api/auth/signout");
   }
 
   const mergedUser = { ...user, ...dbUserObj };
