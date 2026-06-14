@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Mail, Check, LogOut, Settings, MessageSquare, Sparkles, Lock, ArrowRight, User } from "lucide-react";
+import { Mail, Check, LogOut, Settings, MessageSquare, Sparkles, Lock, ArrowRight, User, Eye, EyeOff } from "lucide-react";
 
 interface ClientDashboardProps {
   projectId: string;
@@ -16,6 +16,8 @@ export default function ClientDashboard({ projectId, projectSubdomain, baseDomai
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
 
   // Dashboard states
   const [activeTab, setActiveTab] = useState<"leads" | "branding">("leads");
@@ -168,15 +170,36 @@ export default function ClientDashboard({ projectId, projectSubdomain, baseDomai
 
               <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
                 <label style={{ fontSize: "0.8rem", color: "#9ca3af", fontWeight: 600 }}>Access Password</label>
-                <input 
-                  type="password" 
-                  required
-                  style={{ width: "100%", padding: "0.75rem 1rem", borderRadius: "0.5rem", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#fff", fontSize: "0.9rem" }}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  disabled={loading}
-                />
+                <div style={{ position: "relative", width: "100%" }}>
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    required
+                    style={{ width: "100%", padding: "0.75rem 2.5rem 0.75rem 1rem", borderRadius: "0.5rem", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#fff", fontSize: "0.9rem" }}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: "absolute",
+                      right: "0.75rem",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      color: "#9ca3af",
+                      cursor: "pointer",
+                      padding: 0,
+                      display: "flex",
+                      alignItems: "center"
+                    }}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
 
               <button 

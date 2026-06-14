@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogIn, Sparkles } from "lucide-react";
+import { LogIn, Sparkles, Eye, EyeOff } from "lucide-react";
 import MarketingHeader from "../components/MarketingHeader";
 import { useSystemSettings } from "@/hooks/useSystemSettings";
 
@@ -13,10 +13,10 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   
-  // Forgot Password state
   const [forgotMode, setForgotMode] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotSuccess, setForgotSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   
   const { settings } = useSystemSettings();
 
@@ -130,7 +130,37 @@ export default function SignInPage() {
                 <label style={{ margin: 0 }}>Password</label>
                 <button type="button" onClick={() => { setForgotMode(true); setError(""); setForgotSuccess(""); }} style={{ background: "none", border: "none", color: "#818cf8", fontSize: "0.8rem", cursor: "pointer", padding: 0 }}>Forgot password?</button>
               </div>
-              <input className="field" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" disabled={loading} required />
+              <div style={{ position: "relative", width: "100%" }}>
+                <input 
+                  className="field" 
+                  type={showPassword ? "text" : "password"} 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  placeholder="Your password" 
+                  disabled={loading} 
+                  required 
+                  style={{ paddingRight: "2.5rem", width: "100%" }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    right: "0.75rem",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    color: "#9ca3af",
+                    cursor: "pointer",
+                    padding: 0,
+                    display: "flex",
+                    alignItems: "center"
+                  }}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
             <button className="primary-action" style={{ width: "100%", marginTop: "1.25rem" }} disabled={loading}>
               <LogIn size={17} />
