@@ -18,32 +18,21 @@ export interface SystemSettings {
 }
 
 export function useSystemSettings() {
-  const [settings, setSettings] = useState<SystemSettings>(() => {
-    const isCursorWebs = typeof window !== "undefined" && 
-      (window.location.hostname.includes("cursonwebs") || window.location.hostname.includes("cursorwebs"));
-    
-    return {
-      appName: isCursorWebs ? "CursorWebs" : "Webbing",
-      appLogo: isCursorWebs ? "/logo.png" : "",
-      appEmail: isCursorWebs ? "support@cursorwebs.com" : "support@webbing.in",
-      landingHeroTitle: "Build polished websites with AI in one flow.",
-      landingHeroSubtitle: isCursorWebs
-        ? "Describe the business once and CursorWebs assembles a modern site with home, features, pricing, about, contact, hosting, and provider-aware AI routing."
-        : "Describe the business once and Webbing assembles a modern site with home, features, pricing, about, contact, hosting, and provider-aware AI routing.",
-      landingAboutTitle: isCursorWebs
-        ? "CursorWebs is built for fast, useful site production."
-        : "Webbing is built for fast, useful site production.",
-      landingAboutText: "The platform combines prompt-driven generation, reusable page sections, publishing workflows, and admin-level provider controls so teams can build without wrestling with scattered tools.",
-      landingContactTitle: "Need a custom workflow?",
-      landingContactText: isCursorWebs
-        ? "Reach the CursorWebs team for provider setup, agency plans, domain support, and enterprise onboarding."
-        : "Reach the Webbing team for provider setup, agency plans, domain support, and enterprise onboarding.",
-      landingContactEmail: isCursorWebs ? "support@cursorwebs.com" : "support@webbing.in",
-      landingFeatures: "",
-      policyPrivacy: "",
-      policyTerms: "",
-      policyRefund: "",
-    };
+  const [settings, setSettings] = useState<SystemSettings>({
+    appName: "CursorWebs",
+    appLogo: "/logo.png",
+    appEmail: "support@cursorwebs.com",
+    landingHeroTitle: "Build polished websites with AI in one flow.",
+    landingHeroSubtitle: "Describe the business once and CursorWebs assembles a modern site with home, features, pricing, about, contact, hosting, and provider-aware AI routing.",
+    landingAboutTitle: "CursorWebs is built for fast, useful site production.",
+    landingAboutText: "The platform combines prompt-driven generation, reusable page sections, publishing workflows, and admin-level provider controls so teams can build without wrestling with scattered tools.",
+    landingContactTitle: "Need a custom workflow?",
+    landingContactText: "Reach the CursorWebs team for provider setup, agency plans, domain support, and enterprise onboarding.",
+    landingContactEmail: "support@cursorwebs.com",
+    landingFeatures: "",
+    policyPrivacy: "",
+    policyTerms: "",
+    policyRefund: "",
   });
   const [loading, setLoading] = useState(true);
 
