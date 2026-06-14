@@ -4320,6 +4320,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                                 setNewClientEmail("");
                                 setNewClientPassword("");
                               }}
+                              type="button"
                               className="primary-action"
                               style={{ width: "fit-content", alignSelf: "flex-end", padding: "0.4rem 1rem", fontSize: "0.8rem", background: "#818cf8", color: "#fff", border: 0, borderRadius: "0.3rem", cursor: "pointer", fontWeight: 700 }}
                             >
