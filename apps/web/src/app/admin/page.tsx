@@ -65,9 +65,10 @@ export default async function AdminPage() {
   let payoutRequests: any[] = [];
   let refundRequests: any[] = [];
   let systemSettings: any = null;
+  let usageMetrics: any[] = [];
 
   try {
-    const [dbUsers, dbProjects, dbSubscriptions, dbTotalTenants, dbLlmKeys, dbPlans, dbRequests, dbSettings, dbFeedbacks, dbPayouts, dbRefunds, dbDiscounts] = await Promise.all([
+    const [dbUsers, dbProjects, dbSubscriptions, dbTotalTenants, dbLlmKeys, dbPlans, dbRequests, dbSettings, dbFeedbacks, dbPayouts, dbRefunds, dbDiscounts, dbUsageMetrics] = await Promise.all([
       prisma.user.findMany({ include: { tenant: true }, orderBy: { createdAt: "desc" } }),
       prisma.project.findMany({ include: { tenant: true, customDomain: true, user: true }, orderBy: { createdAt: "desc" } }),
       prisma.subscription.findMany({ include: { tenant: true }, orderBy: { createdAt: "desc" } }),
@@ -79,7 +80,8 @@ export default async function AdminPage() {
       prisma.feedback.findMany({ orderBy: { createdAt: "desc" } }),
       prisma.payoutRequest.findMany({ include: { user: true }, orderBy: { createdAt: "desc" } }),
       prisma.refundRequest.findMany({ include: { tenant: true, paymentRequest: true }, orderBy: { createdAt: "desc" } }),
-      prisma.systemSetting.findMany({ where: { key: { startsWith: "yearlyDiscount_" } } })
+      prisma.systemSetting.findMany({ where: { key: { startsWith: "yearlyDiscount_" } } }),
+      prisma.usageMetric.findMany({ orderBy: { createdAt: "desc" } })
     ]);
     users = dbUsers;
     projects = dbProjects;
@@ -97,6 +99,7 @@ export default async function AdminPage() {
     upiId = dbSettings.upiId || "pogakula@ybl";
     payoutRequests = dbPayouts;
     refundRequests = dbRefunds;
+    usageMetrics = dbUsageMetrics || [];
   } catch (error) {
     console.error("Admin data load failed:", error);
     return (
@@ -171,6 +174,7 @@ export default async function AdminPage() {
             protocol={protocol}
             initialSettings={systemSettings}
             enableLicenseGenerator={enableLicenseGenerator}
+            initialUsageMetrics={usageMetrics}
           />
         </div>
       );

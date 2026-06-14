@@ -90,6 +90,7 @@ interface AdminConsoleProps {
   protocol: string;
   initialSettings?: any;
   enableLicenseGenerator?: boolean;
+  initialUsageMetrics?: any[];
 }
 
 const emailTemplates = {
@@ -420,6 +421,7 @@ export default function AdminConsole({
   protocol,
   initialSettings,
   enableLicenseGenerator = false,
+  initialUsageMetrics = [],
 }: AdminConsoleProps) {
   // States
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -430,6 +432,7 @@ export default function AdminConsole({
   const [feedbacks, setFeedbacks] = useState<any[]>(initialFeedbacks || []);
   const [payouts, setPayouts] = useState<any[]>(initialPayouts || []);
   const [refunds, setRefunds] = useState<any[]>(initialRefunds || []);
+  const [trendTab, setTrendTab] = useState<"day" | "month" | "year">("month");
 
   // Search & Pagination States
   const [userSearch, setUserSearch] = useState("");
@@ -1296,17 +1299,77 @@ export default function AdminConsole({
             return acc;
           }, {} as Record<string, number>);
 
-          const freeCount = planCounts["free"] || 0;
-          const proCount = planCounts["pro"] || 0;
-          const agencyCount = planCounts["agency"] || 0;
+          const freeCount = (planCounts["free"] || 0) + (planCounts["free-plan"] || 0) + (planCounts["starter"] || 0);
+          const individualCount = (planCounts["individual"] || 0) + (planCounts["individual-plan"] || 0);
+          const proCount = (planCounts["pro"] || 0) + (planCounts["pro-plan"] || 0);
+          const agencyCount = (planCounts["agency"] || 0) + (planCounts["agency-plan"] || 0);
           const otherCount = Object.keys(planCounts).reduce((acc, key) => {
-            if (key !== "free" && key !== "pro" && key !== "agency") {
+            if (
+              key !== "free" && key !== "free-plan" && key !== "starter" &&
+              key !== "individual" && key !== "individual-plan" &&
+              key !== "pro" && key !== "pro-plan" &&
+              key !== "agency" && key !== "agency-plan"
+            ) {
               acc += planCounts[key];
             }
             return acc;
           }, 0);
 
-          const totalPlansCount = freeCount + proCount + agencyCount + otherCount;
+          const totalPlansCount = freeCount + individualCount + proCount + agencyCount + otherCount;
+
+          // 1. Calculate Revenue
+          const totalRevenue = (requests || [])
+            .filter(r => r.status === "APPROVED")
+            .reduce((acc, r) => acc + (r.amount || 0), 0);
+
+          // 2. Calculate Tokens
+          const usageMetrics = initialUsageMetrics || [];
+          const totalTokens = usageMetrics.reduce((acc, m) => acc + (m.tokenCount || 0), 0);
+          const approxLlmBill = (totalTokens / 1000) * 1.5;
+          const profit = totalRevenue - approxLlmBill;
+
+          // Helper to format dates for aggregation
+          const getDayStr = (d: Date) => d.toISOString().split("T")[0]; // YYYY-MM-DD
+          const getMonthStr = (d: Date) => d.toISOString().substring(0, 7); // YYYY-MM
+          const getYearStr = (d: Date) => d.toISOString().substring(0, 4); // YYYY
+
+          // Aggregate users by period
+          const usersByDay: Record<string, number> = {};
+          const usersByMonth: Record<string, number> = {};
+          const usersByYear: Record<string, number> = {};
+          
+          (users || []).forEach(u => {
+            if (!u.createdAt) return;
+            const date = new Date(u.createdAt);
+            if (isNaN(date.getTime())) return;
+            
+            const day = getDayStr(date);
+            const month = getMonthStr(date);
+            const year = getYearStr(date);
+            
+            usersByDay[day] = (usersByDay[day] || 0) + 1;
+            usersByMonth[month] = (usersByMonth[month] || 0) + 1;
+            usersByYear[year] = (usersByYear[year] || 0) + 1;
+          });
+
+          // Aggregate tokens by period
+          const tokensByDay: Record<string, number> = {};
+          const tokensByMonth: Record<string, number> = {};
+          const tokensByYear: Record<string, number> = {};
+
+          usageMetrics.forEach(m => {
+            if (!m.createdAt) return;
+            const date = new Date(m.createdAt);
+            if (isNaN(date.getTime())) return;
+
+            const day = getDayStr(date);
+            const month = getMonthStr(date);
+            const year = getYearStr(date);
+
+            tokensByDay[day] = (tokensByDay[day] || 0) + (m.tokenCount || 0);
+            tokensByMonth[month] = (tokensByMonth[month] || 0) + (m.tokenCount || 0);
+            tokensByYear[year] = (tokensByYear[year] || 0) + (m.tokenCount || 0);
+          });
           const recentPayments = [...(requests || [])]
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
             .slice(0, 4);
@@ -1363,6 +1426,7 @@ export default function AdminConsole({
                     {totalPlansCount > 0 ? (
                       <>
                         {freeCount > 0 && <div style={{ width: `${(freeCount / totalPlansCount) * 100}%`, background: "#94a3b8" }} />}
+                        {individualCount > 0 && <div style={{ width: `${(individualCount / totalPlansCount) * 100}%`, background: "#34d399" }} />}
                         {proCount > 0 && <div style={{ width: `${(proCount / totalPlansCount) * 100}%`, background: "#818cf8" }} />}
                         {agencyCount > 0 && <div style={{ width: `${(agencyCount / totalPlansCount) * 100}%`, background: "#c084fc" }} />}
                         {otherCount > 0 && <div style={{ width: `${(otherCount / totalPlansCount) * 100}%`, background: "#f59e0b" }} />}
@@ -1377,6 +1441,11 @@ export default function AdminConsole({
                       <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#94a3b8" }} />
                       <span style={{ fontSize: "0.75rem", color: "#fff", fontWeight: 600 }}>Free: {freeCount}</span>
                       <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>({totalPlansCount > 0 ? Math.round((freeCount / totalPlansCount) * 100) : 0}%)</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#34d399" }} />
+                      <span style={{ fontSize: "0.75rem", color: "#fff", fontWeight: 600 }}>Individual: {individualCount}</span>
+                      <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>({totalPlansCount > 0 ? Math.round((individualCount / totalPlansCount) * 100) : 0}%)</span>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                       <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#818cf8" }} />
@@ -1396,6 +1465,112 @@ export default function AdminConsole({
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
+
+              {/* Analytics & Financial Intelligence Report Panel */}
+              <div className="surface-panel" style={{ padding: "2rem", marginBottom: "2.5rem", borderRadius: "0.75rem", border: "1px solid var(--line)" }}>
+                <span className="eyebrow" style={{ color: "#a855f7" }}>Financial & AI Intelligence</span>
+                <h3 style={{ margin: "0.25rem 0 0.5rem 0", color: "#fff", fontSize: "1.25rem", fontWeight: 850 }}>Platform Financials & Token Usage</h3>
+                <p style={{ color: "var(--muted)", fontSize: "0.85rem", margin: "0 0 1.5rem 0" }}>
+                  Detailed analysis of revenue streams, estimated model hosting costs, profit margins, and generation workloads.
+                </p>
+
+                {/* 3 Metrics Cards */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1.25rem", marginBottom: "2rem" }}>
+                  <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", padding: "1.25rem", borderRadius: "0.5rem" }}>
+                    <span style={{ fontSize: "0.75rem", color: "#9ca3af", display: "block" }}>TOTAL REVENUE</span>
+                    <strong style={{ fontSize: "1.4rem", color: "#34d399", display: "block", marginTop: "0.25rem" }}>₹{totalRevenue.toLocaleString("en-IN")}</strong>
+                    <span style={{ fontSize: "0.7rem", color: "#6b7280" }}>Including upgrades & credit purchases</span>
+                  </div>
+                  <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", padding: "1.25rem", borderRadius: "0.5rem" }}>
+                    <span style={{ fontSize: "0.75rem", color: "#9ca3af", display: "block" }}>ESTIMATED LLM BILL</span>
+                    <strong style={{ fontSize: "1.4rem", color: "#f87171", display: "block", marginTop: "0.25rem" }}>₹{approxLlmBill.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</strong>
+                    <span style={{ fontSize: "0.7rem", color: "#6b7280" }}>Calculated at ₹1.5 per 1K tokens ({totalTokens.toLocaleString()} tokens)</span>
+                  </div>
+                  <div style={{ background: "rgba(99, 102, 241, 0.05)", border: "1px solid rgba(99, 102, 241, 0.15)", padding: "1.25rem", borderRadius: "0.5rem" }}>
+                    <span style={{ fontSize: "0.75rem", color: "#c084fc", display: "block" }}>ESTIMATED PLATFORM PROFIT</span>
+                    <strong style={{ fontSize: "1.4rem", color: "#c084fc", display: "block", marginTop: "0.25rem" }}>₹{profit.toLocaleString("en-IN", { maximumFractionDigits: 2 })}</strong>
+                    <span style={{ fontSize: "0.7rem", color: "#a78bfa" }}>Revenue minus estimated LLM bill</span>
+                  </div>
+                </div>
+
+                {/* Trend Selector Controls */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "0.75rem", marginBottom: "1rem" }}>
+                  <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#fff" }}>Periodic Growth & Workload Trends</span>
+                  <div style={{ display: "flex", gap: "0.5rem", background: "rgba(255,255,255,0.03)", padding: "0.2rem", borderRadius: "0.375rem" }}>
+                    {(["day", "month", "year"] as const).map((tab) => (
+                      <button
+                        key={tab}
+                        type="button"
+                        onClick={() => setTrendTab(tab)}
+                        style={{
+                          background: trendTab === tab ? "rgba(129, 140, 248, 0.15)" : "transparent",
+                          border: "none",
+                          color: trendTab === tab ? "#818cf8" : "#9ca3af",
+                          padding: "0.3rem 0.75rem",
+                          borderRadius: "0.25rem",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          cursor: "pointer"
+                        }}
+                      >
+                        {tab === "day" ? "Day-wise" : tab === "month" ? "Month-wise" : "Year-wise"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Trends Data Table */}
+                <div style={{ maxHeight: "250px", overflowY: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem", textAlign: "left" }}>
+                    <thead>
+                      <tr style={{ color: "#9ca3af", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.01)" }}>
+                        <th style={{ padding: "0.5rem" }}>Period / Date</th>
+                        <th style={{ padding: "0.5rem" }}>New Users</th>
+                        <th style={{ padding: "0.5rem" }}>Tokens Consumed</th>
+                        <th style={{ padding: "0.5rem" }}>Estimated LLM Cost</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        const userMap = trendTab === "day" ? usersByDay : trendTab === "month" ? usersByMonth : usersByYear;
+                        const tokenMap = trendTab === "day" ? tokensByDay : trendTab === "month" ? tokensByMonth : tokensByYear;
+                        const allPeriods = Array.from(new Set([...Object.keys(userMap), ...Object.keys(tokenMap)]))
+                          .sort((a, b) => b.localeCompare(a));
+
+                        if (allPeriods.length === 0) {
+                          return (
+                            <tr>
+                              <td colSpan={4} style={{ textAlign: "center", color: "#6b7280", padding: "1.5rem" }}>No trend data recorded.</td>
+                            </tr>
+                          );
+                        }
+
+                        return allPeriods.map((period) => {
+                          const usersCount = userMap[period] || 0;
+                          const tokensCount = tokenMap[period] || 0;
+                          const cost = (tokensCount / 1000) * 1.5;
+
+                          let displayPeriod = period;
+                          if (trendTab === "month") {
+                            const [yr, mo] = period.split("-");
+                            const date = new Date(parseInt(yr), parseInt(mo) - 1, 1);
+                            displayPeriod = date.toLocaleString("default", { month: "long", year: "numeric" });
+                          }
+
+                          return (
+                            <tr key={period} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                              <td style={{ padding: "0.5rem", color: "#fff", fontWeight: 600 }}>{displayPeriod}</td>
+                              <td style={{ padding: "0.5rem", color: "#cbd5e1" }}>{usersCount}</td>
+                              <td style={{ padding: "0.5rem", color: "#cbd5e1" }}>{tokensCount.toLocaleString()}</td>
+                              <td style={{ padding: "0.5rem", color: "#f87171" }}>₹{cost.toFixed(2)}</td>
+                            </tr>
+                          );
+                        });
+                      })()}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
