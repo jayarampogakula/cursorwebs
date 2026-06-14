@@ -124,6 +124,8 @@ export async function POST(req: Request) {
         });
 
         // 2. Upgrade Tenant Subscription
+        const planKey = plan.name.toLowerCase();
+        const isCustomAllowed = planKey.includes("pro") || planKey.includes("agency");
         const sub = await tx.subscription.upsert({
           where: { tenantId: request.tenantId },
           update: {
@@ -132,8 +134,8 @@ export async function POST(req: Request) {
             creditsLimit: plan.creditsLimit,
             creditsUsed: 0, // Reset credits used
             withLlm: true,
-            hostingType: "BOTH",
-            domainType: "CUSTOM" // Grant custom domain capabilities
+            hostingType: isCustomAllowed ? "BOTH" : "OURS",
+            domainType: isCustomAllowed ? "CUSTOM" : "SUBDOMAIN"
           },
           create: {
             tenantId: request.tenantId,
@@ -144,8 +146,8 @@ export async function POST(req: Request) {
             creditsLimit: plan.creditsLimit,
             creditsUsed: 0,
             withLlm: true,
-            hostingType: "BOTH",
-            domainType: "CUSTOM"
+            hostingType: isCustomAllowed ? "BOTH" : "OURS",
+            domainType: isCustomAllowed ? "CUSTOM" : "SUBDOMAIN"
           }
         });
         

@@ -60,11 +60,11 @@ export async function POST(
       });
       if (response.ok && response.status === 200) {
         const html = await response.text();
-        // Check that the generated code is not empty and includes standard tags
-        if (html.includes("site-preview")) {
+        // Check that the generated code is not empty and does not contain rendering exceptions
+        if (html && html.trim().length > 100 && !html.includes("Preview Rendering Exception") && !html.includes("Internal Server Error")) {
           renderSuccess = true;
         } else {
-          renderError = "Preview page content is corrupted or missing container classes.";
+          renderError = "Preview page content contains rendering errors or is empty.";
         }
       } else {
         renderError = `Internal renderer returned status code: ${response.status}`;

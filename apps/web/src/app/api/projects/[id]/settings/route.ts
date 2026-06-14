@@ -111,8 +111,9 @@ export async function POST(
     if (customDomain !== undefined) {
       const hostname = customDomain.trim().toLowerCase();
       if (hostname) {
-        const planId = project.tenant?.subscription?.planId || "free-plan";
-        if (planId === "free-plan" || planId === "starter") {
+        const subscription = project.tenant?.subscription;
+        const isCustomDomainAllowed = user.role === "ADMIN" || subscription?.domainType === "CUSTOM";
+        if (!isCustomDomainAllowed) {
           return NextResponse.json({ error: "Custom domain mapping is only available on Pro and Agency plans. Please upgrade." }, { status: 400 });
         }
       }
