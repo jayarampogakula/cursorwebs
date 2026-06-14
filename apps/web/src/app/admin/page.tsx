@@ -104,7 +104,7 @@ export default async function AdminPage() {
         <header className="site-nav">
           <a className="brand" href="/">
             {systemSettings?.appLogo ? (
-              <img src={systemSettings.appLogo} alt={systemSettings?.appName || fallbackAppName} style={{ height: "24px", maxWidth: "120px", objectFit: "contain", marginRight: "0.25rem" }} />
+              <img src={systemSettings.appLogo} alt={systemSettings.appName || fallbackAppName} style={{ height: "24px", maxWidth: "100px", objectFit: "contain", marginRight: "0.25rem" }} />
             ) : (
               <span className="brand-mark"><Sparkles size={18} /></span>
             )}
@@ -142,7 +142,7 @@ export default async function AdminPage() {
           <header className="site-nav" style={{ borderBottom: "1px solid var(--line)", margin: 0, background: "var(--panel)" }}>
             <a className="brand" href="/">
               {systemSettings?.appLogo ? (
-                <img src={systemSettings.appLogo} alt={systemSettings?.appName || fallbackAppName} style={{ height: "24px", maxWidth: "120px", objectFit: "contain", marginRight: "0.25rem" }} />
+                <img src={systemSettings.appLogo} alt={systemSettings.appName || fallbackAppName} style={{ height: "24px", maxWidth: "100px", objectFit: "contain", marginRight: "0.25rem" }} />
               ) : (
                 <span className="brand-mark"><Sparkles size={18} /></span>
               )}
