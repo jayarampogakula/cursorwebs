@@ -66,6 +66,13 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
+        <script dangerouslySetInnerHTML={{ __html: `
+          window.addEventListener('error', function(e) {
+            if (e.message && (e.message.indexOf('ChunkLoadError') !== -1 || e.message.indexOf('Loading chunk') !== -1)) {
+              window.location.reload();
+            }
+          });
+        `}} />
         <style dangerouslySetInnerHTML={{ __html: `
           :root {
             color-scheme: ${colorScheme};
