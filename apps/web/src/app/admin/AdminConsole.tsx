@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Check, X, Shield, Plus, Trash2, Edit2, Sparkles, DollarSign, Layers, Users, Key, ChevronLeft, ChevronRight, Home, MessageSquare, Mail, Sliders } from "lucide-react";
+import { Check, X, Shield, Plus, Trash2, Edit2, Sparkles, DollarSign, Layers, Users, Key, ChevronLeft, ChevronRight, Home, MessageSquare, Mail, Sliders, Globe, Search } from "lucide-react";
 import PlanEditor from "./PlanEditor";
 import UserEditor from "./UserEditor";
 import LlmKeyManager from "../components/LlmKeyManager";
@@ -423,13 +423,65 @@ export default function AdminConsole({
 }: AdminConsoleProps) {
   // States
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState<"dashboard" | "users" | "keys" | "plans" | "payments" | "feedback" | "emails" | "payouts" | "refunds" | "branding">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "websites" | "users" | "keys" | "plans" | "payments" | "feedback" | "emails" | "payouts" | "refunds" | "branding">("dashboard");
   const [upiId, setUpiId] = useState(initialUpiId);
   const [plans, setPlans] = useState<Plan[]>(initialPlans || []);
   const [requests, setRequests] = useState<PaymentRequest[]>(initialRequests || []);
   const [feedbacks, setFeedbacks] = useState<any[]>(initialFeedbacks || []);
   const [payouts, setPayouts] = useState<any[]>(initialPayouts || []);
   const [refunds, setRefunds] = useState<any[]>(initialRefunds || []);
+
+  // Search & Pagination States
+  const [userSearch, setUserSearch] = useState("");
+  const [userPage, setUserPage] = useState(0);
+  const [subSearch, setSubSearch] = useState("");
+  const [subPage, setSubPage] = useState(0);
+  const [projectSearch, setProjectSearch] = useState("");
+  const [projectPage, setProjectPage] = useState(0);
+  const ITEMS_PER_PAGE = 10;
+
+  const renderSearchBar = (value: string, onChange: (val: string) => void, placeholder: string) => (
+    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "rgba(255,255,255,0.03)", border: "1px solid var(--line)", borderRadius: "0.5rem", padding: "0.4rem 0.75rem", width: "100%", maxWidth: "320px" }}>
+      <Search size={16} style={{ color: "var(--muted)" }} />
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{ background: "none", border: "none", color: "#fff", outline: "none", fontSize: "0.85rem", width: "100%" }}
+      />
+    </div>
+  );
+
+  const renderPagination = (currentPage: number, totalItems: number, onPageChange: (page: number) => void) => {
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    if (totalPages <= 1) return null;
+    return (
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1rem", padding: "0.5rem 0" }}>
+        <span style={{ fontSize: "0.8rem", color: "var(--muted)" }}>
+          Showing {currentPage * ITEMS_PER_PAGE + 1} - {Math.min((currentPage + 1) * ITEMS_PER_PAGE, totalItems)} of {totalItems} items
+        </span>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <button
+            type="button"
+            disabled={currentPage === 0}
+            onClick={() => onPageChange(currentPage - 1)}
+            style={{ display: "flex", alignItems: "center", justifyItems: "center", gap: "0.25rem", padding: "0.4rem 0.8rem", background: "rgba(255,255,255,0.03)", border: "1px solid var(--line)", color: currentPage === 0 ? "rgba(255,255,255,0.2)" : "#fff", borderRadius: "0.375rem", cursor: currentPage === 0 ? "not-allowed" : "pointer", fontSize: "0.8rem" }}
+          >
+            <ChevronLeft size={14} /> Prev
+          </button>
+          <button
+            type="button"
+            disabled={(currentPage + 1) >= totalPages}
+            onClick={() => onPageChange(currentPage + 1)}
+            style={{ display: "flex", alignItems: "center", justifyItems: "center", gap: "0.25rem", padding: "0.4rem 0.8rem", background: "rgba(255,255,255,0.03)", border: "1px solid var(--line)", color: (currentPage + 1) >= totalPages ? "rgba(255,255,255,0.2)" : "#fff", borderRadius: "0.375rem", cursor: (currentPage + 1) >= totalPages ? "not-allowed" : "pointer", fontSize: "0.8rem" }}
+          >
+            Next <ChevronRight size={14} />
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   // System branding states
   const isCursorWebs = typeof baseDomain === "string" && (baseDomain.toLowerCase().includes("cursonwebs") || baseDomain.toLowerCase().includes("cursorwebs"));
@@ -927,6 +979,31 @@ export default function AdminConsole({
             {!sidebarCollapsed && <span>Users</span>}
           </button>
 
+          {/* Websites Item */}
+          <button
+            type="button"
+            onClick={() => setActiveTab("websites")}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+              width: "100%",
+              padding: "0.6rem 0.8rem",
+              borderRadius: "0.375rem",
+              background: activeTab === "websites" ? "rgba(129, 140, 248, 0.08)" : "none",
+              border: "none",
+              color: activeTab === "websites" ? "#818cf8" : "#9ca3af",
+              cursor: "pointer",
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              textAlign: "left",
+              transition: "all 0.2s"
+            }}
+          >
+            <Globe size={16} />
+            {!sidebarCollapsed && <span>Websites</span>}
+          </button>
+
           {/* API Keys Item */}
           <button
             type="button"
@@ -1207,29 +1284,195 @@ export default function AdminConsole({
         )}
 
         {/* TAB 1: SYSTEM OVERVIEW DASHBOARD */}
-        {activeTab === "dashboard" && (
-          <>
-            <div className="app-title" style={{ marginBottom: "2.5rem" }}>
-              <div>
-                <span className="eyebrow">Admin portal</span>
-                <h1 style={{ color: "#fff", margin: "0.25rem 0 0.5rem 0", fontSize: "1.75rem", fontWeight: 850 }}>System Overview</h1>
-                <p style={{ color: "#9ca3af", fontSize: "0.9rem", margin: 0 }}>Manage tenants, websites, subscription credits, and platform-level AI providers.</p>
-              </div>
-              <div className="metric-row" style={{ marginTop: "1.5rem" }}>
-                <div className="stat-tile"><strong>{totalUsers}</strong><span>users</span></div>
-                <div className="stat-tile"><strong>{totalSites}</strong><span>websites</span></div>
-                <div className="stat-tile"><strong>{totalTenants}</strong><span>tenants</span></div>
-                <div className="stat-tile"><strong>{activeSubs}</strong><span>active plans</span></div>
-              </div>
-            </div>
+        {activeTab === "dashboard" && (() => {
+          const totalCreditsLimit = (subscriptions || []).reduce((acc, s) => acc + (s?.creditsLimit || 0), 0);
+          const totalCreditsUsed = (subscriptions || []).reduce((acc, s) => acc + (s?.creditsUsed || 0), 0);
+          const creditsPercent = totalCreditsLimit > 0 ? Math.min(100, Math.round((totalCreditsUsed / totalCreditsLimit) * 100)) : 0;
 
+          const planCounts = (subscriptions || []).reduce((acc, s) => {
+            if (!s || !s.planId) return acc;
+            const key = s.planId.toLowerCase();
+            acc[key] = (acc[key] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>);
+
+          const freeCount = planCounts["free"] || 0;
+          const proCount = planCounts["pro"] || 0;
+          const agencyCount = planCounts["agency"] || 0;
+          const otherCount = Object.keys(planCounts).reduce((acc, key) => {
+            if (key !== "free" && key !== "pro" && key !== "agency") {
+              acc += planCounts[key];
+            }
+            return acc;
+          }, 0);
+
+          const totalPlansCount = freeCount + proCount + agencyCount + otherCount;
+          const recentPayments = [...(requests || [])]
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .slice(0, 4);
+
+          return (
+            <>
+              <div className="app-title" style={{ marginBottom: "2.5rem" }}>
+                <div>
+                  <span className="eyebrow">Admin portal</span>
+                  <h1 style={{ color: "#fff", margin: "0.25rem 0 0.5rem 0", fontSize: "1.75rem", fontWeight: 850 }}>System Overview</h1>
+                  <p style={{ color: "#9ca3af", fontSize: "0.9rem", margin: 0 }}>Manage tenants, websites, subscription credits, and platform-level AI providers.</p>
+                </div>
+                <div className="metric-row" style={{ marginTop: "1.5rem" }}>
+                  <div className="stat-tile"><strong>{totalUsers}</strong><span>users</span></div>
+                  <div className="stat-tile"><strong>{totalSites}</strong><span>websites</span></div>
+                  <div className="stat-tile"><strong>{totalTenants}</strong><span>tenants</span></div>
+                  <div className="stat-tile"><strong>{activeSubs}</strong><span>active plans</span></div>
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1.5rem", marginBottom: "1.5rem" }}>
+                {/* Card 1: AI Credits Usage */}
+                <div className="surface-panel" style={{ padding: "1.5rem", height: "100%" }}>
+                  <span className="eyebrow">Platform Utilization</span>
+                  <h3 style={{ margin: "0.25rem 0 0.5rem 0", color: "#fff", fontSize: "1.1rem", fontWeight: 800 }}>AI Credits Distribution</h3>
+                  <p style={{ color: "var(--muted)", fontSize: "0.8rem", margin: 0 }}>Active subscription credit consumption vs allocation limits.</p>
+                  
+                  <div style={{ marginTop: "2rem" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.5rem" }}>
+                      <span style={{ fontSize: "1.5rem", fontWeight: 850, color: "#fff" }}>
+                        {totalCreditsUsed.toLocaleString()}
+                      </span>
+                      <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                        of {totalCreditsLimit.toLocaleString()} credits allocated
+                      </span>
+                    </div>
+                    <div style={{ height: "8px", background: "rgba(255,255,255,0.05)", borderRadius: "4px", overflow: "hidden" }}>
+                      <div style={{ width: `${creditsPercent}%`, height: "100%", background: "linear-gradient(90deg, #818cf8 0%, #c084fc 100%)", borderRadius: "4px" }} />
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.5rem", fontSize: "0.75rem", color: "var(--muted)" }}>
+                      <span>{creditsPercent}% Used</span>
+                      <span>{(100 - creditsPercent)}% Available</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card 2: Plan Distribution */}
+                <div className="surface-panel" style={{ padding: "1.5rem", height: "100%" }}>
+                  <span className="eyebrow">Subscription Shares</span>
+                  <h3 style={{ margin: "0.25rem 0 0.5rem 0", color: "#fff", fontSize: "1.1rem", fontWeight: 800 }}>Plan Distribution</h3>
+                  <p style={{ color: "var(--muted)", fontSize: "0.8rem", margin: 0 }}>Breakdown of workspace subscriptions by billing tier.</p>
+                  
+                  <div style={{ display: "flex", height: "8px", borderRadius: "4px", overflow: "hidden", background: "rgba(255,255,255,0.05)", marginTop: "2.5rem" }}>
+                    {totalPlansCount > 0 ? (
+                      <>
+                        {freeCount > 0 && <div style={{ width: `${(freeCount / totalPlansCount) * 100}%`, background: "#94a3b8" }} />}
+                        {proCount > 0 && <div style={{ width: `${(proCount / totalPlansCount) * 100}%`, background: "#818cf8" }} />}
+                        {agencyCount > 0 && <div style={{ width: `${(agencyCount / totalPlansCount) * 100}%`, background: "#c084fc" }} />}
+                        {otherCount > 0 && <div style={{ width: `${(otherCount / totalPlansCount) * 100}%`, background: "#f59e0b" }} />}
+                      </>
+                    ) : (
+                      <div style={{ width: "100%", background: "rgba(255,255,255,0.1)" }} />
+                    )}
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginTop: "1.5rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#94a3b8" }} />
+                      <span style={{ fontSize: "0.75rem", color: "#fff", fontWeight: 600 }}>Free: {freeCount}</span>
+                      <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>({totalPlansCount > 0 ? Math.round((freeCount / totalPlansCount) * 100) : 0}%)</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#818cf8" }} />
+                      <span style={{ fontSize: "0.75rem", color: "#fff", fontWeight: 600 }}>Pro: {proCount}</span>
+                      <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>({totalPlansCount > 0 ? Math.round((proCount / totalPlansCount) * 100) : 0}%)</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#c084fc" }} />
+                      <span style={{ fontSize: "0.75rem", color: "#fff", fontWeight: 600 }}>Agency: {agencyCount}</span>
+                      <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>({totalPlansCount > 0 ? Math.round((agencyCount / totalPlansCount) * 100) : 0}%)</span>
+                    </div>
+                    {otherCount > 0 && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                        <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#f59e0b" }} />
+                        <span style={{ fontSize: "0.75rem", color: "#fff", fontWeight: 600 }}>Other: {otherCount}</span>
+                        <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>({Math.round((otherCount / totalPlansCount) * 100)}%)</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Recent Payments Feed */}
+              <div className="surface-panel" style={{ padding: "1.5rem" }}>
+                <span className="eyebrow">Financial Logs</span>
+                <h3 style={{ margin: "0.25rem 0 0.5rem 0", color: "#fff", fontSize: "1.1rem", fontWeight: 800 }}>Recent Payments Activity</h3>
+                <p style={{ color: "var(--muted)", fontSize: "0.8rem", margin: "0 0 1.25rem 0" }}>Status logs of incoming plan upgrade payments.</p>
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  {recentPayments.map((r) => (
+                    <div key={r.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.75rem 1rem", background: "rgba(255,255,255,0.02)", border: "1px solid var(--line)", borderRadius: "0.5rem" }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.15rem" }}>
+                        <span style={{ color: "#fff", fontWeight: 700, fontSize: "0.85rem" }}>{r.tenant?.name || "N/A"}</span>
+                        <span style={{ color: "var(--muted)", fontSize: "0.75rem" }}>
+                          UTR: <code style={{ color: "#818cf8" }}>{r.utr}</code> • {new Date(r.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                        <span style={{ color: "#fff", fontWeight: 600, fontSize: "0.85rem" }}>₹{r.amount}</span>
+                        <span style={{
+                          fontSize: "0.7rem",
+                          fontWeight: 700,
+                          padding: "0.2rem 0.5rem",
+                          borderRadius: "0.25rem",
+                          textTransform: "uppercase",
+                          color: r.status === "APPROVED" ? "#34d399" : r.status === "REJECTED" ? "#f87171" : "#f59e0b",
+                          background: r.status === "APPROVED" ? "rgba(52,211,153,0.1)" : r.status === "REJECTED" ? "rgba(239, 68, 68, 0.1)" : "rgba(245,158,11,0.1)"
+                        }}>
+                          {r.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                  {recentPayments.length === 0 && (
+                    <div style={{ textAlign: "center", padding: "1.5rem", color: "var(--muted)", fontSize: "0.85rem" }}>No recent payments.</div>
+                  )}
+                </div>
+              </div>
+            </>
+          );
+        })()}
+
+        {/* TAB 1.5: WEBSITES MANAGEMENT */}
+        {activeTab === "websites" && (() => {
+          const filteredProjects = (projects || []).filter((p) => {
+            const query = projectSearch.toLowerCase().trim();
+            if (!query) return true;
+            const customDomainHost = p.customDomain?.hostname || "";
+            const userEmail = p.user?.email || "";
+            const userName = p.user?.name || "";
+            const clientLogins = (p.theme as any)?.metadata?.clientLogins || [];
+            const clientLoginMatch = clientLogins.some((login: any) => 
+              (login.email || "").toLowerCase().includes(query)
+            );
+            return (
+              (p.name || "").toLowerCase().includes(query) ||
+              (p.subdomain || "").toLowerCase().includes(query) ||
+              customDomainHost.toLowerCase().includes(query) ||
+              userEmail.toLowerCase().includes(query) ||
+              userName.toLowerCase().includes(query) ||
+              (p.tenant?.name || "").toLowerCase().includes(query) ||
+              (p.status || "").toLowerCase().includes(query) ||
+              clientLoginMatch
+            );
+          });
+          const paginatedProjects = filteredProjects.slice(projectPage * ITEMS_PER_PAGE, (projectPage + 1) * ITEMS_PER_PAGE);
+
+          return (
             <section className="surface-panel">
-              <div className="section-heading-row" style={{ marginBottom: "1.2rem" }}>
+              <div className="section-heading-row" style={{ marginBottom: "1.2rem", display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "1rem" }}>
                 <div>
                   <span className="eyebrow">Websites</span>
                   <h2 style={{ margin: 0, color: "#fff", fontSize: "1.25rem", fontWeight: 800 }}>Generated Websites</h2>
                   <p style={{ color: "#9ca3af", fontSize: "0.85rem", margin: "0.2rem 0 0 0" }}>All generated projects and publishing status.</p>
                 </div>
+                {renderSearchBar(projectSearch, (val) => { setProjectSearch(val); setProjectPage(0); }, "Search site, subdomain, owner...")}
               </div>
               <div className="table-wrap">
                 <table className="data-table">
@@ -1237,7 +1480,7 @@ export default function AdminConsole({
                     <tr><th>Site</th><th>Subdomain</th><th>Owner & Client Logins</th><th>Status</th><th>Workspace</th><th style={{ textAlign: "right" }}>Actions</th></tr>
                   </thead>
                   <tbody>
-                    {(projects || []).map((p) => {
+                    {paginatedProjects.map((p) => {
                       const subdomainUrl = `${protocol}://${p.subdomain}.${baseDomain}`;
                       const customDomain = p.customDomain;
                       const customDomainHostname = customDomain?.hostname;
@@ -1320,173 +1563,215 @@ export default function AdminConsole({
                         </tr>
                       );
                     })}
-                    {(projects || []).length === 0 && (
+                    {filteredProjects.length === 0 && (
                       <tr>
-                        <td colSpan={6} style={{ textAlign: "center", color: "#9ca3af", padding: "2rem" }}>No generated websites on the platform.</td>
+                        <td colSpan={6} style={{ textAlign: "center", color: "#9ca3af", padding: "2rem" }}>No generated websites found.</td>
                       </tr>
                     )}
                   </tbody>
                 </table>
               </div>
+              {renderPagination(projectPage, filteredProjects.length, setProjectPage)}
             </section>
-          </>
-        )}
+          );
+        })()}
 
         {/* TAB 2: USERS AND SUBSCRIPTION CREDIT QUOTAS */}
-        {activeTab === "users" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-            <section className="surface-panel">
-              <div className="section-heading-row" style={{ marginBottom: "1.2rem" }}>
-                <div>
-                  <span className="eyebrow">Users</span>
-                  <h2 style={{ margin: 0, color: "#fff", fontSize: "1.25rem", fontWeight: 800 }}>User Management</h2>
-                  <p style={{ color: "#9ca3af", fontSize: "0.85rem", margin: "0.2rem 0 0 0" }}>Workspace ownership and roles across the platform.</p>
-                </div>
-              </div>
-              <div className="table-wrap">
-                <table className="data-table">
-                  <thead>
-                    <tr><th>Name</th><th>Email</th><th>Role</th><th>Workspace</th><th style={{ textAlign: "right" }}>Actions</th></tr>
-                  </thead>
-                  <tbody>
-                    {(users || []).map((u) => (
-                      <tr key={u.id}>
-                        <td><strong>{u.name}</strong></td>
-                        <td>{u.email}</td>
-                        <td><span className="status-pill" style={{ fontSize: "0.75rem", padding: "0.15rem 0.45rem", borderRadius: "0.25rem", fontWeight: 700, background: "rgba(99, 102, 241, 0.15)", color: "#a5b4fc" }}>{u.role}</span></td>
-                        <td>{u.tenant.name}</td>
-                        <td style={{ textAlign: "right" }}>
-                          <a 
-                            href={`/dashboard?tenantId=${u.tenant.id}`}
-                            className="glow-btn"
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              background: "rgba(99, 102, 241, 0.15)",
-                              border: "1px solid rgba(99, 102, 241, 0.3)",
-                              color: "#c084fc",
-                              padding: "0.4rem 0.8rem",
-                              borderRadius: "0.5rem",
-                              fontSize: "0.8rem",
-                              fontWeight: 700,
-                              textDecoration: "none",
-                              marginRight: "0.5rem"
-                            }}
-                          >
-                            Enter Dashboard
-                          </a>
-                          <UserEditor
-                            userId={u.id}
-                            initialName={u.name || ""}
-                            initialEmail={u.email}
-                            initialRole={u.role}
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
+        {activeTab === "users" && (() => {
+          const filteredUsers = (users || []).filter((u) => {
+            const query = userSearch.toLowerCase().trim();
+            if (!query) return true;
+            return (
+              (u.name || "").toLowerCase().includes(query) ||
+              (u.email || "").toLowerCase().includes(query) ||
+              (u.role || "").toLowerCase().includes(query) ||
+              (u.tenant?.name || "").toLowerCase().includes(query)
+            );
+          });
+          const paginatedUsers = filteredUsers.slice(userPage * ITEMS_PER_PAGE, (userPage + 1) * ITEMS_PER_PAGE);
 
-            <section className="surface-panel">
-              <div className="section-heading-row" style={{ marginBottom: "1.2rem" }}>
-                <div>
-                  <span className="eyebrow">Plans</span>
-                  <h2 style={{ margin: 0, color: "#fff", fontSize: "1.25rem", fontWeight: 800 }}>Subscription Credit Quotas</h2>
-                  <p style={{ color: "#9ca3af", fontSize: "0.85rem", margin: "0.2rem 0 0 0" }}>Adjust tenant credit limits and subscription attributes without leaving the admin panel.</p>
+          const filteredSubs = (subscriptions || []).filter((s) => {
+            const query = subSearch.toLowerCase().trim();
+            if (!query) return true;
+            return (
+              (s.tenant?.name || "").toLowerCase().includes(query) ||
+              (s.planId || "").toLowerCase().includes(query) ||
+              (s.status || "").toLowerCase().includes(query) ||
+              (s.hostingType || "").toLowerCase().includes(query) ||
+              (s.domainType || "").toLowerCase().includes(query)
+            );
+          });
+          const paginatedSubs = filteredSubs.slice(subPage * ITEMS_PER_PAGE, (subPage + 1) * ITEMS_PER_PAGE);
+
+          return (
+            <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+              <section className="surface-panel">
+                <div className="section-heading-row" style={{ marginBottom: "1.2rem", display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "1rem" }}>
+                  <div>
+                    <span className="eyebrow">Users</span>
+                    <h2 style={{ margin: 0, color: "#fff", fontSize: "1.25rem", fontWeight: 800 }}>User Management</h2>
+                    <p style={{ color: "#9ca3af", fontSize: "0.85rem", margin: "0.2rem 0 0 0" }}>Workspace ownership and roles across the platform.</p>
+                  </div>
+                  {renderSearchBar(userSearch, (val) => { setUserSearch(val); setUserPage(0); }, "Search name, email, workspace...")}
                 </div>
-              </div>
-              <div className="table-wrap">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Workspace</th>
-                      <th>Plan</th>
-                      <th>Status</th>
-                      <th>Used</th>
-                      <th>Limit</th>
-                      <th>AI / LLM</th>
-                      <th>Hosting</th>
-                      <th>Domain</th>
-                      <th style={{ textAlign: "right" }}>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(subscriptions || []).map((s) => (
-                      <tr key={s.id}>
-                        <td><strong>{s.tenant.name}</strong></td>
-                        <td style={{ textTransform: "capitalize" }}>{s.planId.replace("-", " ")}</td>
-                        <td>
-                          <span
-                            style={{
-                              fontSize: "0.75rem",
-                              padding: "0.15rem 0.4rem",
-                              borderRadius: "0.25rem",
-                              fontWeight: 700,
-                              background: s.status === "ACTIVE" ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)",
-                              color: s.status === "ACTIVE" ? "#34d399" : "#f87171"
-                            }}
-                          >
-                            {s.status}
-                          </span>
-                        </td>
-                        <td>{s.creditsUsed} credits</td>
-                        <td><strong>{s.creditsLimit} credits</strong></td>
-                        <td>
-                          {s.withLlm ? (
-                            <span style={{ color: "#34d399", fontWeight: 600 }}>Enabled</span>
-                          ) : (
-                            <span style={{ color: "#f87171", fontWeight: 600 }}>Disabled</span>
-                          )}
-                        </td>
-                        <td>
-                          {s.hostingType === "OURS" && "Our Hosting"}
-                          {s.hostingType === "THEIRS" && "Own Hosting"}
-                          {s.hostingType === "BOTH" && "Both"}
-                        </td>
-                        <td>
-                          {s.domainType === "SUBDOMAIN" && "Subdomain Only"}
-                          {s.domainType === "CUSTOM" && "Custom Domain"}
-                        </td>
-                        <td style={{ textAlign: "right" }}>
-                          <a 
-                            href={`/dashboard?tenantId=${s.tenantId}`}
-                            className="glow-btn"
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              background: "rgba(99, 102, 241, 0.15)",
-                              border: "1px solid rgba(99, 102, 241, 0.3)",
-                              color: "#c084fc",
-                              padding: "0.4rem 0.8rem",
-                              borderRadius: "0.5rem",
-                              fontSize: "0.8rem",
-                              fontWeight: 700,
-                              textDecoration: "none",
-                              marginRight: "0.5rem"
-                            }}
-                          >
-                            Enter Dashboard
-                          </a>
-                          <PlanEditor
-                            tenantId={s.tenantId}
-                            initialPlanId={s.planId}
-                            initialLimit={s.creditsLimit}
-                            initialWithLlm={s.withLlm}
-                            initialHostingType={s.hostingType}
-                            initialDomainType={s.domainType}
-                            initialStatus={s.status}
-                          />
-                        </td>
+                <div className="table-wrap">
+                  <table className="data-table">
+                    <thead>
+                      <tr><th>Name</th><th>Email</th><th>Role</th><th>Workspace</th><th style={{ textAlign: "right" }}>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                      {paginatedUsers.map((u) => (
+                        <tr key={u.id}>
+                          <td><strong>{u.name}</strong></td>
+                          <td>{u.email}</td>
+                          <td><span className="status-pill" style={{ fontSize: "0.75rem", padding: "0.15rem 0.45rem", borderRadius: "0.25rem", fontWeight: 700, background: "rgba(99, 102, 241, 0.15)", color: "#a5b4fc" }}>{u.role}</span></td>
+                          <td>{u.tenant.name}</td>
+                          <td style={{ textAlign: "right" }}>
+                            <a 
+                              href={`/dashboard?tenantId=${u.tenant.id}`}
+                              className="glow-btn"
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                background: "rgba(99, 102, 241, 0.15)",
+                                border: "1px solid rgba(99, 102, 241, 0.3)",
+                                color: "#c084fc",
+                                padding: "0.4rem 0.8rem",
+                                borderRadius: "0.5rem",
+                                fontSize: "0.8rem",
+                                fontWeight: 700,
+                                textDecoration: "none",
+                                marginRight: "0.5rem"
+                              }}
+                            >
+                              Enter Dashboard
+                            </a>
+                            <UserEditor
+                              userId={u.id}
+                              initialName={u.name || ""}
+                              initialEmail={u.email}
+                              initialRole={u.role}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredUsers.length === 0 && (
+                        <tr>
+                          <td colSpan={5} style={{ textAlign: "center", color: "#9ca3af", padding: "2rem" }}>No users found matching query.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                {renderPagination(userPage, filteredUsers.length, setUserPage)}
+              </section>
+
+              <section className="surface-panel">
+                <div className="section-heading-row" style={{ marginBottom: "1.2rem", display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "1rem" }}>
+                  <div>
+                    <span className="eyebrow">Plans</span>
+                    <h2 style={{ margin: 0, color: "#fff", fontSize: "1.25rem", fontWeight: 800 }}>Subscription Credit Quotas</h2>
+                    <p style={{ color: "#9ca3af", fontSize: "0.85rem", margin: "0.2rem 0 0 0" }}>Adjust tenant credit limits and subscription attributes without leaving the admin panel.</p>
+                  </div>
+                  {renderSearchBar(subSearch, (val) => { setSubSearch(val); setSubPage(0); }, "Search workspace, plan...")}
+                </div>
+                <div className="table-wrap">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Workspace</th>
+                        <th>Plan</th>
+                        <th>Status</th>
+                        <th>Used</th>
+                        <th>Limit</th>
+                        <th>AI / LLM</th>
+                        <th>Hosting</th>
+                        <th>Domain</th>
+                        <th style={{ textAlign: "right" }}>Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          </div>
-        )}
+                    </thead>
+                    <tbody>
+                      {paginatedSubs.map((s) => (
+                        <tr key={s.id}>
+                          <td><strong>{s.tenant.name}</strong></td>
+                          <td style={{ textTransform: "capitalize" }}>{s.planId.replace("-", " ")}</td>
+                          <td>
+                            <span
+                              style={{
+                                fontSize: "0.75rem",
+                                padding: "0.15rem 0.4rem",
+                                borderRadius: "0.25rem",
+                                fontWeight: 700,
+                                background: s.status === "ACTIVE" ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)",
+                                color: s.status === "ACTIVE" ? "#34d399" : "#f87171"
+                              }}
+                            >
+                              {s.status}
+                            </span>
+                          </td>
+                          <td>{s.creditsUsed} credits</td>
+                          <td><strong>{s.creditsLimit} credits</strong></td>
+                          <td>
+                            {s.withLlm ? (
+                              <span style={{ color: "#34d399", fontWeight: 600 }}>Enabled</span>
+                            ) : (
+                              <span style={{ color: "#f87171", fontWeight: 600 }}>Disabled</span>
+                            )}
+                          </td>
+                          <td>
+                            {s.hostingType === "OURS" && "Our Hosting"}
+                            {s.hostingType === "THEIRS" && "Own Hosting"}
+                            {s.hostingType === "BOTH" && "Both"}
+                          </td>
+                          <td>
+                            {s.domainType === "SUBDOMAIN" && "Subdomain Only"}
+                            {s.domainType === "CUSTOM" && "Custom Domain"}
+                          </td>
+                          <td style={{ textAlign: "right" }}>
+                            <a 
+                              href={`/dashboard?tenantId=${s.tenantId}`}
+                              className="glow-btn"
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                background: "rgba(99, 102, 241, 0.15)",
+                                border: "1px solid rgba(99, 102, 241, 0.3)",
+                                color: "#c084fc",
+                                padding: "0.4rem 0.8rem",
+                                borderRadius: "0.5rem",
+                                fontSize: "0.8rem",
+                                fontWeight: 700,
+                                textDecoration: "none",
+                                marginRight: "0.5rem"
+                              }}
+                            >
+                              Enter Dashboard
+                            </a>
+                            <PlanEditor
+                              tenantId={s.tenantId}
+                              initialPlanId={s.planId}
+                              initialLimit={s.creditsLimit}
+                              initialWithLlm={s.withLlm}
+                              initialHostingType={s.hostingType}
+                              initialDomainType={s.domainType}
+                              initialStatus={s.status}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredSubs.length === 0 && (
+                        <tr>
+                          <td colSpan={9} style={{ textAlign: "center", color: "#9ca3af", padding: "2rem" }}>No subscriptions found.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                {renderPagination(subPage, filteredSubs.length, setSubPage)}
+              </section>
+            </div>
+          );
+        })()}
 
         {/* TAB 3: GLOBAL LLM API KEYS */}
         {activeTab === "keys" && (
