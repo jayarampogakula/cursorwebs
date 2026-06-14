@@ -29,7 +29,7 @@ export const config = {
 
 export default function middleware(req: NextRequest) {
   const url = req.nextUrl;
-  const hostname = req.headers.get("host") || "webbing.in";
+  const hostname = req.headers.get("host") || "cursorwebs.com";
   const path = url.pathname;
 
   const requestHeaders = new Headers(req.headers);
@@ -39,7 +39,7 @@ export default function middleware(req: NextRequest) {
   const hostnameWithoutPort = hostname.split(":")[0].toLowerCase();
 
   // Local development fallback/handling
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "https://webbing.in";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || "https://cursorwebs.com";
   let appHost = appUrl.startsWith("http") ? new URL(appUrl).hostname : appUrl.split(":")[0];
   appHost = appHost.toLowerCase();
 

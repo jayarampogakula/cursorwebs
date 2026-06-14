@@ -3,12 +3,12 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: webbing-postgres
+    container_name: cursorwebs-postgres
     restart: always
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-supersecret}
-      POSTGRES_DB: ${DB_NAME:-webbing}
+      POSTGRES_DB: ${DB_NAME:-cursorwebs}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -16,7 +16,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: webbing-redis
+    container_name: cursorwebs-redis
     restart: always
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redispassword}
     volumes:
@@ -28,62 +28,62 @@ services:
     build:
       context: ../../
       dockerfile: docker/prod/Dockerfile.app
-    container_name: webbing-app
+    container_name: cursorwebs-app
     restart: always
     depends_on:
       - postgres
       - redis
     environment:
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-supersecret}@postgres:5432/${DB_NAME:-webbing}?schema=public
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-supersecret}@postgres:5432/${DB_NAME:-cursorwebs}?schema=public
       REDIS_URL: redis://:${REDIS_PASSWORD:-redispassword}@redis:6379
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-super-secret-auth-key}
-      NEXT_PUBLIC_APP_URL: ${APP_URL:-https://app.webbing.io}
+      NEXT_PUBLIC_APP_URL: ${APP_URL:-https://app.cursorwebs.com}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
       SMTP_HOST: ${SMTP_HOST:-smtp.hostinger.com}
       SMTP_PORT: ${SMTP_PORT:-465}
-      SMTP_USER: ${SMTP_USER:-support@webbing.in}
+      SMTP_USER: ${SMTP_USER:-support@cursorwebs.com}
       SMTP_PASS: ${SMTP_PASS}
-      SMTP_FROM: ${SMTP_FROM:-Webbing Support <support@webbing.in>}
+      SMTP_FROM: ${SMTP_FROM:-CursorWebs Support <support@cursorwebs.com>}
     ports:
       - "3000:3000"
     labels:
       - "traefik.enable=true"
       # HTTP router
-      - "traefik.http.routers.webbing-http.rule=Host(`webbing.in`) || HostRegexp(`^.+\\.webbing\\.in$$`) || Host(`webbing.io`) || HostRegexp(`^.+\\.webbing\\.io$$`)"
-      - "traefik.http.routers.webbing-http.entrypoints=http"
-      - "traefik.http.routers.webbing-http.service=webbing"
-      - "traefik.http.routers.webbing-http.priority=100"
+      - "traefik.http.routers.cursorwebs-http.rule=Host(`cursorwebs.com`) || HostRegexp(`^.+\\.cursorwebs\\.com$$`) || Host(`cursonwebs.com`) || HostRegexp(`^.+\\.cursonwebs\\.com$$`)"
+      - "traefik.http.routers.cursorwebs-http.entrypoints=http"
+      - "traefik.http.routers.cursorwebs-http.service=cursorwebs"
+      - "traefik.http.routers.cursorwebs-http.priority=100"
       # HTTPS router
-      - "traefik.http.routers.webbing-https.rule=Host(`webbing.in`) || HostRegexp(`^.+\\.webbing\\.in$$`) || Host(`webbing.io`) || HostRegexp(`^.+\\.webbing\\.io$$`)"
-      - "traefik.http.routers.webbing-https.entrypoints=https"
-      - "traefik.http.routers.webbing-https.service=webbing"
-      - "traefik.http.routers.webbing-https.priority=100"
-      - "traefik.http.routers.webbing-https.tls=true"
+      - "traefik.http.routers.cursorwebs-https.rule=Host(`cursorwebs.com`) || HostRegexp(`^.+\\.cursorwebs\\.com$$`) || Host(`cursonwebs.com`) || HostRegexp(`^.+\\.cursonwebs\\.com$$`)"
+      - "traefik.http.routers.cursorwebs-https.entrypoints=https"
+      - "traefik.http.routers.cursorwebs-https.service=cursorwebs"
+      - "traefik.http.routers.cursorwebs-https.priority=100"
+      - "traefik.http.routers.cursorwebs-https.tls=true"
       # Service
-      - "traefik.http.services.webbing.loadbalancer.server.port=3000"
+      - "traefik.http.services.cursorwebs.loadbalancer.server.port=3000"
       # Custom domain catch-all (lowest priority, catches anything not matched above)
-      - "traefik.http.routers.webbing-custom-http.rule=PathPrefix(`/`)"
-      - "traefik.http.routers.webbing-custom-http.entrypoints=http"
-      - "traefik.http.routers.webbing-custom-http.service=webbing"
-      - "traefik.http.routers.webbing-custom-http.priority=1"
-      - "traefik.http.routers.webbing-custom-https.rule=PathPrefix(`/`)"
-      - "traefik.http.routers.webbing-custom-https.entrypoints=https"
-      - "traefik.http.routers.webbing-custom-https.service=webbing"
-      - "traefik.http.routers.webbing-custom-https.priority=1"
-      - "traefik.http.routers.webbing-custom-https.tls=true"
+      - "traefik.http.routers.cursorwebs-custom-http.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.cursorwebs-custom-http.entrypoints=http"
+      - "traefik.http.routers.cursorwebs-custom-http.service=cursorwebs"
+      - "traefik.http.routers.cursorwebs-custom-http.priority=1"
+      - "traefik.http.routers.cursorwebs-custom-https.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.cursorwebs-custom-https.entrypoints=https"
+      - "traefik.http.routers.cursorwebs-custom-http.service=cursorwebs"
+      - "traefik.http.routers.cursorwebs-custom-https.priority=1"
+      - "traefik.http.routers.cursorwebs-custom-https.tls=true"
 
   worker:
     build:
       context: ../../
       dockerfile: docker/prod/Dockerfile.worker
-    container_name: webbing-worker
+    container_name: cursorwebs-worker
     restart: always
     depends_on:
       - redis
       - postgres
     environment:
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-supersecret}@postgres:5432/${DB_NAME:-webbing}?schema=public
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-supersecret}@postgres:5432/${DB_NAME:-cursorwebs}?schema=public
       REDIS_URL: redis://:${REDIS_PASSWORD:-redispassword}@redis:6379
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
@@ -93,5 +93,3 @@ services:
 volumes:
   postgres_data:
   redis_data:
-
-

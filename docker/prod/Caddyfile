@@ -9,7 +9,7 @@
 }
 
 # Main SaaS and subdomain router
-*.webbing.io, webbing.io, *.webbing.in, webbing.in {
+*.cursorwebs.com, cursorwebs.com, *.cursonwebs.com, cursonwebs.com {
     reverse_proxy nextjs:3000
 }
 
