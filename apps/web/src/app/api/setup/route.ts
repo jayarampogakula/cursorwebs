@@ -14,7 +14,7 @@ async function isSetupRequired(req?: Request) {
   try {
     // 1. Check if default admin user is still using default credentials
     const defaultAdmin = await prisma.user.findUnique({
-      where: { email: "admin@webbing.in" }
+      where: { email: "admin@cursorwebs.com" }
     });
 
     if (defaultAdmin && defaultAdmin.passwordHash) {
@@ -61,14 +61,14 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { appName, adminEmail, adminPassword, adminName, licenseKey } = await req.json();
+    const licenseKeyClean = (licenseKey || "CURSORWEBS-FREE-LICENSE").trim();
 
-    if (!appName || !adminEmail || !adminPassword || !adminName || !licenseKey) {
-      return NextResponse.json({ error: "All configuration details are required (SaaS Name, Admin Name, Email, Password, License Key)." }, { status: 400 });
+    if (!appName || !adminEmail || !adminPassword || !adminName) {
+      return NextResponse.json({ error: "All configuration details are required (SaaS Name, Admin Name, Email, Password)." }, { status: 400 });
     }
 
     const host = req.headers.get("host") || "localhost";
-    const verification = await verifyLicenseOnline(licenseKey, host);
+    const verification = await verifyLicenseOnline(licenseKeyClean, host);
     if (!verification.success) {
       return NextResponse.json({ error: verification.error || "License verification failed." }, { status: 400 });
     }
@@ -90,11 +90,11 @@ export async function POST(req: Request) {
       }
 
       // 2. Update or create the administrator user
-      const defaultAdmin = await tx.user.findUnique({ where: { email: "admin@webbing.in" } });
+      const defaultAdmin = await tx.user.findUnique({ where: { email: "admin@cursorwebs.com" } });
       if (defaultAdmin) {
         // Upgrade default admin account details
         await tx.user.update({
-          where: { email: "admin@webbing.in" },
+          where: { email: "admin@cursorwebs.com" },
           data: {
             email: emailClean,
             name: nameClean,
@@ -156,8 +156,8 @@ export async function POST(req: Request) {
 
       await tx.systemSetting.upsert({
         where: { key: "licenseKey" },
-        update: { value: licenseKey.trim() },
-        create: { key: "licenseKey", value: licenseKey.trim() }
+        update: { value: licenseKeyClean },
+        create: { key: "licenseKey", value: licenseKeyClean }
       });
     });
 

@@ -1506,7 +1506,7 @@ export default function EcommerceStore({
                         
                         {(() => {
                           const upiId = settings.paymentDetails?.upiId || "example@upi";
-                          const merchantName = projectSubdomain || "Webbing Store";
+                          const merchantName = projectSubdomain || "CursorWebs Store";
                           const amount = getCartTotal();
                           const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR`;
                           const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUrl)}`;
@@ -2679,7 +2679,7 @@ export default function EcommerceStore({
       <footer style={{ borderTop: "1px solid rgba(255,255,255,0.06)", padding: "2rem", background: "rgba(0,0,0,0.2)", marginTop: "auto", fontSize: "0.8rem", color: "#64748b", textAlign: "center" }}>
         <p>© {new Date().getFullYear()} {storeName || projectSubdomain.toUpperCase() || "eCommerce Single Vendor Store"}. All rights reserved.</p>
         <p style={{ marginTop: "0.5rem" }}>
-          Built with <span style={{ color: "#a855f7", fontWeight: 700 }}>Webbing AI Engine</span>
+          Built with <span style={{ color: "#a855f7", fontWeight: 700 }}>CursorWebs AI Engine</span>
         </p>
       </footer>
 

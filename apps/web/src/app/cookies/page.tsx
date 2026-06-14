@@ -25,10 +25,10 @@ export default function CookiesPage() {
         <section style={{ marginBottom: "2rem" }}>
           <h2 style={{ color: "#fff", fontSize: "1.3rem", fontWeight: 700, margin: "1.5rem 0 0.5rem 0" }}>2. How We Use Cookies</h2>
           <p>
-            Webbing uses cookies for the following essential purposes:
+            CursorWebs uses cookies for the following essential purposes:
           </p>
           <ul style={{ margin: "0.5rem 0 0 1rem", paddingLeft: "1rem" }}>
-            <li><strong>Authentication:</strong> We use secure cookies to verify your identity and maintain your login sessions (`webbing-session`).</li>
+            <li><strong>Authentication:</strong> We use secure cookies to verify your identity and maintain your login sessions (`cursorwebs-session`).</li>
             <li><strong>Affiliate Tracking:</strong> We use cookies or local storage to temporarily cache partner referral codes when someone visits a referral link, ensuring they receive their 10% discount during signup or plan checkout.</li>
             <li><strong>Preferences:</strong> We store local theme options, panel toggles, and sidebar preferences.</li>
           </ul>
@@ -37,7 +37,7 @@ export default function CookiesPage() {
         <section style={{ marginBottom: "2rem" }}>
           <h2 style={{ color: "#fff", fontSize: "1.3rem", fontWeight: 700, margin: "1.5rem 0 0.5rem 0" }}>3. Managing Cookies</h2>
           <p>
-            Most browsers allow you to block or delete cookies in their settings. However, blocking essential session cookies will prevent you from logging into your Webbing dashboard or using the visual editor features.
+            Most browsers allow you to block or delete cookies in their settings. However, blocking essential session cookies will prevent you from logging into your CursorWebs dashboard or using the visual editor features.
           </p>
         </section>
       </main>
@@ -50,7 +50,7 @@ export default function CookiesPage() {
           <a href="/refund" style={{ color: "var(--muted)", textDecoration: "none", fontSize: "0.85rem", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = 'var(--muted)'}>Refund Policy</a>
         </div>
         <div style={{ color: "rgba(255, 255, 255, 0.3)", fontSize: "0.8rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem" }}>
-          <span>© {new Date().getFullYear()} Webbing Platforms Inc. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} CursorWebs Platforms Inc. All rights reserved.</span>
           <span style={{ opacity: 0.6 }}>Version V1.0</span>
         </div>
       </footer>

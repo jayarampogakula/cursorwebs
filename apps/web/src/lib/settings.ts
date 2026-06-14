@@ -54,18 +54,11 @@ export async function getSystemSettings(host?: string): Promise<SystemSettings> 
   }
 
   const cleanHost = resolvedHost ? resolvedHost.toLowerCase().split(":")[0] : "";
-  const isCursorWebs = cleanHost.includes("cursonwebs") || cleanHost.includes("cursorwebs");
-  const defaultApp = isCursorWebs ? "CursorWebs" : "Webbing";
-  const defaultEmail = isCursorWebs ? "support@cursonwebs.com" : "support@webbing.in";
-  const defaultHeroSubtitle = isCursorWebs
-    ? "Describe the business once and CursorWebs assembles a modern site with home, features, pricing, about, contact, hosting, and provider-aware AI routing."
-    : "Describe the business once and Webbing assembles a modern site with home, features, pricing, about, contact, hosting, and provider-aware AI routing.";
-  const defaultAboutTitle = isCursorWebs
-    ? "CursorWebs is built for fast, useful site production."
-    : "Webbing is built for fast, useful site production.";
-  const defaultContactText = isCursorWebs
-    ? "Reach the CursorWebs team for provider setup, agency plans, domain support, and enterprise onboarding."
-    : "Reach the Webbing team for provider setup, agency plans, domain support, and enterprise onboarding.";
+  const defaultApp = "CursorWebs";
+  const defaultEmail = "support@cursorwebs.com";
+  const defaultHeroSubtitle = "Describe the business once and CursorWebs assembles a modern site with home, features, pricing, about, contact, hosting, and provider-aware AI routing.";
+  const defaultAboutTitle = "CursorWebs is built for fast, useful site production.";
+  const defaultContactText = "Reach the CursorWebs team for provider setup, agency plans, domain support, and enterprise onboarding.";
 
   try {
     const settings = await prisma.systemSetting.findMany();

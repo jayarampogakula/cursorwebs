@@ -17,11 +17,11 @@ async function getSmtpSettings() {
     const host = map.smtpHost || process.env.SMTP_HOST || "smtp.hostinger.com";
     const port = parseInt(map.smtpPort || process.env.SMTP_PORT || "465", 10);
     const secure = port === 465; // Use SSL for 465
-    const user = map.smtpUser || process.env.SMTP_USER || "support@webbing.in";
+    const user = map.smtpUser || process.env.SMTP_USER || "support@cursorwebs.com";
     const pass = map.smtpPass || process.env.SMTP_PASS || "";
     
     // Resolve branding parameters
-    const appName = map.appName || "Webbing";
+    const appName = map.appName || "CursorWebs";
     const appEmail = map.appEmail || user;
     
     // Resolve from address: if smtpFromName & smtpFromEmail are configured, construct format
@@ -38,10 +38,10 @@ async function getSmtpSettings() {
     const host = process.env.SMTP_HOST || "smtp.hostinger.com";
     const port = parseInt(process.env.SMTP_PORT || "465", 10);
     const secure = port === 465;
-    const user = process.env.SMTP_USER || "support@webbing.in";
+    const user = process.env.SMTP_USER || "support@cursorwebs.com";
     const pass = process.env.SMTP_PASS || "";
-    const defaultFrom = process.env.SMTP_FROM || `"Webbing Support" <support@webbing.in>`;
-    return { host, port, secure, user, pass, defaultFrom, appName: "Webbing", appEmail: "support@webbing.in" };
+    const defaultFrom = process.env.SMTP_FROM || `"CursorWebs Support" <support@cursorwebs.com>`;
+    return { host, port, secure, user, pass, defaultFrom, appName: "CursorWebs", appEmail: "support@cursorwebs.com" };
   }
 }
 
@@ -55,13 +55,13 @@ async function getEmailBranding() {
     });
     const map = Object.fromEntries(settings.map((s) => [s.key, s.value]));
     return {
-      appName: map.appName || "Webbing",
-      appEmail: map.appEmail || map.smtpFromEmail || map.smtpUser || "support@webbing.in"
+      appName: map.appName || "CursorWebs",
+      appEmail: map.appEmail || map.smtpFromEmail || map.smtpUser || "support@cursorwebs.com"
     };
   } catch (err) {
     return {
-      appName: "Webbing",
-      appEmail: "support@webbing.in"
+      appName: "CursorWebs",
+      appEmail: "support@cursorwebs.com"
     };
   }
 }

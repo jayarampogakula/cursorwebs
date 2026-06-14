@@ -16,8 +16,8 @@ export default function PricingSection({ initialPlans }: { initialPlans?: any[] 
       items: [
         "1 active website",
         "3 generation credits",
-        "Webbing subdomain only",
-        "Webbing branding footer"
+        "CursorWebs subdomain only",
+        "CursorWebs branding footer"
       ],
       featured: false,
       buttonText: "Choose Free",
@@ -32,8 +32,8 @@ export default function PricingSection({ initialPlans }: { initialPlans?: any[] 
       items: [
         "2 active websites",
         "10 credits per month",
-        "Webbing subdomain only",
-        "Webbing branding footer"
+        "CursorWebs subdomain only",
+        "CursorWebs branding footer"
       ],
       featured: false,
       buttonText: "Choose Individual",

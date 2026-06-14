@@ -26,10 +26,10 @@ async function main() {
     // 2. Create or update Admin User
     const adminPasswordHash = hashPassword("Admin123");
     const adminUser = await prisma.user.upsert({
-      where: { email: "admin@webbing.in" },
+      where: { email: "admin@cursorwebs.com" },
       update: {},
       create: {
-        email: "admin@webbing.in",
+        email: "admin@cursorwebs.com",
         name: "SaaS Admin Manager",
         passwordHash: adminPasswordHash,
         role: Role.ADMIN,
@@ -70,10 +70,10 @@ async function main() {
     // 5. Create or update Standard User
     const userPasswordHash = hashPassword("User123");
     const standardUser = await prisma.user.upsert({
-      where: { email: "user@webbing.in" },
+      where: { email: "user@cursorwebs.com" },
       update: {},
       create: {
-        email: "user@webbing.in",
+        email: "user@cursorwebs.com",
         name: "John Doe User",
         passwordHash: userPasswordHash,
         role: Role.USER,
@@ -107,8 +107,8 @@ async function main() {
   // 7. Seed Default Plans
   console.log("Seeding default plans...");
   const defaultPlans = [
-    { name: "Starter", price: 0, creditsLimit: 3, features: "1 Active Site, Webbing Subdomain only, Webbing Branding Footer" },
-    { name: "Individual Plan", price: 179, creditsLimit: 10, features: "2 Sites, Webbing Subdomain only, 10 Credits/month" },
+    { name: "Starter", price: 0, creditsLimit: 3, features: "1 Active Site, CursorWebs Subdomain only, CursorWebs Branding Footer" },
+    { name: "Individual Plan", price: 179, creditsLimit: 10, features: "2 Sites, CursorWebs Subdomain only, 10 Credits/month" },
     { name: "Pro Plan", price: 599, creditsLimit: 100, features: "10 Sites, Custom Domain, White-labeled, Priority Support" },
     { name: "Agency", price: 2499, creditsLimit: 500, features: "50 Sites, White-labeled, Dedicated APIs, Priority Support" }
   ];

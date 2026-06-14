@@ -27,7 +27,7 @@ export default async function RefundPage() {
             <section style={{ marginBottom: "2rem" }}>
               <h2 style={{ color: "#fff", fontSize: "1.3rem", fontWeight: 700, margin: "1.5rem 0 0.5rem 0" }}>1. 10-Day Cancellation Window</h2>
               <p>
-                We want you to be completely satisfied with Webbing. If you decide to cancel a paid subscription (Pro or Agency plan) within <strong>10 days</strong> of your purchase or upgrade, you are eligible for a credit-deducted refund.
+                We want you to be completely satisfied with CursorWebs. If you decide to cancel a paid subscription (Pro or Agency plan) within <strong>10 days</strong> of your purchase or upgrade, you are eligible for a credit-deducted refund.
               </p>
             </section>
 

@@ -19,16 +19,16 @@ export interface SystemSettings {
 
 export function useSystemSettings() {
   const [settings, setSettings] = useState<SystemSettings>({
-    appName: "Webbing",
-    appLogo: "",
-    appEmail: "support@webbing.in",
+    appName: "CursorWebs",
+    appLogo: "/logo.png",
+    appEmail: "support@cursorwebs.com",
     landingHeroTitle: "Build polished websites with AI in one flow.",
-    landingHeroSubtitle: "Describe the business once and Webbing assembles a modern site with home, features, pricing, about, contact, hosting, and provider-aware AI routing.",
-    landingAboutTitle: "Webbing is built for fast, useful site production.",
+    landingHeroSubtitle: "Describe the business once and CursorWebs assembles a modern site with home, features, pricing, about, contact, hosting, and provider-aware AI routing.",
+    landingAboutTitle: "CursorWebs is built for fast, useful site production.",
     landingAboutText: "The platform combines prompt-driven generation, reusable page sections, publishing workflows, and admin-level provider controls so teams can build without wrestling with scattered tools.",
     landingContactTitle: "Need a custom workflow?",
-    landingContactText: "Reach the Webbing team for provider setup, agency plans, domain support, and enterprise onboarding.",
-    landingContactEmail: "support@webbing.in",
+    landingContactText: "Reach the CursorWebs team for provider setup, agency plans, domain support, and enterprise onboarding.",
+    landingContactEmail: "support@cursorwebs.com",
     landingFeatures: "",
     policyPrivacy: "",
     policyTerms: "",
