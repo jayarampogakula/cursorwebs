@@ -45,7 +45,7 @@ export async function POST(
 
     const projectId = params.id;
     const project = await prisma.project.findFirst({
-      where: { id: projectId, tenantId: user.tenantId },
+      where: user.role === "ADMIN" ? { id: projectId } : { id: projectId, tenantId: user.tenantId },
       include: {
         tenant: {
           include: { subscription: true }
@@ -263,7 +263,7 @@ Choose an appropriate ID based on the niche:
       // Increment Tenant credits count
       if (tenant.subscription && !hasUserKeys) {
         await tx.subscription.update({
-          where: { tenantId: user.tenantId },
+          where: { tenantId: tenant.id },
           data: { creditsUsed: { increment: 1 } }
         });
       }

@@ -11,7 +11,7 @@ async function checkAdminAuth(projectId: string, req?: Request) {
 
   if (user) {
     const project = await prisma.project.findFirst({
-      where: { id: projectId, tenantId: user.tenantId },
+      where: user.role === "ADMIN" ? { id: projectId } : { id: projectId, tenantId: user.tenantId },
     });
     if (project && (user.role === "ADMIN" || !project.userId || project.userId === user.userId)) {
       return true;

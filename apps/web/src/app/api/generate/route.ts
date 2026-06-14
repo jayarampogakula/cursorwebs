@@ -53,10 +53,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized. Please sign in or provide a valid API Key." }, { status: 401 });
     }
 
-    const tenantId = user.tenantId;
-
     const body = await req.json();
     const validated = generationSchema.parse(body);
+
+    let tenantId = user.tenantId;
+    if (user.role === "ADMIN" && body.tenantId) {
+      tenantId = body.tenantId;
+    }
 
     // 2. Verify tenant exists and check credits quota
     const tenant = await prisma.tenant.findUnique({

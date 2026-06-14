@@ -18,7 +18,7 @@ export async function GET(
 
     const projectId = params.id;
     const project = await prisma.project.findFirst({
-      where: { id: projectId, tenantId: user.tenantId },
+      where: user.role === "ADMIN" ? { id: projectId } : { id: projectId, tenantId: user.tenantId },
       include: {
         customDomain: true,
         pages: {
@@ -65,7 +65,7 @@ export async function DELETE(
 
     const projectId = params.id;
     const project = await prisma.project.findFirst({
-      where: { id: projectId, tenantId: user.tenantId },
+      where: user.role === "ADMIN" ? { id: projectId } : { id: projectId, tenantId: user.tenantId },
     });
 
     if (!project) {

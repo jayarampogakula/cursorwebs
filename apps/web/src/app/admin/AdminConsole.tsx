@@ -1356,6 +1356,25 @@ export default function AdminConsole({
                         <td><span className="status-pill" style={{ fontSize: "0.75rem", padding: "0.15rem 0.45rem", borderRadius: "0.25rem", fontWeight: 700, background: "rgba(99, 102, 241, 0.15)", color: "#a5b4fc" }}>{u.role}</span></td>
                         <td>{u.tenant.name}</td>
                         <td style={{ textAlign: "right" }}>
+                          <a 
+                            href={`/dashboard?tenantId=${u.tenant.id}`}
+                            className="glow-btn"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              background: "rgba(99, 102, 241, 0.15)",
+                              border: "1px solid rgba(99, 102, 241, 0.3)",
+                              color: "#c084fc",
+                              padding: "0.4rem 0.8rem",
+                              borderRadius: "0.5rem",
+                              fontSize: "0.8rem",
+                              fontWeight: 700,
+                              textDecoration: "none",
+                              marginRight: "0.5rem"
+                            }}
+                          >
+                            Enter Dashboard
+                          </a>
                           <UserEditor
                             userId={u.id}
                             initialName={u.name || ""}
@@ -1431,6 +1450,25 @@ export default function AdminConsole({
                           {s.domainType === "CUSTOM" && "Custom Domain"}
                         </td>
                         <td style={{ textAlign: "right" }}>
+                          <a 
+                            href={`/dashboard?tenantId=${s.tenantId}`}
+                            className="glow-btn"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              background: "rgba(99, 102, 241, 0.15)",
+                              border: "1px solid rgba(99, 102, 241, 0.3)",
+                              color: "#c084fc",
+                              padding: "0.4rem 0.8rem",
+                              borderRadius: "0.5rem",
+                              fontSize: "0.8rem",
+                              fontWeight: 700,
+                              textDecoration: "none",
+                              marginRight: "0.5rem"
+                            }}
+                          >
+                            Enter Dashboard
+                          </a>
                           <PlanEditor
                             tenantId={s.tenantId}
                             initialPlanId={s.planId}

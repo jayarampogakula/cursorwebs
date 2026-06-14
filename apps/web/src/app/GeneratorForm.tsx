@@ -6,6 +6,7 @@ import { Globe, Sparkles, ArrowRight, ArrowLeft, Check, ShoppingBag, ShieldCheck
 
 interface GeneratorFormProps {
   user: { userId: string; email: string; role: string; tenantId: string } | null;
+  tenantId?: string;
   onSuccess?: (projectId: string) => void;
 }
 
@@ -22,7 +23,7 @@ const stylesList = [
   { id: "Portfolio", label: "Portfolio", desc: "Glassmorphic details, custom bento portfolio blocks" }
 ];
 
-export default function GeneratorForm({ user, onSuccess }: GeneratorFormProps) {
+export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFormProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
 
@@ -97,6 +98,7 @@ export default function GeneratorForm({ user, onSuccess }: GeneratorFormProps) {
           targetAudience: "",
           style,
           ecommerce,
+          tenantId,
         }),
       });
 

@@ -46,7 +46,7 @@ export async function POST(
 
     const projectId = params.id;
     const project = await prisma.project.findFirst({
-      where: { id: projectId, tenantId: user.tenantId }
+      where: user.role === "ADMIN" ? { id: projectId } : { id: projectId, tenantId: user.tenantId }
     });
 
     if (!project) {

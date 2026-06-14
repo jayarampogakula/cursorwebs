@@ -27,7 +27,7 @@ export async function POST(
 
     const projectId = params.id;
     const project = await prisma.project.findFirst({
-      where: { id: projectId, tenantId: user.tenantId },
+      where: user.role === "ADMIN" ? { id: projectId } : { id: projectId, tenantId: user.tenantId },
     });
 
     if (!project) {
@@ -41,9 +41,11 @@ export async function POST(
     const body = await req.json();
     const validated = regenerateSchema.parse(body);
 
+    const targetTenantId = user.role === "ADMIN" ? project.tenantId : user.tenantId;
+
     // Verify credits quota
     const tenant = await prisma.tenant.findUnique({
-      where: { id: user.tenantId },
+      where: { id: targetTenantId },
       include: { subscription: true }
     });
 
@@ -100,7 +102,7 @@ export async function POST(
     // Increment credits
     if (tenant.subscription && !hasUserKeys) {
       await prisma.subscription.update({
-        where: { tenantId: user.tenantId },
+        where: { tenantId: targetTenantId },
         data: { creditsUsed: { increment: requiredCredits } }
       });
     }

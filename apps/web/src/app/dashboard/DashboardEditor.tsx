@@ -1882,6 +1882,33 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
   if (activeView === "homepage") {
     return (
       <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100vh", background: "var(--bg)", overflow: "hidden" }}>
+        {user.role === "ADMIN" && tenant.id !== user.tenantId && (
+          <div style={{
+            background: "linear-gradient(to right, #4f46e5, #7c3aed)",
+            color: "#ffffff",
+            padding: "0.6rem 1.5rem",
+            fontSize: "0.85rem",
+            fontWeight: 700,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            boxShadow: "0 4px 15px rgba(124, 58, 237, 0.25)",
+            zIndex: 1000
+          }}>
+            <span>⚙️ Admin Control: Managing Workspace <strong>{tenant.name}</strong></span>
+            <a href="/admin" style={{
+              color: "#ffffff",
+              textDecoration: "underline",
+              fontWeight: 800,
+              background: "rgba(255, 255, 255, 0.15)",
+              padding: "0.25rem 0.75rem",
+              borderRadius: "0.25rem",
+              fontSize: "0.75rem"
+            }}>
+              Return to Admin Console
+            </a>
+          </div>
+        )}
         {/* Persistent Site Header (Main Menu) */}
         <header className="site-nav dashboard-nav" style={{ borderBottom: "1px solid var(--line)", margin: 0, background: "var(--panel)", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 1.5rem", height: "70px", flexShrink: 0 }}>
           <a className="brand" href="/">
@@ -2672,6 +2699,33 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
   // ----------------------------------------------------
   return (
     <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100vh", background: "var(--bg)", overflow: "hidden" }}>
+      {user.role === "ADMIN" && tenant.id !== user.tenantId && (
+        <div style={{
+          background: "linear-gradient(to right, #4f46e5, #7c3aed)",
+          color: "#ffffff",
+          padding: "0.6rem 1.5rem",
+          fontSize: "0.85rem",
+          fontWeight: 700,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          boxShadow: "0 4px 15px rgba(124, 58, 237, 0.25)",
+          zIndex: 1000
+        }}>
+          <span>⚙️ Admin Control: Managing Workspace <strong>{tenant.name}</strong></span>
+          <a href="/admin" style={{
+            color: "#ffffff",
+            textDecoration: "underline",
+            fontWeight: 800,
+            background: "rgba(255, 255, 255, 0.15)",
+            padding: "0.25rem 0.75rem",
+            borderRadius: "0.25rem",
+            fontSize: "0.75rem"
+          }}>
+            Return to Admin Console
+          </a>
+        </div>
+      )}
       {/* Persistent Site Header (Main Menu) */}
       <header className="site-nav dashboard-nav" style={{ borderBottom: "1px solid var(--line)", margin: 0, background: "var(--panel)", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 1.5rem", height: "70px", flexShrink: 0 }}>
         <a className="brand" href="/">
@@ -3245,7 +3299,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                 Cancel
               </button>
             </div>
-            <GeneratorForm user={user} onSuccess={handleNewProjectGenerated} />
+            <GeneratorForm user={user} tenantId={tenant.id} onSuccess={handleNewProjectGenerated} />
           </div>
         </div>
       ) : !currentProject ? (

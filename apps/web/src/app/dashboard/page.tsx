@@ -37,7 +37,7 @@ async function getLlmKeys(userId: string) {
   }
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams?: { tenantId?: string } }) {
   const reqHost = headers().get("x-forwarded-host") || headers().get("host") || "";
   const { setupRequired, licenseValid } = await checkSetupAndLicense(reqHost);
   if (setupRequired || !licenseValid) {
@@ -48,6 +48,10 @@ export default async function DashboardPage() {
   const user = sessionToken ? verifySession(sessionToken) : null;
 
   if (!user) redirect("/signin");
+
+  const targetTenantId = (user.role === "ADMIN" && searchParams?.tenantId)
+    ? searchParams.tenantId
+    : user.tenantId;
 
   const hostHeader = headers().get("host") || "webbing.in";
   const baseDomain = hostHeader.startsWith("app.") ? hostHeader.slice(4) : hostHeader;
@@ -65,7 +69,7 @@ export default async function DashboardPage() {
   try {
     const [dbTenant, dbLlmKeys, dbPlans, dbUpiSetting, dbUser, dbSettings, dbDiscounts] = await Promise.all([
       prisma.tenant.findUnique({
-        where: { id: user.tenantId },
+        where: { id: targetTenantId },
         include: {
           subscription: true,
           projects: {
