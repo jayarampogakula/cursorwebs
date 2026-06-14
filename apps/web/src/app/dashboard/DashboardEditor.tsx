@@ -1256,8 +1256,8 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
   const remainingCredits = Math.max(0, totalCredits - usedCredits);
 
   const currentPlan = tenant.subscription?.planId || "starter";
-  const isAgency = currentPlan === "agency";
-  const canBuyCredits = currentPlan === "pro-plan" || currentPlan === "agency";
+  const isAgency = currentPlan === "agency" || currentPlan === "agency-plan";
+  const canBuyCredits = true;
 
   // Homepage categories
   const draftProjects = projects.filter(p => p.status === "DRAFT" || p.status === "GENERATING" || p.status === "FAILED");
@@ -1355,60 +1355,58 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                     )}
         
                     {/* Current Active Plan & Refund Section */}
-                    {tenant.subscription && tenant.subscription.planId !== "free-plan" && tenant.subscription.planId !== "starter" && (
-                      <div style={{ background: "rgba(255, 255, 255, 0.02)", padding: "1.25rem", borderRadius: "0.75rem", border: "1px solid rgba(255, 255, 255, 0.05)", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <div>
-                            <span style={{ fontSize: "0.75rem", color: "#9ca3af", display: "block" }}>CURRENT ACTIVE PLAN</span>
-                            <strong style={{ color: "#fff", display: "block", fontSize: "1.1rem", textTransform: "capitalize" }}>
-                              {tenant.subscription.planId.replace("-plan", "").replace("-annual", " Annual")}
-                            </strong>
-                            <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>
-                              Credits: {tenant.subscription.creditsUsed} / {tenant.subscription.creditsLimit} used
-                            </span>
-                          </div>
-                          <div>
-                            {refundEligibility && refundEligibility.eligible && (
-                              <button
-                                type="button"
-                                onClick={handleRefundSubmit}
-                                disabled={submittingRefund}
-                                className="danger-action"
-                                style={{ padding: "0.4rem 0.8rem", fontSize: "0.8rem", fontWeight: 700 }}
-                              >
-                                {submittingRefund ? "Processing..." : "Cancel & Refund"}
-                              </button>
-                            )}
-                          </div>
+                    <div style={{ background: "rgba(255, 255, 255, 0.02)", padding: "1.25rem", borderRadius: "0.75rem", border: "1px solid rgba(255, 255, 255, 0.05)", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div>
+                          <span style={{ fontSize: "0.75rem", color: "#9ca3af", display: "block" }}>CURRENT ACTIVE PLAN</span>
+                          <strong style={{ color: "#fff", display: "block", fontSize: "1.1rem", textTransform: "capitalize" }}>
+                            {tenant.subscription?.planId ? tenant.subscription.planId.replace("-plan", "").replace("-annual", " Annual") : "Starter (Free)"}
+                          </strong>
+                          <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                            Credits: {tenant.subscription?.creditsUsed ?? 0} / {tenant.subscription?.creditsLimit ?? 10} used
+                          </span>
                         </div>
-        
-                        {/* Refund quote calculations display */}
-                        {refundEligibility && refundEligibility.eligible && (
-                          <div style={{ background: "rgba(239, 68, 68, 0.05)", border: "1px solid rgba(239, 68, 68, 0.1)", borderRadius: "0.5rem", padding: "0.75rem 1rem", fontSize: "0.75rem", color: "#f87171" }}>
-                            <div style={{ fontWeight: 700, marginBottom: "0.25rem" }}>Eligible for cancellation & credit-deducted refund:</div>
-                            <ul style={{ margin: 0, paddingLeft: "1.2rem", lineHeight: 1.4 }}>
-                              <li>Original payment: ₹{refundEligibility.amountPaid}</li>
-                              <li>Credits used: {refundEligibility.creditsUsed} (deducted at ₹{Math.round(refundEligibility.deductAmount / (refundEligibility.creditsUsed || 1))} per credit)</li>
-                              <li>Deduction amount: -₹{refundEligibility.deductAmount}</li>
-                              <li>Estimated net refund: <strong>₹{refundEligibility.refundAmount}</strong></li>
-                              <li>Refund window expires in: <strong>{refundEligibility.daysRemaining} days</strong></li>
-                            </ul>
-                          </div>
-                        )}
-        
-                        {refundMessage && (
-                          <div style={{ padding: "0.75rem 1rem", background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.2)", borderRadius: "0.5rem", color: "#34d399", fontSize: "0.85rem" }}>
-                            {refundMessage}
-                          </div>
-                        )}
-        
-                        {refundError && (
-                          <div style={{ padding: "0.75rem 1rem", background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: "0.5rem", color: "#f87171", fontSize: "0.85rem" }}>
-                            {refundError}
-                          </div>
-                        )}
+                        <div>
+                          {refundEligibility && refundEligibility.eligible && tenant.subscription?.planId !== "free-plan" && tenant.subscription?.planId !== "starter" && tenant.subscription?.planId !== "free" && (
+                            <button
+                              type="button"
+                              onClick={handleRefundSubmit}
+                              disabled={submittingRefund}
+                              className="danger-action"
+                              style={{ padding: "0.4rem 0.8rem", fontSize: "0.8rem", fontWeight: 700 }}
+                            >
+                              {submittingRefund ? "Processing..." : "Cancel & Refund"}
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    )}
+      
+                      {/* Refund quote calculations display */}
+                      {refundEligibility && refundEligibility.eligible && tenant.subscription?.planId !== "free-plan" && tenant.subscription?.planId !== "starter" && tenant.subscription?.planId !== "free" && (
+                        <div style={{ background: "rgba(239, 68, 68, 0.05)", border: "1px solid rgba(239, 68, 68, 0.1)", borderRadius: "0.5rem", padding: "0.75rem 1rem", fontSize: "0.75rem", color: "#f87171" }}>
+                          <div style={{ fontWeight: 700, marginBottom: "0.25rem" }}>Eligible for cancellation & credit-deducted refund:</div>
+                          <ul style={{ margin: 0, paddingLeft: "1.2rem", lineHeight: 1.4 }}>
+                            <li>Original payment: ₹{refundEligibility.amountPaid}</li>
+                            <li>Credits used: {refundEligibility.creditsUsed} (deducted at ₹{Math.round(refundEligibility.deductAmount / (refundEligibility.creditsUsed || 1))} per credit)</li>
+                            <li>Deduction amount: -₹{refundEligibility.deductAmount}</li>
+                            <li>Estimated net refund: <strong>₹{refundEligibility.refundAmount}</strong></li>
+                            <li>Refund window expires in: <strong>{refundEligibility.daysRemaining} days</strong></li>
+                          </ul>
+                        </div>
+                      )}
+      
+                      {refundMessage && (
+                        <div style={{ padding: "0.75rem 1rem", background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.2)", borderRadius: "0.5rem", color: "#34d399", fontSize: "0.85rem" }}>
+                          {refundMessage}
+                        </div>
+                      )}
+      
+                      {refundError && (
+                        <div style={{ padding: "0.75rem 1rem", background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: "0.5rem", color: "#f87171", fontSize: "0.85rem" }}>
+                          {refundError}
+                        </div>
+                      )}
+                    </div>
         
                     {upgradeMessage && (
                       <div style={{ padding: "0.75rem 1rem", background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.2)", borderRadius: "0.5rem", color: "#34d399", fontSize: "0.85rem" }}>
@@ -1510,8 +1508,9 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                             <>
                               {[
                                 { id: "credits-10", name: "10 Credits Pack", creditsLimit: 10, price: 99, features: "Adds 10 AI generation credits to your account immediately" },
-                                { id: "credits-50", name: "50 Credits Pack", creditsLimit: 50, price: 399, features: "Adds 50 AI generation credits to your account immediately" },
-                                { id: "credits-100", name: "100 Credits Pack", creditsLimit: 100, price: 699, features: "Adds 100 AI generation credits to your account immediately" },
+                                { id: "credits-100", name: "100 Credits Pack", creditsLimit: 100, price: 499, features: "Adds 100 AI generation credits to your account immediately" },
+                                { id: "credits-500", name: "500 Credits Pack", creditsLimit: 500, price: 1999, features: "Adds 500 AI generation credits to your account immediately" },
+                                { id: "credits-1000", name: "1000 Credits Pack", creditsLimit: 1000, price: 3799, features: "Adds 1000 AI generation credits to your account immediately" },
                               ].map((pack) => (
                                 <div key={pack.id} style={{ padding: "1.25rem", background: "rgba(255,255,255,0.01)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "0.75rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                   <div>
