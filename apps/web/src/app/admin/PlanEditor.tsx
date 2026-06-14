@@ -11,6 +11,7 @@ interface PlanEditorProps {
   initialHostingType: string;
   initialDomainType: string;
   initialStatus: string;
+  availablePlans?: Array<{ id: string; name: string }>;
 }
 
 export default function PlanEditor({
@@ -21,6 +22,7 @@ export default function PlanEditor({
   initialHostingType,
   initialDomainType,
   initialStatus,
+  availablePlans,
 }: PlanEditorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [planId, setPlanId] = useState(initialPlanId);
@@ -180,9 +182,19 @@ export default function PlanEditor({
                   style={{ background: "#0d111c", color: "#ffffff", width: "100%" }}
                   disabled={loading}
                 >
-                  <option value="free-plan">Free Plan</option>
-                  <option value="pro-plan">Pro Plan</option>
-                  <option value="agency-plan">Agency Plan</option>
+                  {availablePlans && availablePlans.length > 0 ? (
+                    availablePlans.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="free-plan">Free Plan</option>
+                      <option value="pro-plan">Pro Plan</option>
+                      <option value="agency-plan">Agency Plan</option>
+                    </>
+                  )}
                 </select>
               </div>
 

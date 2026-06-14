@@ -44,6 +44,7 @@ interface Order {
   id: string;
   customerName: string;
   customerEmail: string;
+  customerAddress?: string;
   items: any; // JSON array of items
   total: number;
   status: string;
@@ -427,12 +428,14 @@ export default function EcommerceStore({
         };
       });
 
+      const formattedAddress = `${checkoutForm.address}, ${checkoutForm.city}, ${checkoutForm.state} - ${checkoutForm.zip}`;
       const res = await fetch(`/api/projects/${projectId}/ecommerce/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerEmail: email.toLowerCase().trim(),
           customerName: name,
+          customerAddress: formattedAddress,
           items: orderItems,
           total: getCartTotal(),
           paymentMethod: checkoutForm.paymentMethod,
@@ -1882,6 +1885,11 @@ export default function EcommerceStore({
                               <div>
                                 <strong>{ord.customerName}</strong>
                                 <span style={{ color: "#64748b", display: "block" }}>{ord.customerEmail}</span>
+                                {ord.customerAddress && (
+                                  <span style={{ color: "#94a3b8", display: "block", fontSize: "0.75rem", fontStyle: "italic", marginTop: "0.2rem" }}>
+                                    {ord.customerAddress}
+                                  </span>
+                                )}
                               </div>
                               <span style={{ color: "#a855f7", fontWeight: 700 }}>₹{Number(ord.total).toLocaleString()}</span>
                               <span style={{ 
@@ -2187,8 +2195,13 @@ export default function EcommerceStore({
                             <tr key={ord.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                               <td style={{ padding: "0.75rem" }}><strong>{ord.id.slice(0, 8)}</strong></td>
                               <td style={{ padding: "0.75rem" }}>
-                                {ord.customerName}
+                                <strong>{ord.customerName}</strong>
                                 <span style={{ color: "#64748b", display: "block", fontSize: "0.75rem" }}>{ord.customerEmail}</span>
+                                {ord.customerAddress && (
+                                  <span style={{ color: "#94a3b8", display: "block", fontSize: "0.75rem", fontStyle: "italic", marginTop: "0.2rem" }}>
+                                    {ord.customerAddress}
+                                  </span>
+                                )}
                               </td>
                               <td style={{ padding: "0.75rem" }}>
                                 {Array.isArray(ord.items) ? ord.items.map((i: any) => `${i.name} (x${i.quantity})`).join(", ") : "Items parsing issue"}

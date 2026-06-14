@@ -244,6 +244,7 @@ model Order {
   store         EcomStore @relation(fields: [storeId], references: [id], onDelete: Cascade)
   customerEmail String
   customerName  String
+  customerAddress String?
   items         Json      // [{ productId, quantity, price }]
   total         Decimal   @db.Decimal(10, 2)
   status        String    @default("PENDING") // PENDING, PAID, SHIPPED, REFUNDED

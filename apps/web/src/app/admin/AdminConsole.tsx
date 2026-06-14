@@ -1755,6 +1755,7 @@ export default function AdminConsole({
                               initialHostingType={s.hostingType}
                               initialDomainType={s.domainType}
                               initialStatus={s.status}
+                              availablePlans={plans}
                             />
                           </td>
                         </tr>

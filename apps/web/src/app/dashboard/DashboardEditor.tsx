@@ -3990,9 +3990,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                       {isProOrAgencyOrAdmin && (
                         <button onClick={() => setSettingsTab("clients")} type="button" style={{ background: "none", border: "none", color: settingsTab === "clients" ? "#818cf8" : "#9ca3af", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>Client Logins</button>
                       )}
-                      {isAgencyOrAdmin && (
-                        <button onClick={() => setSettingsTab("devkeys")} type="button" style={{ background: "none", border: "none", color: settingsTab === "devkeys" ? "#818cf8" : "#9ca3af", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>Developer Keys</button>
-                      )}
+                      <button onClick={() => setSettingsTab("devkeys")} type="button" style={{ background: "none", border: "none", color: settingsTab === "devkeys" ? "#818cf8" : "#9ca3af", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>Developer Keys</button>
                     </div>
 
                     {/* Settings Form Container */}
@@ -4230,14 +4228,16 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                             <h4 style={{ color: "#fff", margin: 0 }}>Developer API Keys</h4>
-                            <button
-                              type="button"
-                              onClick={handleGenerateDevKey}
-                              className="glow-btn"
-                              style={{ background: "linear-gradient(to right, #6366f1, #a855f7)", color: "#fff", border: "none", padding: "0.4rem 0.8rem", borderRadius: "0.4rem", fontSize: "0.75rem", cursor: "pointer", fontWeight: 700 }}
-                            >
-                              + Generate New Key
-                            </button>
+                            {isAgencyOrAdmin && (
+                              <button
+                                type="button"
+                                onClick={handleGenerateDevKey}
+                                className="glow-btn"
+                                style={{ background: "linear-gradient(to right, #6366f1, #a855f7)", color: "#fff", border: "none", padding: "0.4rem 0.8rem", borderRadius: "0.4rem", fontSize: "0.75rem", cursor: "pointer", fontWeight: 700 }}
+                              >
+                                + Generate New Key
+                              </button>
+                            )}
                           </div>
                           
                           <p style={{ color: "#9ca3af", fontSize: "0.75rem", margin: "0 0 1rem 0", lineHeight: 1.4 }}>
@@ -4247,34 +4247,75 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                             </code>
                           </p>
 
-                          {devKeysLoading ? (
-                            <span style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Loading developer keys...</span>
-                          ) : devKeys.length === 0 ? (
-                            <div style={{ padding: "1.5rem", border: "1px dashed rgba(255,255,255,0.1)", borderRadius: "0.5rem", textAlign: "center", color: "#6b7280", fontSize: "0.8rem" }}>
-                              No active developer keys. Generate one above to get started.
+                          {!isAgencyOrAdmin ? (
+                            <div style={{ 
+                              background: "rgba(99, 102, 241, 0.05)", 
+                              border: "1px solid rgba(99, 102, 241, 0.15)", 
+                              borderRadius: "0.75rem", 
+                              padding: "1.5rem", 
+                              marginTop: "0.5rem", 
+                              display: "flex", 
+                              flexDirection: "column", 
+                              gap: "0.75rem" 
+                            }}>
+                              <span style={{ color: "#fff", fontWeight: 700, fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                                🔒 Premium Feature: Developer API Keys
+                              </span>
+                              <p style={{ color: "#9ca3af", fontSize: "0.75rem", margin: 0, lineHeight: 1.5 }}>
+                                Enable API access to programmatically trigger, create, edit, or publish websites. This option is only available on the Agency plan.
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => setUpgradeModalOpen(true)}
+                                className="glow-btn"
+                                style={{
+                                  background: "linear-gradient(to right, #6366f1, #d946ef)",
+                                  color: "#ffffff",
+                                  padding: "0.5rem 1rem",
+                                  borderRadius: "0.5rem",
+                                  fontSize: "0.75rem",
+                                  fontWeight: 700,
+                                  cursor: "pointer",
+                                  border: "none",
+                                  alignSelf: "flex-start",
+                                  boxShadow: "0 4px 12px rgba(217, 70, 239, 0.2)"
+                                }}
+                              >
+                                Upgrade Plan
+                              </button>
                             </div>
                           ) : (
-                            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-                              {devKeys.map((k) => (
-                                <div key={k.id} className="glass-panel" style={{ padding: "1rem", borderRadius: "0.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid rgba(255,255,255,0.06)" }}>
-                                  <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                                    <code style={{ fontSize: "0.8rem", color: "#fff", fontFamily: "monospace" }}>
-                                      {k.key}
-                                    </code>
-                                    <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>
-                                      Created: {new Date(k.createdAt).toLocaleDateString()}
-                                    </span>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRevokeDevKey(k.id)}
-                                    style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", color: "#f87171", padding: "0.3rem 0.6rem", borderRadius: "0.25rem", fontSize: "0.7rem", cursor: "pointer", fontWeight: 700 }}
-                                  >
-                                    Revoke
-                                  </button>
+                            <>
+                              {devKeysLoading ? (
+                                <span style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Loading developer keys...</span>
+                              ) : devKeys.length === 0 ? (
+                                <div style={{ padding: "1.5rem", border: "1px dashed rgba(255,255,255,0.1)", borderRadius: "0.5rem", textAlign: "center", color: "#6b7280", fontSize: "0.8rem" }}>
+                                  No active developer keys. Generate one above to get started.
                                 </div>
-                              ))}
-                            </div>
+                              ) : (
+                                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                                  {devKeys.map((k) => (
+                                    <div key={k.id} className="glass-panel" style={{ padding: "1rem", borderRadius: "0.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid rgba(255,255,255,0.06)" }}>
+                                      <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                                        <code style={{ fontSize: "0.8rem", color: "#fff", fontFamily: "monospace" }}>
+                                          {k.key}
+                                        </code>
+                                        <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>
+                                          Created: {new Date(k.createdAt).toLocaleDateString()}
+                                        </span>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRevokeDevKey(k.id)}
+                                        style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", color: "#f87171", padding: "0.3rem 0.6rem", borderRadius: "0.25rem", fontSize: "0.7rem", cursor: "pointer", fontWeight: 700 }}
+                                      >
+                                        Revoke
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
                       )}

@@ -97,7 +97,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
 
     const body = await req.json();
-    const { customerEmail, customerName, items, total, paymentMethod } = body;
+    const { customerEmail, customerName, customerAddress, items, total, paymentMethod } = body;
 
     if (!customerEmail || !customerName || !items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: "Missing checkout parameters" }, { status: 400 });
@@ -132,6 +132,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
           storeId: store.id,
           customerEmail,
           customerName,
+          customerAddress,
           items: items, // JSON format
           total: Number(total),
           status: "PENDING",
