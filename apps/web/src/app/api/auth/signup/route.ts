@@ -8,7 +8,7 @@ import { getSystemSettings } from "@/lib/settings";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password, tenantName, referrerCode } = await req.json();
+    const { name, email, password, tenantName, referrerCode, phone, plan } = await req.json();
 
     if (!email || !password || !name) {
       return NextResponse.json(
@@ -84,6 +84,7 @@ export async function POST(req: Request) {
       data: {
         email: emailClean,
         name: name.trim(),
+        phone: phone ? phone.trim() : null,
         passwordHash,
         role: Role.USER,
         tenantId: tenant.id,
@@ -98,34 +99,66 @@ export async function POST(req: Request) {
     });
 
 
-    // 4. Create Free tier Subscription
-    let freeCreditsLimit = 3;
-    let freePlanId = "free-plan";
-    try {
-      const starterPlan = await prisma.plan.findFirst({
-        where: {
-          OR: [
-            { name: { equals: "Starter", mode: "insensitive" } },
-            { price: 0 }
-          ]
+    // 4. Create Subscription (Free or selected Paid plan)
+    let creditsLimit = 10;
+    let finalPlanId = "free-plan";
+    let status = SubscriptionStatus.ACTIVE;
+    let durationMs = 30 * 24 * 60 * 60 * 1000; // 30 days default
+
+    if (plan) {
+      try {
+        const cleanPlan = plan.replace("-annual", "");
+        const dbPlan = await prisma.plan.findFirst({
+          where: {
+            OR: [
+              { id: cleanPlan },
+              { name: { equals: cleanPlan, mode: "insensitive" } },
+              { name: { equals: cleanPlan.replace("-plan", ""), mode: "insensitive" } }
+            ]
+          }
+        });
+        if (dbPlan) {
+          creditsLimit = dbPlan.creditsLimit;
+          finalPlanId = dbPlan.name.toLowerCase().replace(/\s+/g, "-");
+          if (plan.endsWith("-annual")) {
+            finalPlanId = `${finalPlanId}-annual`;
+            durationMs = 365 * 24 * 60 * 60 * 1000; // 1 year
+          }
+          if (dbPlan.price > 0) {
+            status = SubscriptionStatus.UNPAID; // Require purchase confirmation
+          }
         }
-      });
-      if (starterPlan) {
-        freeCreditsLimit = starterPlan.creditsLimit;
-        freePlanId = starterPlan.name.toLowerCase().replace(/\s+/g, "-");
+      } catch (err) {
+        console.error("Failed to fetch selected plan from DB:", err);
       }
-    } catch (err) {
-      console.error("Failed to fetch starter plan from DB:", err);
+    } else {
+      // Default Free plan lookup
+      try {
+        const starterPlan = await prisma.plan.findFirst({
+          where: {
+            OR: [
+              { name: { equals: "Starter", mode: "insensitive" } },
+              { price: 0 }
+            ]
+          }
+        });
+        if (starterPlan) {
+          creditsLimit = starterPlan.creditsLimit;
+          finalPlanId = starterPlan.name.toLowerCase().replace(/\s+/g, "-");
+        }
+      } catch (err) {
+        console.error("Failed to fetch starter plan from DB:", err);
+      }
     }
 
     await prisma.subscription.create({
       data: {
         tenantId: tenant.id,
-        planId: freePlanId,
-        status: SubscriptionStatus.ACTIVE,
+        planId: finalPlanId,
+        status: status,
         currentPeriodStart: new Date(),
-        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-        creditsLimit: freeCreditsLimit,
+        currentPeriodEnd: new Date(Date.now() + durationMs),
+        creditsLimit: creditsLimit,
         creditsUsed: 0,
       },
     });

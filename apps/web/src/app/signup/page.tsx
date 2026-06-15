@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, UserPlus } from "lucide-react";
+import { Sparkles, UserPlus, Eye, EyeOff } from "lucide-react";
 import MarketingHeader from "../components/MarketingHeader";
 import { useSystemSettings } from "@/hooks/useSystemSettings";
 
@@ -10,8 +10,11 @@ export default function SignUpPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [tenantName, setTenantName] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { settings } = useSystemSettings();
@@ -19,6 +22,11 @@ export default function SignUpPage() {
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
+      const planParam = urlParams.get("plan");
+      if (planParam) {
+        setSelectedPlan(planParam);
+        localStorage.setItem("webbing_selected_plan", planParam);
+      }
       const ref = urlParams.get("ref");
       if (ref) {
         localStorage.setItem("webbing_referrer", ref);
@@ -45,6 +53,8 @@ export default function SignUpPage() {
         body: JSON.stringify({ 
           name: name.trim(), 
           email: email.trim(), 
+          phone: phone.trim() || undefined,
+          plan: selectedPlan || undefined,
           password, 
           tenantName: tenantName.trim() || undefined,
           referrerCode: referrerCode || undefined
@@ -95,8 +105,43 @@ export default function SignUpPage() {
             <input className="field" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" disabled={loading} required />
           </div>
           <div className="field-group" style={{ marginTop: "1rem" }}>
+            <label>Phone number</label>
+            <input className="field" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91 XXXXX XXXXX" disabled={loading} />
+          </div>
+          <div className="field-group" style={{ marginTop: "1rem" }}>
             <label>Password</label>
-            <input className="field" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Minimum 6 characters" disabled={loading} required />
+            <div style={{ position: "relative" }}>
+              <input 
+                className="field" 
+                type={showPassword ? "text" : "password"} 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                placeholder="Minimum 6 characters" 
+                disabled={loading} 
+                required 
+                style={{ paddingRight: "2.5rem" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: "0.75rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  color: "#9ca3af",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 0
+                }}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
           <div className="field-group" style={{ marginTop: "1rem" }}>
             <label>Workspace name</label>

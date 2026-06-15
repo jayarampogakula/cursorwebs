@@ -474,6 +474,35 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
     }
   }, [activeView, builderTab, settingsTab]);
 
+  // Auto-open selected upgrade plan modal from signup redirect
+  useEffect(() => {
+    if (typeof window !== "undefined" && initialPlans.length > 0) {
+      const selectedPlanParam = localStorage.getItem("webbing_selected_plan");
+      if (selectedPlanParam) {
+        const cleanParam = selectedPlanParam.replace("-annual", "");
+        const plan = initialPlans.find(p => 
+          p.id === cleanParam || 
+          p.name.toLowerCase() === cleanParam.toLowerCase() ||
+          p.name.toLowerCase().replace(/\s+/g, "-") === cleanParam.toLowerCase()
+        );
+        if (plan) {
+          let planName = plan.name;
+          let amount = plan.price;
+          let planId = plan.name.toLowerCase().replace(/\s+/g, "-");
+          if (selectedPlanParam.endsWith("-annual")) {
+            const discountPercent = plan.yearlyDiscount || 0;
+            amount = Math.round(plan.price * 12 * (1 - discountPercent / 100));
+            planName = `${plan.name} (Annually)`;
+            planId = `${planId}-annual`;
+          }
+          setSelectedUpgradePlan({ ...plan, id: planId, price: amount, name: planName });
+          setUpgradeModalOpen(true);
+        }
+        localStorage.removeItem("webbing_selected_plan");
+      }
+    }
+  }, [initialPlans]);
+
   // Sync state with selected project
   useEffect(() => {
     if (currentProject) {
@@ -1554,7 +1583,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                                         type="button"
                                         onClick={() => setSelectedUpgradePlan({ ...plan, id: planKey })}
                                         className="glow-btn"
-                                        style={{ padding: "0.5rem 1rem", fontSize: "0.8rem", fontWeight: 700 }}
+                                        style={{ padding: "0.5rem 1rem", fontSize: "0.8rem", fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 }}
                                       >
                                         Select Plan
                                       </button>
@@ -1609,7 +1638,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                                       type="button"
                                       onClick={() => setSelectedUpgradePlan({ ...plan, id: customId, price: amount, name: planName })}
                                       className="glow-btn"
-                                      style={{ padding: "0.5rem 1rem", fontSize: "0.8rem", fontWeight: 700 }}
+                                      style={{ padding: "0.5rem 1rem", fontSize: "0.8rem", fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 }}
                                     >
                                       Select Plan
                                     </button>
