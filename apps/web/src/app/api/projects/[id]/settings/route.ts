@@ -112,9 +112,14 @@ export async function POST(
       const hostname = customDomain.trim().toLowerCase();
       if (hostname) {
         const subscription = project.tenant?.subscription;
-        const isCustomDomainAllowed = user.role === "ADMIN" || subscription?.domainType === "CUSTOM";
+        const isCustomDomainAllowed = 
+          user.role === "ADMIN" || 
+          subscription?.domainType === "CUSTOM" ||
+          subscription?.planId?.toLowerCase().includes("individual") ||
+          subscription?.planId?.toLowerCase().includes("pro") ||
+          subscription?.planId?.toLowerCase().includes("agency");
         if (!isCustomDomainAllowed) {
-          return NextResponse.json({ error: "Custom domain mapping is only available on Pro and Agency plans. Please upgrade." }, { status: 400 });
+          return NextResponse.json({ error: "Custom domain mapping is only available on Individual, Pro, and Agency plans. Please upgrade." }, { status: 400 });
         }
       }
       if (!hostname) {

@@ -9,15 +9,14 @@ export default function PricingSection({ initialPlans }: { initialPlans?: any[] 
   const defaultPlans = [
     {
       id: "starter",
-      name: "Free",
+      name: "Starter",
       priceDisplay: "₹0",
       period: "/ month",
       text: "For trying the builder",
       items: [
-        "1 active website",
-        "3 generation credits",
-        "CursorWebs subdomain only",
-        "CursorWebs branding footer"
+        "30 Days Duration",
+        "1 subdomain website",
+        "10 free credits"
       ],
       featured: false,
       buttonText: "Choose Free",
@@ -26,20 +25,19 @@ export default function PricingSection({ initialPlans }: { initialPlans?: any[] 
     {
       id: "individual",
       name: "Individual Plan",
-      priceDisplay: billingCycle === "monthly" ? "₹179" : "₹2,040",
+      priceDisplay: billingCycle === "monthly" ? "₹159" : "₹1,812",
       period: billingCycle === "monthly" ? "/ month" : "/ year",
       text: "For personal use",
       items: [
         "2 active websites",
-        "10 credits per month",
-        "CursorWebs subdomain only",
-        "CursorWebs branding footer"
+        "Custom domain support",
+        "20 credits per month"
       ],
       featured: false,
       buttonText: "Choose Individual",
       signUpUrl: billingCycle === "monthly" ? "/signup?plan=individual" : "/signup?plan=individual-annual",
       discountBadge: billingCycle === "annually" ? "Save 5%" : null,
-      subText: billingCycle === "annually" ? "Equivalent to ₹170/month" : null
+      subText: billingCycle === "annually" ? "Equivalent to ₹151/month" : null
     },
     {
       id: "pro-plan",
@@ -49,11 +47,11 @@ export default function PricingSection({ initialPlans }: { initialPlans?: any[] 
       text: "For creators and teams",
       items: [
         "10 active websites",
-        "100 credits per month",
-        "Custom domains support",
-        "White-labeled workspace",
-        "Commerce store builder",
-        "Priority email support"
+        "Custom domain support",
+        "Create ecommerce sites",
+        "Logins for each site",
+        "Priority support",
+        "100 credits per month"
       ],
       featured: true,
       buttonText: "Choose Pro",
@@ -69,11 +67,12 @@ export default function PricingSection({ initialPlans }: { initialPlans?: any[] 
       text: "For client production",
       items: [
         "50 active websites",
-        "500 credits per month",
-        "Custom domains support",
-        "White-labeled workspace",
-        "Dedicated LLM API keys",
-        "Priority 24/7 support"
+        "Custom domain support",
+        "Create ecommerce sites",
+        "Logins for each site",
+        "Bring your own Key option",
+        "Priority support",
+        "500 credits per month"
       ],
       featured: false,
       buttonText: "Choose Agency",
@@ -87,7 +86,14 @@ export default function PricingSection({ initialPlans }: { initialPlans?: any[] 
 
   if (initialPlans && initialPlans.length > 0) {
     plans = initialPlans.map((plan) => {
-      const defaultInfo = defaultPlans.find(p => p.id === plan.id) || {
+      const defaultInfo = defaultPlans.find(p => 
+        p.id === plan.id || 
+        p.name.toLowerCase() === plan.name.toLowerCase() ||
+        (plan.name.toLowerCase().includes("starter") && p.id === "starter") ||
+        (plan.name.toLowerCase().includes("individual") && p.id === "individual") ||
+        (plan.name.toLowerCase().includes("pro") && p.id === "pro-plan") ||
+        (plan.name.toLowerCase().includes("agency") && p.id === "agency")
+      ) || {
         text: "Custom plan details",
         featured: false,
         buttonText: "Choose Plan",

@@ -107,15 +107,19 @@ async function main() {
   // 7. Seed Default Plans
   console.log("Seeding default plans...");
   const defaultPlans = [
-    { name: "Starter", price: 0, creditsLimit: 3, features: "1 Active Site, CursorWebs Subdomain only, CursorWebs Branding Footer" },
-    { name: "Individual Plan", price: 179, creditsLimit: 10, features: "2 Sites, CursorWebs Subdomain only, 10 Credits/month" },
-    { name: "Pro Plan", price: 599, creditsLimit: 100, features: "10 Sites, Custom Domain, White-labeled, Priority Support" },
-    { name: "Agency", price: 2499, creditsLimit: 500, features: "50 Sites, White-labeled, Dedicated APIs, Priority Support" }
+    { name: "Starter", price: 0, creditsLimit: 10, features: "30 Days Duration, 1 Subdomain, 10 Free Credits" },
+    { name: "Individual Plan", price: 159, creditsLimit: 20, features: "2 Active Sites, Custom Domain Support, 20 Credits/month" },
+    { name: "Pro Plan", price: 599, creditsLimit: 100, features: "10 Active Sites, Custom Domain Support, Create Ecommerce Sites, Logins for each site, Priority Support" },
+    { name: "Agency", price: 2499, creditsLimit: 500, features: "50 Active Websites, Custom Domain Support, Create Ecommerce Sites, Logins for each site, Bring Your Own Key Option, Priority Support" }
   ];
   for (const plan of defaultPlans) {
     await prisma.plan.upsert({
       where: { name: plan.name },
-      update: {},
+      update: {
+        price: plan.price,
+        creditsLimit: plan.creditsLimit,
+        features: plan.features
+      },
       create: {
         name: plan.name,
         price: plan.price,

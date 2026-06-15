@@ -95,6 +95,16 @@ export async function POST(req: Request) {
       );
     }
 
+    if (validated.ecommerce) {
+      const isEcommerceAllowed = user.role === "ADMIN" || planId.includes("pro") || planId.includes("agency");
+      if (!isEcommerceAllowed) {
+        return NextResponse.json(
+          { error: "Ecommerce site generation is only available on Pro and Agency plans. Please upgrade your plan." },
+          { status: 403 }
+        );
+      }
+    }
+
     // Check if user has active custom keys
     const userKeysCount = await prisma.llmApiKey.count({
       where: {

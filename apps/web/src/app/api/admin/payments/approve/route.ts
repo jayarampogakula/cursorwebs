@@ -124,8 +124,7 @@ export async function POST(req: Request) {
         });
 
         // 2. Upgrade Tenant Subscription
-        const planKey = plan.name.toLowerCase();
-        const isCustomAllowed = planKey.includes("pro") || planKey.includes("agency");
+        const isCustomAllowed = planKey.includes("pro") || planKey.includes("agency") || planKey.includes("individual");
         const sub = await tx.subscription.upsert({
           where: { tenantId: request.tenantId },
           update: {

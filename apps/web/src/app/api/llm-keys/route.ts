@@ -69,6 +69,21 @@ export async function POST(req: Request) {
   const payload = keySchema.parse(await req.json());
   const scope = payload.scope === "GLOBAL" && user.role === "ADMIN" ? LlmKeyScope.GLOBAL : LlmKeyScope.USER;
 
+  if (scope === LlmKeyScope.USER) {
+    const tenantObj = await prisma.tenant.findUnique({
+      where: { id: user.tenantId },
+      include: { subscription: true }
+    });
+    const planId = tenantObj?.subscription?.planId?.toLowerCase() || "free-plan";
+    const isAgencyOrAdmin = user.role === "ADMIN" || planId.includes("agency");
+    if (!isAgencyOrAdmin) {
+      return NextResponse.json(
+        { error: "Bring your own LLM Key option is only available on the Agency plan. Please upgrade your subscription." },
+        { status: 403 }
+      );
+    }
+  }
+
   try {
     const key = await prisma.llmApiKey.create({
       data: {

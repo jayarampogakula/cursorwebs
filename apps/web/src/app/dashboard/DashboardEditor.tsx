@@ -392,7 +392,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
 
   const isAgencyOrAdmin = user.role === "ADMIN" || tenant.subscription?.planId === "agency" || tenant.subscription?.planId === "agency-plan";
   const isProOrAgencyOrAdmin = user.role === "ADMIN" || tenant.subscription?.planId?.toLowerCase().includes("pro") || tenant.subscription?.planId?.toLowerCase().includes("agency");
-  const hasCustomDomainPrivilege = user.role === "ADMIN" || tenant.subscription?.domainType === "CUSTOM" || tenant.subscription?.planId?.toLowerCase().includes("pro") || tenant.subscription?.planId?.toLowerCase().includes("agency");
+  const hasCustomDomainPrivilege = user.role === "ADMIN" || tenant.subscription?.domainType === "CUSTOM" || tenant.subscription?.planId?.toLowerCase().includes("pro") || tenant.subscription?.planId?.toLowerCase().includes("agency") || tenant.subscription?.planId?.toLowerCase().includes("individual");
 
   const handleGenerateDevKey = async () => {
     try {
@@ -4095,7 +4095,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                                 🔒 Premium Feature: Custom Domains
                               </span>
                               <p style={{ color: "#9ca3af", fontSize: "0.75rem", margin: 0, lineHeight: 1.5 }}>
-                                Map your own custom domain (e.g., <strong>yourbrand.com</strong>) to this project. This option is only available on Pro and Agency plans.
+                                Map your own custom domain (e.g., <strong>yourbrand.com</strong>) to this project. This option is only available on Individual, Pro, and Agency plans.
                               </p>
                               <button
                                 type="button"
@@ -4208,7 +4208,42 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                       {settingsTab === "keys" && (
                         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                           <h4 style={{ color: "#fff", margin: 0 }}>AI Provider Key Configurations</h4>
-                          {keysLoading ? (
+                          {!isAgencyOrAdmin ? (
+                            <div style={{ 
+                              background: "rgba(99, 102, 241, 0.05)", 
+                              border: "1px solid rgba(99, 102, 241, 0.15)", 
+                              borderRadius: "0.75rem", 
+                              padding: "1.5rem", 
+                              display: "flex", 
+                              flexDirection: "column", 
+                              gap: "0.75rem" 
+                            }}>
+                              <span style={{ color: "#fff", fontWeight: 700, fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                                🔒 Premium Feature: Bring Your Own API Keys
+                              </span>
+                              <p style={{ color: "#9ca3af", fontSize: "0.75rem", margin: 0, lineHeight: 1.5 }}>
+                                Route website edits, custom section text, and code generations using your personal OpenAI, Claude, or Gemini credentials. This feature is only available on the Agency plan.
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => setUpgradeModalOpen(true)}
+                                className="glow-btn"
+                                style={{
+                                  background: "linear-gradient(to right, #6366f1, #d946ef)",
+                                  color: "#ffffff",
+                                  padding: "0.5rem 1rem",
+                                  borderRadius: "0.5rem",
+                                  fontSize: "0.75rem",
+                                  fontWeight: 700,
+                                  border: "none",
+                                  cursor: "pointer",
+                                  alignSelf: "flex-start",
+                                }}
+                              >
+                                Upgrade Plan
+                              </button>
+                            </div>
+                          ) : keysLoading ? (
                             <span style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Loading provider keys...</span>
                           ) : (
                             <div style={{ scale: "0.95", transformOrigin: "top left" }}>
