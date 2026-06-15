@@ -110,7 +110,7 @@ export default async function DashboardPage({ searchParams }: { searchParams?: {
       ...p,
       yearlyDiscount: parseInt(discountMap[`yearlyDiscount_${p.id}`] || "0", 10)
     }));
-    upiId = dbUpiSetting?.value || "pogakula@ybl";
+    upiId = dbSettings?.upiId || dbUpiSetting?.value || "pogakula@ybl";
     dbUserObj = dbUser;
     systemSettings = dbSettings;
 
