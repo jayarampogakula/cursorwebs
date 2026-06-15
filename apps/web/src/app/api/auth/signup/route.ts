@@ -99,14 +99,33 @@ export async function POST(req: Request) {
 
 
     // 4. Create Free tier Subscription
+    let freeCreditsLimit = 3;
+    let freePlanId = "free-plan";
+    try {
+      const starterPlan = await prisma.plan.findFirst({
+        where: {
+          OR: [
+            { name: { equals: "Starter", mode: "insensitive" } },
+            { price: 0 }
+          ]
+        }
+      });
+      if (starterPlan) {
+        freeCreditsLimit = starterPlan.creditsLimit;
+        freePlanId = starterPlan.name.toLowerCase().replace(/\s+/g, "-");
+      }
+    } catch (err) {
+      console.error("Failed to fetch starter plan from DB:", err);
+    }
+
     await prisma.subscription.create({
       data: {
         tenantId: tenant.id,
-        planId: "free-plan",
+        planId: freePlanId,
         status: SubscriptionStatus.ACTIVE,
         currentPeriodStart: new Date(),
         currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
-        creditsLimit: 3,
+        creditsLimit: freeCreditsLimit,
         creditsUsed: 0,
       },
     });

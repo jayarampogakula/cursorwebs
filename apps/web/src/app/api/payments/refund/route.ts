@@ -122,6 +122,26 @@ export async function POST(req: Request) {
     const deductAmount = Math.round(creditsUsed * costPerCredit);
     const refundAmount = Math.max(0, amountPaid - deductAmount);
 
+    // Fetch the Starter/Free plan from DB dynamically to use the configured credit limit
+    let freeCreditsLimit = 3;
+    let freePlanId = "free-plan";
+    try {
+      const starterPlan = await prisma.plan.findFirst({
+        where: {
+          OR: [
+            { name: { equals: "Starter", mode: "insensitive" } },
+            { price: 0 }
+          ]
+        }
+      });
+      if (starterPlan) {
+        freeCreditsLimit = starterPlan.creditsLimit;
+        freePlanId = starterPlan.name.toLowerCase().replace(/\s+/g, "-");
+      }
+    } catch (err) {
+      console.error("Failed to fetch starter plan from DB:", err);
+    }
+
     const result = await prisma.$transaction(async (tx) => {
       // 1. Create Refund Request
       const refund = await tx.refundRequest.create({
@@ -145,9 +165,9 @@ export async function POST(req: Request) {
       await tx.subscription.update({
         where: { tenantId: user.tenantId },
         data: {
-          planId: "free-plan",
+          planId: freePlanId,
           status: SubscriptionStatus.CANCELED,
-          creditsLimit: 3,
+          creditsLimit: freeCreditsLimit,
           creditsUsed: 0,
           currentPeriodStart: new Date(),
           currentPeriodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
