@@ -4637,15 +4637,22 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
 
             {currentProject && !isCreatingNew && (
               <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "0.6rem" : "1rem" }}>
-                <span style={{ fontSize: "0.75rem", color: "#cbd5e1" }}>
-                  {isMobile ? (
-                    <a href={activeSiteUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#818cf8", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.2rem" }}>
-                      Open Link <ExternalLink size={11} />
-                    </a>
-                  ) : (
-                    <>Workspace URL: <a href={activeSiteUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#818cf8", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.2rem" }}>{currentProject.subdomain}.{baseDomain} <ExternalLink size={12} /></a></>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: isMobile ? "center" : "flex-end", gap: "0.15rem" }}>
+                  <span style={{ fontSize: "0.75rem", color: "#cbd5e1" }}>
+                    {isMobile ? (
+                      <a href={activeSiteUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#818cf8", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.2rem" }}>
+                        Open Link <ExternalLink size={11} />
+                      </a>
+                    ) : (
+                      <>Workspace URL: <a href={activeSiteUrl} target="_blank" rel="noopener noreferrer" style={{ color: "#818cf8", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.2rem" }}>{currentProject.subdomain}.{baseDomain} <ExternalLink size={12} /></a></>
+                    )}
+                  </span>
+                  {!isMobile && (
+                    <span style={{ fontSize: "0.65rem", color: "#6b7280" }}>
+                      Note: You can change your subdomain in Settings &gt; Domains
+                    </span>
                   )}
-                </span>
+                </div>
                 
                 <button
                   onClick={handleRefreshPreview}

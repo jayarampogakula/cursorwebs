@@ -126,8 +126,16 @@ export async function POST(req: Request) {
     }
 
     // 3. Generate a unique subdomain slug
-    const cleanName = validated.name.toLowerCase().replace(/[^a-z0-9]/g, "-");
-    const uniqueSlug = `${cleanName}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const cleanName = validated.name.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    let uniqueSlug = cleanName || "site";
+    
+    let exists = await prisma.project.findUnique({ where: { subdomain: uniqueSlug } });
+    let counter = 1;
+    while (exists) {
+      uniqueSlug = `${cleanName}-${counter}`;
+      exists = await prisma.project.findUnique({ where: { subdomain: uniqueSlug } });
+      counter++;
+    }
 
     // 4. Create Draft Project
     const project = await prisma.project.create({

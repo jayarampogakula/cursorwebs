@@ -13,6 +13,7 @@ import {
   Heart, 
   Filter, 
   ArrowLeft, 
+  ArrowRight,
   Check, 
   CheckCircle2, 
   Package, 
@@ -150,6 +151,10 @@ export default function EcommerceStore({
 
   // Payment Details Local Edit States
   const [upiIdInput, setUpiIdInput] = useState("");
+  const [phonepeUpiInput, setPhonepeUpiInput] = useState("");
+  const [phonepeMerchantIdInput, setPhonepeMerchantIdInput] = useState("");
+  const [phonepeSaltKeyInput, setPhonepeSaltKeyInput] = useState("");
+  const [phonepeSaltIndexInput, setPhonepeSaltIndexInput] = useState("1");
   const [bankNameInput, setBankNameInput] = useState("");
   const [bankAccountNameInput, setBankAccountNameInput] = useState("");
   const [bankAccountNumberInput, setBankAccountNumberInput] = useState("");
@@ -161,6 +166,7 @@ export default function EcommerceStore({
 
   // Customer/Checkout states
   const [paymentReference, setPaymentReference] = useState("");
+  const [phonepeModalOpen, setPhonepeModalOpen] = useState(false);
 
   // Helper for admin headers
   const getAdminHeaders = (passcode?: string) => {
@@ -245,6 +251,10 @@ export default function EcommerceStore({
       if (data.settings) {
         setSettings(data.settings);
         setUpiIdInput(data.settings.paymentDetails?.upiId || "");
+        setPhonepeUpiInput(data.settings.paymentDetails?.phonepeUpiId || "");
+        setPhonepeMerchantIdInput(data.settings.paymentDetails?.phonepeMerchantId || "");
+        setPhonepeSaltKeyInput(data.settings.paymentDetails?.phonepeSaltKey || "");
+        setPhonepeSaltIndexInput(data.settings.paymentDetails?.phonepeSaltIndex || "1");
         setBankNameInput(data.settings.paymentDetails?.bankName || "");
         setBankAccountNameInput(data.settings.paymentDetails?.accountName || "");
         setBankAccountNumberInput(data.settings.paymentDetails?.accountNumber || "");
@@ -403,8 +413,8 @@ export default function EcommerceStore({
   };
 
   // Submit Order Checkout
-  const handlePlaceOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handlePlaceOrder = async (e?: React.FormEvent, overrideMethod?: string, overrideRef?: string) => {
+    if (e) e.preventDefault();
     if (cart.length === 0) return;
 
     try {
@@ -428,6 +438,9 @@ export default function EcommerceStore({
         };
       });
 
+      const method = overrideMethod || checkoutForm.paymentMethod;
+      const ref = overrideRef || paymentReference;
+
       const formattedAddress = `${checkoutForm.address}, ${checkoutForm.city}, ${checkoutForm.state} - ${checkoutForm.zip}`;
       const res = await fetch(`/api/projects/${projectId}/ecommerce/orders`, {
         method: "POST",
@@ -438,8 +451,8 @@ export default function EcommerceStore({
           customerAddress: formattedAddress,
           items: orderItems,
           total: getCartTotal(),
-          paymentMethod: checkoutForm.paymentMethod,
-          paymentId: (checkoutForm.paymentMethod === "upi" || checkoutForm.paymentMethod === "banktransfer") ? paymentReference.trim() : undefined
+          paymentMethod: method,
+          paymentId: (method === "upi" || method === "phonepe" || method === "banktransfer") ? ref.trim() : undefined
         })
       });
 
@@ -552,6 +565,10 @@ export default function EcommerceStore({
         ...settings,
         paymentDetails: {
           upiId: upiIdInput,
+          phonepeUpiId: phonepeUpiInput,
+          phonepeMerchantId: phonepeMerchantIdInput,
+          phonepeSaltKey: phonepeSaltKeyInput,
+          phonepeSaltIndex: phonepeSaltIndexInput,
           bankName: bankNameInput,
           accountName: bankAccountNameInput,
           accountNumber: bankAccountNumberInput,
@@ -1485,7 +1502,13 @@ export default function EcommerceStore({
                       {settings.gateways?.upi && (
                         <label style={{ display: "flex", gap: "0.5rem", padding: "0.8rem", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "0.4rem", cursor: "pointer", background: checkoutForm.paymentMethod === "upi" ? "rgba(99,102,241,0.08)" : "transparent" }}>
                           <input type="radio" name="gateway" checked={checkoutForm.paymentMethod === "upi"} onChange={() => { setCheckoutForm({ ...checkoutForm, paymentMethod: "upi" }); setPaymentReference(""); }} />
-                          UPI / GPay / PhonePe
+                          UPI / GPay (Direct UPI)
+                        </label>
+                      )}
+                      {settings.gateways?.phonepe && (
+                        <label style={{ display: "flex", gap: "0.5rem", padding: "0.8rem", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "0.4rem", cursor: "pointer", background: checkoutForm.paymentMethod === "phonepe" ? "rgba(139,92,246,0.08)" : "transparent" }}>
+                          <input type="radio" name="gateway" checked={checkoutForm.paymentMethod === "phonepe"} onChange={() => { setCheckoutForm({ ...checkoutForm, paymentMethod: "phonepe" }); setPaymentReference(""); }} />
+                          PhonePe Gateway
                         </label>
                       )}
                       {settings.gateways?.banktransfer && (
@@ -1540,6 +1563,56 @@ export default function EcommerceStore({
                             placeholder="Enter 12-digit transaction number" 
                           />
                         </div>
+                      </div>
+                    )}
+
+                    {checkoutForm.paymentMethod === "phonepe" && settings.gateways?.phonepe && (
+                      <div className="glass-panel" style={{ padding: "1.25rem", borderRadius: "0.5rem", border: "1px solid rgba(139, 92, 246, 0.3)", background: "rgba(139, 92, 246, 0.03)", display: "flex", flexDirection: "column", gap: "1rem", marginTop: "0.5rem" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "0.75rem" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                            <span style={{ fontSize: "1.1rem", fontWeight: 700, color: "#a78bfa" }}>PhonePe Secure Checkout</span>
+                          </div>
+                          <span style={{ fontSize: "0.75rem", background: "rgba(167, 139, 250, 0.15)", color: "#c084fc", padding: "0.15rem 0.5rem", borderRadius: "10px", fontWeight: 700 }}>
+                            Gateway Mode
+                          </span>
+                        </div>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", color: "#cbd5e1", fontSize: "0.85rem" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between" }}>
+                            <span>Merchant ID:</span>
+                            <strong style={{ color: "#fff" }}>{settings.paymentDetails?.phonepeMerchantId || "Demo Merchant"}</strong>
+                          </div>
+                          <div style={{ display: "flex", justifyContent: "space-between" }}>
+                            <span>Amount to Pay:</span>
+                            <strong style={{ color: "#a78bfa", fontSize: "1rem" }}>₹{getCartTotal().toLocaleString()}</strong>
+                          </div>
+                        </div>
+
+                        <button 
+                          type="button" 
+                          className="glow-btn"
+                          onClick={() => setPhonepeModalOpen(true)}
+                          style={{ 
+                            background: "linear-gradient(to right, #7c3aed, #6d28d9)", 
+                            color: "#fff", 
+                            border: "none", 
+                            padding: "0.75rem 1.5rem", 
+                            borderRadius: "0.5rem", 
+                            cursor: "pointer", 
+                            fontWeight: 700, 
+                            fontSize: "0.9rem",
+                            textAlign: "center",
+                            boxShadow: "0 4px 15px rgba(124, 58, 237, 0.3)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "0.5rem",
+                            width: "100%"
+                          }}
+                        >
+                          <span>Proceed to Pay with PhonePe</span>
+                          <ArrowRight size={16} />
+                        </button>
                       </div>
                     )}
 
@@ -2249,7 +2322,7 @@ export default function EcommerceStore({
                           <h4 style={{ margin: 0 }}>Active Gateways</h4>
                           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                             <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontSize: "0.85rem" }}>
-                              <span>UPI / PhonePe / Google Pay</span>
+                              <span>UPI / Google Pay (Direct UPI)</span>
                               <input 
                                 type="checkbox" 
                                 checked={!!settings.gateways?.upi}
@@ -2259,6 +2332,28 @@ export default function EcommerceStore({
                                     gateways: {
                                       ...settings.gateways,
                                       upi: e.target.checked
+                                    }
+                                  };
+                                  setSettings(updatedSettings);
+                                  await fetch(`/api/projects/${projectId}/ecommerce/settings`, {
+                                    method: "POST",
+                                    headers: getAdminHeadersJson(),
+                                    body: JSON.stringify({ settings: updatedSettings })
+                                  });
+                                }}
+                              />
+                            </label>
+                            <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontSize: "0.85rem" }}>
+                              <span>PhonePe Payment Gateway</span>
+                              <input 
+                                type="checkbox" 
+                                checked={!!settings.gateways?.phonepe}
+                                onChange={async (e) => {
+                                  const updatedSettings = {
+                                    ...settings,
+                                    gateways: {
+                                      ...settings.gateways,
+                                      phonepe: e.target.checked
                                     }
                                   };
                                   setSettings(updatedSettings);
@@ -2318,12 +2413,12 @@ export default function EcommerceStore({
                         </div>
 
                         {/* Payment Details Form */}
-                        {(settings.gateways?.upi || settings.gateways?.banktransfer) && (
+                        {(settings.gateways?.upi || settings.gateways?.phonepe || settings.gateways?.banktransfer) && (
                           <form onSubmit={handleSavePaymentSettings} className="glass-panel" style={{ padding: "1.25rem", borderRadius: "0.75rem", border: "1px solid rgba(255,255,255,0.06)", display: "flex", flexDirection: "column", gap: "1rem" }}>
                             <h4 style={{ margin: 0 }}>Payment Method Configuration</h4>
                             
                             {settings.gateways?.upi && (
-                              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", borderBottom: settings.gateways?.banktransfer ? "1px solid rgba(255,255,255,0.06)" : "none", paddingBottom: "1rem" }}>
+                              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", borderBottom: (settings.gateways?.banktransfer || settings.gateways?.phonepe) ? "1px solid rgba(255,255,255,0.06)" : "none", paddingBottom: "1rem" }}>
                                 <span style={{ fontSize: "0.8rem", color: "#818cf8", fontWeight: 700 }}>UPI Settings</span>
                                 <div className="field-group">
                                   <label>UPI ID or Phone Number</label>
@@ -2335,6 +2430,60 @@ export default function EcommerceStore({
                                     placeholder="e.g. 9876543210@upi or upi-id@bank" 
                                     required
                                   />
+                                </div>
+                              </div>
+                            )}
+
+                            {settings.gateways?.phonepe && (
+                              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", borderBottom: settings.gateways?.banktransfer ? "1px solid rgba(255,255,255,0.06)" : "none", paddingBottom: "1rem" }}>
+                                <span style={{ fontSize: "0.8rem", color: "#818cf8", fontWeight: 700 }}>PhonePe Gateway Settings</span>
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }} className="field-group">
+                                  <div>
+                                    <label>Merchant ID</label>
+                                    <input 
+                                      type="text" 
+                                      className="field" 
+                                      value={phonepeMerchantIdInput} 
+                                      onChange={(e) => setPhonepeMerchantIdInput(e.target.value)} 
+                                      placeholder="e.g. MID12345" 
+                                      required
+                                    />
+                                  </div>
+                                  <div>
+                                    <label>PhonePe UPI ID</label>
+                                    <input 
+                                      type="text" 
+                                      className="field" 
+                                      value={phonepeUpiInput} 
+                                      onChange={(e) => setPhonepeUpiInput(e.target.value)} 
+                                      placeholder="e.g. merchant@ybl" 
+                                      required
+                                    />
+                                  </div>
+                                </div>
+                                <div style={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: "0.5rem" }} className="field-group">
+                                  <div>
+                                    <label>Salt Key</label>
+                                    <input 
+                                      type="text" 
+                                      className="field" 
+                                      value={phonepeSaltKeyInput} 
+                                      onChange={(e) => setPhonepeSaltKeyInput(e.target.value)} 
+                                      placeholder="e.g. abcde-1234-fghij-5678" 
+                                      required
+                                    />
+                                  </div>
+                                  <div>
+                                    <label>Salt Index</label>
+                                    <input 
+                                      type="text" 
+                                      className="field" 
+                                      value={phonepeSaltIndexInput} 
+                                      onChange={(e) => setPhonepeSaltIndexInput(e.target.value)} 
+                                      placeholder="e.g. 1" 
+                                      required
+                                    />
+                                  </div>
                                 </div>
                               </div>
                             )}
@@ -2696,6 +2845,283 @@ export default function EcommerceStore({
         </p>
       </footer>
 
+      {/* PhonePe Simulated Payment Modal */}
+      {phonepeModalOpen && (
+        <PhonepeCheckoutModal 
+          isOpen={phonepeModalOpen} 
+          onClose={() => setPhonepeModalOpen(false)} 
+          amount={getCartTotal()} 
+          merchantName={storeName || projectSubdomain || "eCommerce Store"}
+          phonepeUpiId={settings.paymentDetails?.phonepeUpiId || "merchant@ybl"}
+          phonepeMerchantId={settings.paymentDetails?.phonepeMerchantId || "DEMO_MID"}
+          onSuccess={(txnId) => {
+            handlePlaceOrder(undefined, "phonepe", txnId);
+          }}
+        />
+      )}
+
+    </div>
+  );
+}
+
+interface PhonepeCheckoutModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  amount: number;
+  merchantName: string;
+  phonepeUpiId: string;
+  phonepeMerchantId: string;
+  onSuccess: (txnId: string) => void;
+}
+
+export function PhonepeCheckoutModal({
+  isOpen,
+  onClose,
+  amount,
+  merchantName,
+  phonepeUpiId,
+  phonepeMerchantId,
+  onSuccess
+}: PhonepeCheckoutModalProps) {
+  const [activeTab, setActiveTab] = useState<"upi_app" | "upi_qr" | "card">("upi_app");
+  
+  // Card states
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+  
+  // Process states
+  const [paymentStatus, setPaymentStatus] = useState<"idle" | "processing" | "success" | "failed">("idle");
+  const [processingStep, setProcessingStep] = useState(0);
+
+  const processingSteps = [
+    "Initiating PhonePe payment request...",
+    "Waiting for secure bank connection...",
+    "Verifying details with your bank...",
+    "Processing transaction. Please wait...",
+    "Transaction confirmed successfully!"
+  ];
+
+  useEffect(() => {
+    if (paymentStatus === "processing") {
+      setProcessingStep(0);
+      const intervals = [800, 1600, 2400, 3200, 3800];
+      const timers = intervals.map((ms, index) => 
+        setTimeout(() => {
+          setProcessingStep(index + 1);
+          if (index === intervals.length - 1) {
+            setPaymentStatus("success");
+            const generatedTxnId = `TXNPHPE${Math.floor(10000000 + Math.random() * 90000000)}`;
+            setTimeout(() => {
+              onSuccess(generatedTxnId);
+            }, 1000);
+          }
+        }, ms)
+      );
+      return () => timers.forEach(clearTimeout);
+    }
+  }, [paymentStatus]);
+
+  const handleCardPaySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (cardNumber.length < 19 || cardExpiry.length < 5 || cardCvv.length < 3) {
+      alert("Please enter valid card details.");
+      return;
+    }
+    setPaymentStatus("processing");
+  };
+
+  const handleDirectUpiPay = () => {
+    const upiUrl = `upi://pay?pa=${phonepeUpiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR`;
+    window.open(upiUrl, "_blank");
+    setPaymentStatus("processing");
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(6, 9, 20, 0.85)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 99999, padding: "1rem" }}>
+      <div className="glass-panel" style={{ width: "100%", maxWidth: "460px", padding: "1.5rem", borderRadius: "1rem", border: "1px solid rgba(139, 92, 246, 0.3)", background: "#0b0f19", boxShadow: "0 10px 40px rgba(0,0,0,0.5)", color: "#fff", display: "flex", flexDirection: "column", gap: "1rem", position: "relative" }}>
+        
+        {/* Close Button */}
+        {paymentStatus !== "processing" && paymentStatus !== "success" && (
+          <button 
+            onClick={onClose} 
+            style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", color: "#64748b", cursor: "pointer", fontSize: "1.2rem" }}
+          >
+            ✕
+          </button>
+        )}
+
+        {/* Brand header */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "0.75rem" }}>
+          <div style={{ background: "#5f259f", width: "32px", height: "32px", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, fontSize: "1.1rem" }}>
+            Pe
+          </div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: "1rem", fontWeight: 800, color: "#fff" }}>PhonePe</span>
+            <span style={{ fontSize: "0.65rem", color: "#8b5cf6", fontWeight: 700, letterSpacing: "1px" }}>SECURE GATEWAY</span>
+          </div>
+        </div>
+
+        {paymentStatus === "idle" && (
+          <>
+            {/* Merchant Details */}
+            <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)", borderRadius: "0.5rem", padding: "0.85rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.15rem" }}>
+                <span style={{ fontSize: "0.7rem", color: "#64748b", textTransform: "uppercase" }}>Merchant</span>
+                <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#cbd5e1" }}>{merchantName}</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.15rem" }}>
+                <span style={{ fontSize: "0.7rem", color: "#64748b", textTransform: "uppercase" }}>Amount</span>
+                <span style={{ fontSize: "1.1rem", fontWeight: 800, color: "#a78bfa" }}>₹{amount.toLocaleString()}</span>
+              </div>
+            </div>
+
+            {/* Payment Method Tabs */}
+            <div style={{ display: "flex", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <button onClick={() => setActiveTab("upi_app")} style={{ flex: 1, padding: "0.75rem 0.25rem", background: "none", border: "none", borderBottom: activeTab === "upi_app" ? "2px solid #a78bfa" : "none", color: activeTab === "upi_app" ? "#a78bfa" : "#64748b", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer" }}>
+                UPI Intent (App)
+              </button>
+              <button onClick={() => setActiveTab("upi_qr")} style={{ flex: 1, padding: "0.75rem 0.25rem", background: "none", border: "none", borderBottom: activeTab === "upi_qr" ? "2px solid #a78bfa" : "none", color: activeTab === "upi_qr" ? "#a78bfa" : "#64748b", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer" }}>
+                Scan QR
+              </button>
+              <button onClick={() => setActiveTab("card")} style={{ flex: 1, padding: "0.75rem 0.25rem", background: "none", border: "none", borderBottom: activeTab === "card" ? "2px solid #a78bfa" : "none", color: activeTab === "card" ? "#a78bfa" : "#64748b", fontSize: "0.8rem", fontWeight: 700, cursor: "pointer" }}>
+                Card Pay
+              </button>
+            </div>
+
+            {/* Tab content 1: UPI Intent */}
+            {activeTab === "upi_app" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "0.5rem 0", alignItems: "center", textAlign: "center" }}>
+                <div style={{ width: "3.5rem", height: "3.5rem", borderRadius: "50%", background: "rgba(139, 92, 246, 0.1)", color: "#a78bfa", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Phone size={24} />
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                  <strong style={{ fontSize: "0.9rem", color: "#fff" }}>Pay using PhonePe App</strong>
+                  <span style={{ fontSize: "0.75rem", color: "#64748b" }}>Click below to initiate a direct transaction inside your PhonePe mobile application.</span>
+                </div>
+                <button onClick={handleDirectUpiPay} style={{ width: "100%", background: "#5f259f", color: "#fff", border: "none", padding: "0.75rem", borderRadius: "0.5rem", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}>
+                  Pay ₹{amount.toLocaleString()} via PhonePe App
+                </button>
+              </div>
+            )}
+
+            {/* Tab content 2: Scan QR */}
+            {activeTab === "upi_qr" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", padding: "0.5rem 0", alignItems: "center" }}>
+                {(() => {
+                  const upiUrl = `upi://pay?pa=${phonepeUpiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR`;
+                  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiUrl)}`;
+                  return (
+                    <div style={{ background: "#fff", padding: "0.6rem", borderRadius: "0.5rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                      <img src={qrUrl} alt="PhonePe QR" style={{ width: "140px", height: "140px" }} />
+                    </div>
+                  );
+                })()}
+                <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: "0.15rem" }}>
+                  <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Scan this PhonePe UPI QR code using any UPI application (PhonePe, GPay, Paytm)</span>
+                  <strong style={{ fontSize: "0.75rem", color: "#a78bfa", marginTop: "0.25rem" }}>UPI ID: {phonepeUpiId}</strong>
+                </div>
+                <button onClick={() => setPaymentStatus("processing")} style={{ width: "100%", background: "#5f259f", color: "#fff", border: "none", padding: "0.7rem", borderRadius: "0.5rem", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}>
+                  I Have Completed Payment
+                </button>
+              </div>
+            )}
+
+            {/* Tab content 3: Credit/Debit Card */}
+            {activeTab === "card" && (
+              <form onSubmit={handleCardPaySubmit} style={{ display: "flex", flexDirection: "column", gap: "0.85rem", width: "100%" }}>
+                <div className="field-group">
+                  <label style={{ fontSize: "0.7rem" }}>Card Number</label>
+                  <input 
+                    type="text" 
+                    className="field" 
+                    placeholder="1234 5678 1234 5678" 
+                    required 
+                    maxLength={19} 
+                    value={cardNumber} 
+                    onChange={(e) => {
+                      const clean = e.target.value.replace(/\D/g, "");
+                      const formatted = clean.match(/.{1,4}/g)?.join(" ") || clean;
+                      setCardNumber(formatted.slice(0, 19));
+                    }} 
+                  />
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
+                  <div className="field-group">
+                    <label style={{ fontSize: "0.7rem" }}>Expiry Date</label>
+                    <input 
+                      type="text" 
+                      className="field" 
+                      placeholder="MM/YY" 
+                      required 
+                      maxLength={5} 
+                      value={cardExpiry} 
+                      onChange={(e) => {
+                        const clean = e.target.value.replace(/\D/g, "");
+                        let formatted = clean;
+                        if (clean.length > 2) {
+                          formatted = `${clean.slice(0, 2)}/${clean.slice(2, 4)}`;
+                        }
+                        setCardExpiry(formatted);
+                      }} 
+                    />
+                  </div>
+                  <div className="field-group">
+                    <label style={{ fontSize: "0.7rem" }}>CVV</label>
+                    <input 
+                      type="password" 
+                      className="field" 
+                      placeholder="•••" 
+                      required 
+                      maxLength={3} 
+                      value={cardCvv} 
+                      onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 3))} 
+                    />
+                  </div>
+                </div>
+                <button type="submit" style={{ width: "100%", background: "#5f259f", color: "#fff", border: "none", padding: "0.75rem", borderRadius: "0.5rem", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem", marginTop: "0.5rem" }}>
+                  Pay ₹{amount.toLocaleString()} Securely
+                </button>
+              </form>
+            )}
+          </>
+        )}
+
+        {/* Processing State */}
+        {paymentStatus === "processing" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", alignItems: "center", padding: "2rem 0", textAlign: "center" }}>
+            <RefreshCw size={36} className="animate-spin" color="#a78bfa" />
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <strong style={{ fontSize: "1rem", color: "#fff" }}>Securely Processing Payment</strong>
+              <span style={{ fontSize: "0.8rem", color: "#94a3b8", minHeight: "2.4rem" }}>
+                {processingSteps[Math.min(processingStep, processingSteps.length - 1)]}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Success State */}
+        {paymentStatus === "success" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", alignItems: "center", padding: "2rem 0", textAlign: "center" }}>
+            <div style={{ width: "3.5rem", height: "3.5rem", borderRadius: "50%", background: "rgba(34, 197, 94, 0.15)", color: "#4ade80", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <CheckCircle2 size={36} />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <strong style={{ fontSize: "1.2rem", color: "#4ade80" }}>Payment Successful!</strong>
+              <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>
+                Redirecting back to store...
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Footer info */}
+        <div style={{ textAlign: "center", fontSize: "0.65rem", color: "#475569", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "0.75rem", marginTop: "0.5rem" }}>
+          Powered by PhonePe Checkout | PCI-DSS Compliant 256-Bit SSL
+        </div>
+      </div>
     </div>
   );
 }

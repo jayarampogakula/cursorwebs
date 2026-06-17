@@ -1251,4 +1251,160 @@ option {
   border-radius: 0.75rem !important;
 }
 
+/* ==================== HOME PAGE PREMIUM ANIMATIONS ==================== */
+
+/* Hero glow backdrop decorations */
+.hero {
+  position: relative;
+  overflow: visible;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  top: -10%;
+  left: -15%;
+  width: 60%;
+  height: 70%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  filter: blur(80px);
+  z-index: -1;
+  pointer-events: none;
+  animation: pulseGlow 10s ease-in-out infinite alternate;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  bottom: -5%;
+  right: -10%;
+  width: 50%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(155, 231, 220, 0.12) 0%, transparent 70%);
+  filter: blur(80px);
+  z-index: -1;
+  pointer-events: none;
+  animation: pulseGlow 14s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes pulseGlow {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(4%, 6%) scale(1.15);
+    opacity: 1;
+  }
+}
+
+/* Staggered entrance animations */
+.hero > div {
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero > div .eyebrow {
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both 0.1s;
+}
+
+.hero > div h1 {
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both 0.2s;
+  background: linear-gradient(135deg, #ffffff 40%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.hero > div p {
+  animation: slideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) both 0.3s;
+}
+
+.hero .hero-stats {
+  animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) both 0.4s;
+}
+
+.hero > :nth-child(2) {
+  animation: slideUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) both 0.2s;
+}
+
+/* Card Hover Lifts & Premium Glows */
+.stat-tile {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.stat-tile:hover {
+  transform: translateY(-4px);
+  border-color: rgba(129, 140, 248, 0.4);
+  box-shadow: 0 10px 30px rgba(129, 140, 248, 0.12);
+}
+
+.feature-card {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.feature-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(155, 231, 220, 0.4);
+  box-shadow: 0 15px 35px rgba(155, 231, 220, 0.08);
+}
+.feature-card .icon-box {
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+.feature-card:hover .icon-box {
+  transform: scale(1.1) rotate(5deg);
+  background: rgba(155, 231, 220, 0.15);
+}
+
+.pricing-card {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.pricing-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(129, 140, 248, 0.5);
+  box-shadow: 0 20px 40px rgba(129, 140, 248, 0.15);
+}
+
+.surface-panel {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.surface-panel:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Eyebrow badge pulse */
+.eyebrow svg {
+  animation: pulseBadge 2s infinite alternate;
+}
+@keyframes pulseBadge {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 0 4px #9be7dc); }
+}
+
+/* Buttons glow effects */
+.glow-btn {
+  position: relative;
+  overflow: hidden;
+}
+.glow-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  transition: 0.75s;
+  opacity: 0;
+}
+.glow-btn:hover::after {
+  left: 125%;
+  opacity: 1;
+}
+
 

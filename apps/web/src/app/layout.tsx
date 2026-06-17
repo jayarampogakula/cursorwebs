@@ -10,10 +10,45 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const hostHeader = headers().get("x-forwarded-host") || headers().get("host") || "";
   const settings = await getSystemSettings(hostHeader);
-  const appName = settings.appName || "Webbing";
+  const appName = settings.appName || "CursorWebs";
   return {
     title: `${appName} - Production AI Website Builder SaaS`,
-    description: `Generate complete responsive websites, visual editors, custom domains, and e-commerce stores instantly using ${appName}.`,
+    description: `Build and launch high-converting responsive websites, online e-commerce stores, and custom visual editors instantly with ${appName}. The ultimate production-grade AI-powered website builder SaaS.`,
+    metadataBase: new URL("https://cursorwebs.com"),
+    alternates: {
+      canonical: "/",
+    },
+    openGraph: {
+      title: `${appName} - Production AI Website Builder SaaS`,
+      description: `Build and launch high-converting responsive websites, online e-commerce stores, and custom visual editors instantly with ${appName}.`,
+      url: "https://cursorwebs.com",
+      siteName: appName,
+      images: [
+        {
+          url: "/logo.png",
+          width: 1024,
+          height: 1024,
+          alt: `${appName} Logo`,
+        },
+      ],
+      locale: "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${appName} - Production AI Website Builder SaaS`,
+      description: `Build and launch high-converting responsive websites, online e-commerce stores, and custom visual editors instantly with ${appName}.`,
+      images: ["/logo.png"],
+    },
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "any" },
+        { url: "/logo.png", type: "image/png", sizes: "1024x1024" }
+      ],
+      apple: [
+        { url: "/logo.png", type: "image/png", sizes: "1024x1024" }
+      ]
+    }
   };
 }
 

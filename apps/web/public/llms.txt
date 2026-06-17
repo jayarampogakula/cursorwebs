@@ -1,0 +1,22 @@
+# CursorWebs - Production AI Website Builder SaaS
+
+CursorWebs is a production-grade, AI-powered website builder SaaS that allows users to instantly generate complete responsive websites, e-commerce storefronts, visual editors, custom domains, and annual plans from simple text prompts.
+
+## Key Features
+
+- **AI Copy & Layout Generation**: Instantly generate structured pages, hero copy, pricing blocks, feature grids, and contact forms from a single text prompt.
+- **Modern Component System**: Every website is built from clean, responsive, reusable sections that are easy to customize, inspect, and expand.
+- **eCommerce Storefronts**: Create single-vendor storefronts with full shopping carts, checkout logic, product variants, inventory, and payment gateway setups (Stripe, Razorpay, UPI, PhonePe).
+- **Subdomain & Custom Domains**: Publish projects to instant subdomains or map personal custom domains with auto-managed SSL/TLS configurations.
+- **White-labeled ZIP Export**: Download fully offline-ready HTML, CSS, and vanilla JS archives of generated sites, free of external scripts or branding tags.
+- **Annual Subscriptions**: Enable users to lock in annual quotas to save up to 15% on paid plan quotas.
+
+## Useful Links
+
+- [Home Page](https://cursorwebs.com/)
+- [Sign In](https://cursorwebs.com/signin)
+- [Sign Up](https://cursorwebs.com/signup)
+- [Terms & Conditions](https://cursorwebs.com/terms)
+- [Privacy Policy](https://cursorwebs.com/privacy)
+- [Refund Policy](https://cursorwebs.com/refund)
+- [Cookies Policy](https://cursorwebs.com/cookies)
