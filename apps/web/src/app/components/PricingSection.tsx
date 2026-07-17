@@ -14,7 +14,7 @@ export default function PricingSection({ initialPlans }: { initialPlans?: any[] 
       period: "/ month",
       text: "For trying the builder",
       items: [
-        "30 Days Duration",
+        "Free Forever",
         "1 Website (Download Only)",
         "1,000 AI Credits/month",
         "No hosting included"
@@ -122,13 +122,45 @@ export default function PricingSection({ initialPlans }: { initialPlans?: any[] 
         ? `/signup?plan=${plan.id}`
         : (billingCycle === "monthly" ? `/signup?plan=${plan.id}` : `/signup?plan=${plan.id}-annual`);
 
+      // Clean and enrich plan items
+      let planItems: string[] = plan.features.split(",").map((item: string) => item.trim());
+      
+      const isStarter = plan.id === "starter" || plan.name.toLowerCase().includes("starter") || plan.price === 0;
+      if (isStarter) {
+        // Remove 30 Days Duration and 1 Subdomain
+        planItems = planItems.filter(item => 
+          !item.toLowerCase().includes("day") && 
+          !item.toLowerCase().includes("duration") &&
+          !item.toLowerCase().includes("subdomain")
+        );
+        // Ensure "Free Forever" is at the top
+        if (!planItems.some(item => item.toLowerCase().includes("free forever") || item.toLowerCase().includes("forever"))) {
+          planItems.unshift("Free Forever");
+        }
+        // Ensure "1 Website (Download Only)" is listed
+        if (!planItems.some(item => item.toLowerCase().includes("download only") || item.toLowerCase().includes("1 website"))) {
+          planItems.push("1 Website (Download Only)");
+        }
+        // Ensure "No hosting included" is listed
+        if (!planItems.some(item => item.toLowerCase().includes("no hosting"))) {
+          planItems.push("No hosting included");
+        }
+      }
+
+      // Filter out any existing credit entries from the features string
+      planItems = planItems.filter(item => !item.toLowerCase().includes("credits") && !item.toLowerCase().includes("credit"));
+      
+      // Append the clean, formatted credit limit from database plan
+      const creditsDisplay = plan.creditsLimit ? plan.creditsLimit.toLocaleString("en-IN") : "0";
+      planItems.push(isStarter ? `${creditsDisplay} Free Credits` : `${creditsDisplay} Credits/month`);
+
       return {
         id: plan.id,
         name: plan.name,
         priceDisplay,
         period: plan.price === 0 ? "/ month" : (billingCycle === "monthly" ? "/ month" : "/ year"),
         text: defaultInfo.text,
-        items: plan.features.split(",").map((item: string) => item.trim()),
+        items: planItems,
         featured: defaultInfo.featured,
         buttonText: defaultInfo.buttonText,
         signUpUrl,

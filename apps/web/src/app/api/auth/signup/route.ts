@@ -100,10 +100,10 @@ export async function POST(req: Request) {
 
 
     // 4. Create Subscription (Free or selected Paid plan)
-    let creditsLimit = 10;
+    let creditsLimit = 1000;
     let finalPlanId = "free-plan";
     let status = SubscriptionStatus.ACTIVE;
-    let durationMs = 30 * 24 * 60 * 60 * 1000; // 30 days default
+    let durationMs = 100 * 365 * 24 * 60 * 60 * 1000; // 100 years default for free plan (Free Forever)
 
     if (plan) {
       try {
@@ -120,9 +120,15 @@ export async function POST(req: Request) {
         if (dbPlan) {
           creditsLimit = dbPlan.creditsLimit;
           finalPlanId = dbPlan.name.toLowerCase().replace(/\s+/g, "-");
-          if (plan.endsWith("-annual")) {
+          
+          const isDbStarter = dbPlan.price === 0 || dbPlan.name.toLowerCase().includes("starter");
+          if (isDbStarter) {
+            durationMs = 100 * 365 * 24 * 60 * 60 * 1000; // 100 years for free plan
+          } else if (plan.endsWith("-annual")) {
             finalPlanId = `${finalPlanId}-annual`;
             durationMs = 365 * 24 * 60 * 60 * 1000; // 1 year
+          } else {
+            durationMs = 30 * 24 * 60 * 60 * 1000; // 30 days monthly
           }
           if (dbPlan.price > 0) {
             status = SubscriptionStatus.UNPAID; // Require purchase confirmation

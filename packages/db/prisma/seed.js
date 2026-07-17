@@ -107,10 +107,10 @@ async function main() {
   // 7. Seed Default Plans
   console.log("Seeding default plans...");
   const defaultPlans = [
-    { name: "Starter", price: 0, creditsLimit: 10, features: "30 Days Duration, 1 Subdomain, 10 Free Credits" },
-    { name: "Individual Plan", price: 159, creditsLimit: 20, features: "2 Active Sites, Custom Domain Support, 20 Credits/month" },
-    { name: "Pro Plan", price: 599, creditsLimit: 100, features: "10 Active Sites, Custom Domain Support, Create Ecommerce Sites, Logins for each site, Priority Support" },
-    { name: "Agency", price: 2499, creditsLimit: 500, features: "50 Active Websites, Custom Domain Support, Create Ecommerce Sites, Logins for each site, Bring Your Own Key Option, Priority Support" }
+    { name: "Starter", price: 0, creditsLimit: 1000, features: "Free Forever, 1 Website (Download Only), 1,000 Free Credits, No hosting included" },
+    { name: "Individual Plan", price: 199, creditsLimit: 2000, features: "3 Published Subdomains, Custom Domain Support, 2,000 Credits/month" },
+    { name: "Pro Plan", price: 799, creditsLimit: 10000, features: "15 Published Websites, Custom Domain Support, Create Ecommerce Sites, Logins for each site, Priority Support, 10,000 Credits/month" },
+    { name: "Agency", price: 2999, creditsLimit: 50000, features: "Unlimited Websites, Custom Domain Support, Create Ecommerce Sites, Logins for each site, Bring Your Own Key Option, Priority Support, White Label Support, 50,000 Credits/month" }
   ];
   for (const plan of defaultPlans) {
     await prisma.plan.upsert({
