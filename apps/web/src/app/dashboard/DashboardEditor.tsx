@@ -306,6 +306,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
   const [editorWidth, setEditorWidth] = useState(50); // percentage (e.g. 50%)
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const prevProjectIdRef = useRef(selectedProjectId);
 
   useEffect(() => {
@@ -440,6 +441,137 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
 
   // Iframe Refresh Key
   const [iframeKey, setIframeKey] = useState(0);
+
+  // Visual iframe inspector event hook
+  useEffect(() => {
+    if (activePreviewTab !== "inspect") return;
+    
+    const setupInspector = () => {
+      const iframe = iframeRef.current;
+      if (!iframe) return;
+      
+      try {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (!iframeDoc) return;
+        
+        const handleMouseOver = (e: MouseEvent) => {
+          const target = e.target as HTMLElement;
+          if (!target || target === iframeDoc.body || target === iframeDoc.documentElement) return;
+          
+          target.style.outline = "2.5px solid #818cf8";
+          target.style.outlineOffset = "-2.5px";
+          target.style.cursor = "pointer";
+          
+          target.setAttribute("title", `Click to edit ${target.tagName.toLowerCase()}`);
+        };
+        
+        const handleMouseOut = (e: MouseEvent) => {
+          const target = e.target as HTMLElement;
+          if (target) {
+            target.style.outline = "";
+            target.style.outlineOffset = "";
+          }
+        };
+        
+        const handleClick = (e: MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const target = e.target as HTMLElement;
+          
+          let element: HTMLElement | null = target;
+          let sectionType = null;
+          while (element && element !== iframeDoc.body) {
+            const id = element.id?.toUpperCase() || "";
+            const className = typeof element.className === "string" ? element.className.toUpperCase() : "";
+            const tagName = element.tagName.toUpperCase();
+            
+            if (id.includes("HERO") || className.includes("HERO")) {
+              sectionType = "HERO";
+              break;
+            }
+            if (id.includes("ABOUT") || className.includes("ABOUT")) {
+              sectionType = "ABOUT";
+              break;
+            }
+            if (id.includes("CONTACT") || className.includes("CONTACT")) {
+              sectionType = "CONTACT";
+              break;
+            }
+            if (id.includes("SERVICES") || className.includes("SERVICES")) {
+              sectionType = "SERVICES";
+              break;
+            }
+            if (id.includes("FEATURES") || className.includes("FEATURES")) {
+              sectionType = "FEATURES";
+              break;
+            }
+            if (id.includes("PRICING") || className.includes("PRICING")) {
+              sectionType = "PRICING";
+              break;
+            }
+            if (id.includes("TESTIMONIALS") || className.includes("TESTIMONIALS")) {
+              sectionType = "TESTIMONIALS";
+              break;
+            }
+            if (id.includes("FAQS") || className.includes("FAQS") || id.includes("FAQ") || className.includes("FAQ")) {
+              sectionType = "FAQS";
+              break;
+            }
+            if (id.includes("CTA") || className.includes("CTA")) {
+              sectionType = "CTA";
+              break;
+            }
+            if (tagName === "HEADER" || className.includes("HEADER") || id.includes("HEADER") || className.includes("NAV") || id.includes("NAV")) {
+              sectionType = "HEADER";
+              break;
+            }
+            if (tagName === "FOOTER" || className.includes("FOOTER") || id.includes("FOOTER")) {
+              sectionType = "FOOTER";
+              break;
+            }
+            element = element.parentElement;
+          }
+          
+          if (sectionType) {
+            const sec = currentProject?.pages?.[0]?.sections?.find(s => s.type === sectionType);
+            if (sec) {
+              setSelectedSection(sec);
+              setBuilderTab("layers");
+            }
+          }
+        };
+        
+        iframeDoc.addEventListener("mouseover", handleMouseOver);
+        iframeDoc.addEventListener("mouseout", handleMouseOut);
+        iframeDoc.addEventListener("click", handleClick, true);
+        
+        return () => {
+          try {
+            iframeDoc.removeEventListener("mouseover", handleMouseOver);
+            iframeDoc.removeEventListener("mouseout", handleMouseOut);
+            iframeDoc.removeEventListener("click", handleClick, true);
+          } catch (e) {}
+        };
+      } catch (e) {
+        console.warn("Could not access iframe document for inspection:", e);
+      }
+    };
+
+    const iframe = iframeRef.current;
+    if (iframe) {
+      iframe.addEventListener("load", setupInspector);
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (doc && doc.readyState === "complete") {
+        setupInspector();
+      }
+    }
+    
+    return () => {
+      if (iframe) {
+        iframe.removeEventListener("load", setupInspector);
+      }
+    };
+  }, [activePreviewTab, selectedProjectId, iframeKey, currentProject]);
 
   // Load state from URL parameters on mount
   useEffect(() => {
@@ -4832,7 +4964,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
               {/* Quick icons */}
               <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginLeft: "0.4rem", borderLeft: "1px solid rgba(255,255,255,0.08)", paddingLeft: "0.6rem" }}>
                 <button 
-                  onClick={() => setActivePreviewTab("settings")}
+                  onClick={() => setBuilderTab("settings")}
                   style={{ background: "transparent", border: "none", color: "#9ca3af", cursor: "pointer", padding: "0.15rem", display: "flex", alignItems: "center" }}
                   title="Project settings"
                 >
@@ -4857,7 +4989,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
             {/* Center: Unified Capsule Tabs Selector */}
             {currentProject && !isCreatingNew && (
               <div style={{ display: "inline-flex", background: "rgba(255, 255, 255, 0.04)", border: "1px solid rgba(255, 255, 255, 0.05)", padding: "3px", borderRadius: "9999px", gap: "0.15rem" }}>
-                {(["preview", "inspect", "code", "settings"] as const).map(tab => (
+                {(["preview", "inspect", "code"] as const).map(tab => (
                   <button
                     key={tab}
                     onClick={() => setActivePreviewTab(tab)}
@@ -4880,7 +5012,6 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                     {tab === "preview" && <Eye size={11} />}
                     {tab === "inspect" && <Sparkles size={11} />}
                     {tab === "code" && <Code size={11} />}
-                    {tab === "settings" && <Settings size={11} />}
                     <span style={{ textTransform: "capitalize" }}>{tab}</span>
                   </button>
                 ))}
@@ -4995,7 +5126,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                 // READY VIEW: Conditional tab mapping
                 activePreviewTab === "preview" ? (
                   <iframe
-                    key={iframeKey}
+                    key={iframeKey + "-preview"}
                     src={`/preview/${currentProject.id}`}
                     style={{
                       width: "100%",
@@ -5007,77 +5138,26 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                     }}
                   />
                 ) : activePreviewTab === "inspect" ? (
-                  <div style={{ display: "flex", flexGrow: 1, gap: "1rem", overflow: "hidden", width: "100%" }}>
-                    <div style={{ flex: 1, position: "relative", minWidth: 0 }}>
-                      <iframe
-                        key={iframeKey}
-                        src={`/preview/${currentProject.id}`}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          borderRadius: "0.75rem",
-                          background: "#07111b",
-                        }}
-                      />
-                      <div style={{ position: "absolute", top: "1rem", left: "1rem", background: "rgba(99, 102, 241, 0.9)", color: "#fff", padding: "0.4rem 0.8rem", borderRadius: "0.35rem", fontSize: "0.72rem", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.3rem", pointerEvents: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}>
-                        <Sparkles size={11} /> Click elements in inspector panel to edit
-                      </div>
-                    </div>
-                    
-                    {/* Inspector Panel */}
-                    <div style={{ width: "260px", background: "#0b0f19", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "0.75rem", padding: "0.85rem", display: "flex", flexDirection: "column", gap: "0.6rem", overflowY: "auto", flexShrink: 0 }}>
-                      <span style={{ fontSize: "0.7rem", color: "#818cf8", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Page Component Inspector</span>
-                      <strong style={{ fontSize: "0.85rem", color: "#fff", borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "0.4rem" }}>index.html Structure</strong>
-                      
-                      <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginTop: "0.1rem" }}>
-                        {(currentProject.pages[0]?.sections || []).map((sec, idx) => (
-                          <div
-                            key={sec.id || idx}
-                            onClick={() => {
-                              setSelectedSection(sec);
-                              setBuilderTab("layers");
-                            }}
-                            style={{
-                              background: "rgba(255,255,255,0.02)",
-                              border: "1px solid rgba(255,255,255,0.05)",
-                              borderRadius: "0.4rem",
-                              padding: "0.6rem",
-                              cursor: "pointer",
-                              transition: "all 0.15s",
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: "0.15rem",
-                              textAlign: "left"
-                            }}
-                            onMouseOver={(e) => {
-                              e.currentTarget.style.borderColor = "#818cf8";
-                              e.currentTarget.style.background = "rgba(99, 102, 241, 0.05)";
-                            }}
-                            onMouseOut={(e) => {
-                              e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)";
-                              e.currentTarget.style.background = "rgba(255,255,255,0.02)";
-                            }}
-                          >
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#fff" }}>{sec.type} Section</span>
-                              <span style={{ fontSize: "0.58rem", background: "rgba(99, 102, 241, 0.15)", color: "#818cf8", padding: "0.05rem 0.25rem", borderRadius: "0.2rem", fontWeight: 600 }}>#{idx + 1}</span>
-                            </div>
-                            <span style={{ fontSize: "0.62rem", color: "#9ca3af", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                              {sec.type === "HERO" && `Heading: ${sec.content?.heading || ""}`}
-                              {sec.type === "ABOUT" && `Body: ${sec.content?.body || ""}`}
-                              {sec.type === "CONTACT" && `Email: ${sec.content?.email || ""}`}
-                              {sec.type !== "HERO" && sec.type !== "ABOUT" && sec.type !== "CONTACT" && "Custom AI-generated content block"}
-                            </span>
-                            <span style={{ fontSize: "0.58rem", color: "#818cf8", fontWeight: 600, display: "flex", alignItems: "center", gap: "0.2rem", marginTop: "0.15rem" }}>
-                              <CornerDownLeft size={8} /> Click to edit content
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                  <div style={{ flexGrow: 1, position: "relative", width: "100%", height: "100%" }}>
+                    <iframe
+                      ref={iframeRef}
+                      key={iframeKey + "-inspect"}
+                      src={`/preview/${currentProject.id}`}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        border: "1px solid rgba(99, 102, 241, 0.4)",
+                        borderRadius: "0.75rem",
+                        background: "#07111b",
+                        boxShadow: "0 0 15px rgba(99, 102, 241, 0.15)",
+                      }}
+                    />
+                    <div style={{ position: "absolute", top: "1rem", left: "1rem", background: "rgba(99, 102, 241, 0.95)", color: "#fff", padding: "0.45rem 0.9rem", borderRadius: "0.35rem", fontSize: "0.72rem", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.35rem", pointerEvents: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
+                      <Sparkles size={11} /> Visual Inspect Mode Active &bull; Hover &amp; Click elements directly on page to edit
                     </div>
                   </div>
-                ) : activePreviewTab === "code" ? (
+                ) : (
+                  // CODE VIEW: IDE panel with dynamically compiled files
                   <div style={{ display: "flex", flexGrow: 1, gap: "1rem", overflow: "hidden", background: "#060a12", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "0.75rem", width: "100%" }}>
                     
                     {/* Left File Tree Panel */}
@@ -5136,64 +5216,6 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                         </pre>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  // SETTINGS VIEW: Quick settings edit form
-                  <div style={{ flexGrow: 1, background: "#0b0f19", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "0.75rem", padding: "1.5rem", overflowY: "auto", color: "#fff" }}>
-                    <div style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "0.6rem", marginBottom: "1.2rem", textAlign: "left" }}>
-                      <h3 style={{ fontSize: "1.1rem", color: "#fff", margin: 0 }}>Workspace settings</h3>
-                      <p style={{ color: "#9ca3af", fontSize: "0.72rem", margin: "0.15rem 0 0 0" }}>Update your website project configurations and domains instantly.</p>
-                    </div>
-                    
-                    <form onSubmit={handleSaveSettings} style={{ display: "flex", flexDirection: "column", gap: "1rem", maxWidth: "450px", textAlign: "left" }}>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                        <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#cbd5e1" }}>Subdomain Name</label>
-                        <input
-                          type="text"
-                          value={projectSubdomain}
-                          onChange={(e) => setProjectSubdomain(e.target.value)}
-                          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "#fff", padding: "0.5rem", borderRadius: "0.3rem", fontSize: "0.8rem", outline: "none" }}
-                          placeholder="subdomain"
-                        />
-                      </div>
-                      
-                      <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                        <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#cbd5e1" }}>Custom Domain Link</label>
-                        <input
-                          type="text"
-                          value={customDomainName}
-                          onChange={(e) => setCustomDomainName(e.target.value)}
-                          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "#fff", padding: "0.5rem", borderRadius: "0.3rem", fontSize: "0.8rem", outline: "none" }}
-                          placeholder="e.g. mydomain.com"
-                        />
-                      </div>
-                      
-                      <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                        <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#cbd5e1" }}>Website SEO Title</label>
-                        <input
-                          type="text"
-                          value={seoTitle}
-                          onChange={(e) => setSeoTitle(e.target.value)}
-                          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "#fff", padding: "0.5rem", borderRadius: "0.3rem", fontSize: "0.8rem", outline: "none" }}
-                          placeholder="My Awesome Website"
-                        />
-                      </div>
-                      
-                      <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                        <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#cbd5e1" }}>SEO Meta Description</label>
-                        <textarea
-                          value={seoDescription}
-                          onChange={(e) => setSeoDescription(e.target.value)}
-                          rows={3}
-                          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", color: "#fff", padding: "0.5rem", borderRadius: "0.3rem", fontSize: "0.8rem", outline: "none", resize: "none" }}
-                          placeholder="Describe your site details for Google indexing..."
-                        />
-                      </div>
-                      
-                      <button type="submit" className="primary-action" style={{ background: "linear-gradient(135deg, var(--blue), var(--teal))", color: "#fff", border: "none", alignSelf: "flex-start", marginTop: "0.4rem", padding: "0.5rem 1rem", fontSize: "0.8rem" }}>
-                        <Check size={12} style={{ marginRight: "0.25rem" }} /> Save settings
-                      </button>
-                    </form>
                   </div>
                 )
               )
