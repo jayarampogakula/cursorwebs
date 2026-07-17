@@ -308,6 +308,11 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const prevProjectIdRef = useRef(selectedProjectId);
+  const [usedCredits, setUsedCredits] = useState(tenant.subscription?.creditsUsed || 0);
+
+  useEffect(() => {
+    setUsedCredits(tenant.subscription?.creditsUsed || 0);
+  }, [tenant.subscription?.creditsUsed]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -1154,6 +1159,10 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
           setSelectedProjectId(newProjectId);
           setIsCreatingNew(false);
           setActiveView("builder");
+
+          // Update credits state locally
+          const isEcom = !!newProject.theme?.metadata?.isEcommerce;
+          setUsedCredits(prev => prev + (isEcom ? 250 : 50));
         }
       }
     } catch (err) {
@@ -1175,13 +1184,14 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
         )
       );
 
+      const isEcom = !!project.theme?.ecommerce || !!project.theme?.metadata?.isEcommerce;
       const res = await fetch(`/api/projects/${project.id}/regenerate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: project.description || "Website layout for business",
           style: project.theme?.style || "Modern Startup",
-          ecommerce: !!project.theme?.ecommerce,
+          ecommerce: isEcom,
         }),
       });
 
@@ -1189,6 +1199,9 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
       if (!res.ok) throw new Error(data.error || "Failed to trigger regeneration.");
       
       setSuccess("Website generation restarted successfully!");
+
+      // Update credits state locally
+      setUsedCredits(prev => prev + (isEcom ? 250 : 10));
     } catch (err: any) {
       console.error("Retry generation failed:", err);
       setError(err.message || "Failed to restart generation.");
@@ -1230,6 +1243,9 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
 
       setChatMessages((prev) => [...prev, { sender: "ai", text: "Applied changes successfully! Refreshing interactive preview." }]);
       handleRefreshPreview();
+      
+      // Update credits state locally
+      setUsedCredits(prev => prev + 10);
     } catch (err: any) {
       setChatMessages((prev) => [...prev, { sender: "ai", text: `Error: ${err.message}` }]);
     } finally {
@@ -1817,7 +1833,6 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
   const activeSiteUrl = customDomainUrl || subdomainUrl;
 
   const totalCredits = tenant.subscription?.creditsLimit || 10;
-  const usedCredits = tenant.subscription?.creditsUsed || 0;
   const remainingCredits = Math.max(0, totalCredits - usedCredits);
 
   const currentPlan = tenant.subscription?.planId || "starter";
@@ -5176,7 +5191,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
             {currentProject && !isCreatingNew && (
               <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                 <button
-                  onClick={handleRefreshPreview}
+                  onClick={() => handleRetryGeneration(currentProject)}
                   style={{
                     background: "rgba(255,255,255,0.03)",
                     border: "1px solid rgba(255,255,255,0.08)",
