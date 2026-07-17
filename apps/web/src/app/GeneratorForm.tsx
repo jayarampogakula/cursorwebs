@@ -35,6 +35,53 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
   const [style, setStyle] = useState("Modern Startup");
   const [ecommerce, setEcommerce] = useState(false);
 
+  // Dynamic typing placeholder prompts
+  const placeholderPrompts = [
+    "Make an e-commerce store with cart func",
+    "Design a landing page for my dental clinic",
+    "build a task management app with status columns",
+    "Create a portfolio website for a visual designer",
+    "Build a SaaS billing dashboard with chart views"
+  ];
+
+  const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
+  const [displayedPlaceholder, setDisplayedPlaceholder] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  React.useEffect(() => {
+    let timer: NodeJS.Timeout;
+    const currentFullText = placeholderPrompts[currentPlaceholderIndex];
+    
+    const handleTyping = () => {
+      if (!isDeleting) {
+        setDisplayedPlaceholder((prev) => {
+          const next = currentFullText.substring(0, prev.length + 1);
+          if (next === currentFullText) {
+            timer = setTimeout(() => setIsDeleting(true), 2500);
+          } else {
+            timer = setTimeout(handleTyping, 60);
+          }
+          return next;
+        });
+      } else {
+        setDisplayedPlaceholder((prev) => {
+          const next = currentFullText.substring(0, prev.length - 1);
+          if (next === "") {
+            setIsDeleting(false);
+            setCurrentPlaceholderIndex((prevIdx) => (prevIdx + 1) % placeholderPrompts.length);
+            timer = setTimeout(handleTyping, 200);
+          } else {
+            timer = setTimeout(handleTyping, 30);
+          }
+          return next;
+        });
+      }
+    };
+
+    timer = setTimeout(handleTyping, 100);
+    return () => clearTimeout(timer);
+  }, [isDeleting, currentPlaceholderIndex]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState<{ projectId: string; subdomain: string } | null>(null);
@@ -176,7 +223,7 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
                   handleNext();
                 }
               }}
-              placeholder="Make an e-commerce store with cart func"
+              placeholder={displayedPlaceholder || "Make an e-commerce store with cart func"}
               rows={3}
             />
             <div className="prompt-bottom-bar">
