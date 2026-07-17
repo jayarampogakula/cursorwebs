@@ -1939,13 +1939,18 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
         )}
         {/* Persistent Site Header (Main Menu) */}
         <header className="site-nav dashboard-nav" style={{ borderBottom: "1px solid var(--line)", margin: 0, background: "var(--panel)", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 1.5rem", height: "70px", flexShrink: 0 }}>
-          <a className="brand" href="/">
-            {appLogo ? (
-              <img src={appLogo} alt={appName} style={{ height: "24px", maxWidth: "100px", objectFit: "contain", marginRight: "0.25rem" }} />
-            ) : (
-              <span className="brand-mark"><Sparkles size={18} /></span>
-            )}
-            {appName}
+          <a className="brand" href="/" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <div className="brand-mark-gradient" style={{ display: "grid", placeItems: "center", width: "2.0rem", height: "2.0rem", borderRadius: "0.4rem", background: "linear-gradient(135deg, var(--blue), var(--teal))", boxShadow: "0 6px 18px rgba(32, 199, 181, 0.25)" }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#fff" }}><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.34 18.65a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.21 1.21 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>
+              </div>
+              <span style={{ fontSize: "1.35rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em" }}>
+                Simpl<span style={{ color: "var(--rose)" }}>A</span>Web
+              </span>
+            </div>
+            <span className="logo-tagline" style={{ fontSize: "0.55rem", color: "var(--rose)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: "-2px", marginLeft: "2.5rem" }}>
+              Build your business online, instantly.
+            </span>
           </a>
           
           <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
@@ -2756,13 +2761,18 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
       )}
       {/* Persistent Site Header (Main Menu) */}
       <header className="site-nav dashboard-nav" style={{ borderBottom: "1px solid var(--line)", margin: 0, background: "var(--panel)", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 1.5rem", height: "70px", flexShrink: 0 }}>
-        <a className="brand" href="/">
-          {appLogo ? (
-            <img src={appLogo} alt={appName} style={{ height: "24px", maxWidth: "100px", objectFit: "contain", marginRight: "0.25rem" }} />
-          ) : (
-            <span className="brand-mark"><Sparkles size={18} /></span>
-          )}
-          {appName}
+        <a className="brand" href="/" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <div className="brand-mark-gradient" style={{ display: "grid", placeItems: "center", width: "2.0rem", height: "2.0rem", borderRadius: "0.4rem", background: "linear-gradient(135deg, var(--blue), var(--teal))", boxShadow: "0 6px 18px rgba(32, 199, 181, 0.25)" }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#fff" }}><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.34 18.65a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.21 1.21 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>
+            </div>
+            <span style={{ fontSize: "1.35rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em" }}>
+              Simpl<span style={{ color: "var(--rose)" }}>A</span>Web
+            </span>
+          </div>
+          <span className="logo-tagline" style={{ fontSize: "0.55rem", color: "var(--rose)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: "-2px", marginLeft: "2.5rem" }}>
+            Build your business online, instantly.
+          </span>
         </a>
         
         <div style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
@@ -4520,7 +4530,6 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                                 setNewClientEmail("");
                                 setNewClientPassword("");
                               }}
-                              type="button"
                               className="primary-action"
                               style={{ width: "fit-content", alignSelf: "flex-end", padding: "0.4rem 1rem", fontSize: "0.8rem", background: "#818cf8", color: "#fff", border: 0, borderRadius: "0.3rem", cursor: "pointer", fontWeight: 700 }}
                             >

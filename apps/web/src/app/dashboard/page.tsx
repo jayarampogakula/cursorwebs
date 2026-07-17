@@ -134,13 +134,18 @@ export default async function DashboardPage({ searchParams }: { searchParams?: {
     return (
       <div className="app-shell">
         <header className="site-nav">
-          <a className="brand" href="/">
-            {systemSettings?.appLogo ? (
-              <img src={systemSettings.appLogo} alt={systemSettings?.appName || fallbackAppName} style={{ height: "24px", maxWidth: "120px", objectFit: "contain", marginRight: "0.25rem" }} />
-            ) : (
-              <span className="brand-mark"><Sparkles size={18} /></span>
-            )}
-            {systemSettings?.appName || fallbackAppName}
+          <a className="brand" href="/" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <div className="brand-mark-gradient" style={{ display: "grid", placeItems: "center", width: "2.25rem", height: "2.25rem", borderRadius: "0.5rem", background: "linear-gradient(135deg, var(--blue), var(--teal))", boxShadow: "0 8px 24px rgba(32, 199, 181, 0.25)" }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#fff" }}><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.34 18.65a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.21 1.21 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>
+              </div>
+              <span style={{ fontSize: "1.45rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em" }}>
+                Simpl<span style={{ color: "var(--rose)" }}>A</span>Web
+              </span>
+            </div>
+            <span className="logo-tagline" style={{ fontSize: "0.58rem", color: "var(--rose)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: "-2px", marginLeft: "2.75rem" }}>
+              Build your business online, instantly.
+            </span>
           </a>
           <div className="nav-actions">
             <span style={{ color: "#9aa7bd", fontSize: "0.85rem" }}>{user.email}</span>

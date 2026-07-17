@@ -121,60 +121,87 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
     }
   };
 
+  const suggestions = [
+    { label: "Create a portfolio website", text: "Create a portfolio website for a visual designer showcasing branding, mobile app designs, and case studies." },
+    { label: "Design a landing page", text: "Design a landing page for a modern B2B SaaS analytics platform showing charts, pricing, and sign up form." },
+    { label: "Make an e-commerce store", text: "Make an e-commerce store for an organic coffee brand with product catalog, cart, and brewing guides." },
+    { label: "Build a corporate website", text: "Build a corporate website for a renewable green energy consultant team showcasing solar projects." }
+  ];
+
   return (
-    <div className="surface-panel generator-card" style={{ padding: "2.5rem", borderRadius: "1rem", border: "1px solid rgba(255,255,255,0.08)", background: "rgba(13,19,35,0.85)" }}>
+    <div
+      className={step > 1 ? "surface-panel generator-card" : ""}
+      style={step > 1 ? {
+        padding: "2.5rem",
+        borderRadius: "1rem",
+        border: "1px solid rgba(255,255,255,0.08)",
+        background: "rgba(13,19,35,0.85)",
+        width: "100%",
+        maxWidth: "800px",
+        margin: "0 auto"
+      } : {
+        width: "100%"
+      }}
+    >
       {/* HEADER AND BREADCRUMBS */}
-      <div style={{ marginBottom: "2rem" }}>
-        <span className="eyebrow" style={{ color: "#a78bfa", display: "inline-flex", gap: "0.4rem", alignItems: "center" }}>
-          <Sparkles size={14} /> Step {step} of 3
-        </span>
-        <h2 style={{ fontSize: "1.75rem", color: "#fff", fontWeight: 800, margin: "0.25rem 0" }}>
-          {step === 1 && "Website Parameters"}
-          {step === 2 && "Visual Branding"}
-          {step === 3 && "Building Project"}
-        </h2>
-        <p style={{ color: "#9ca3af", fontSize: "0.85rem", margin: 0 }}>
-          {step === 1 && "Describe your brand offer, keywords, and niche to build custom sections."}
-          {step === 2 && "Choose an interactive design direction and additional capabilities."}
-          {step === 3 && "Your AI website builder workspace is generating pages and writing styles."}
-        </p>
-      </div>
+      {step > 1 && (
+        <div style={{ marginBottom: "2rem" }}>
+          <span className="eyebrow" style={{ color: "#a78bfa", display: "inline-flex", gap: "0.4rem", alignItems: "center" }}>
+            <Sparkles size={14} /> Step {step} of 3
+          </span>
+          <h2 style={{ fontSize: "1.75rem", color: "#fff", fontWeight: 800, margin: "0.25rem 0" }}>
+            {step === 2 && "Visual Branding"}
+            {step === 3 && "Building Project"}
+          </h2>
+          <p style={{ color: "#9ca3af", fontSize: "0.85rem", margin: 0 }}>
+            {step === 2 && "Choose an interactive design direction and additional capabilities."}
+            {step === 3 && "Your AI website builder workspace is generating pages and writing styles."}
+          </p>
+        </div>
+      )}
 
       {error && <div className="form-alert" style={{ marginBottom: "1.5rem" }}>{error}</div>}
 
       {/* STEP 1: PARAMETERS */}
       {step === 1 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-          <div className="form-grid">
-            <div className="field-group">
-              <label>Website Name <span style={{ color: "var(--muted)", fontWeight: "normal", fontSize: "0.8rem" }}>(Optional)</span></label>
-              <input className="field" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Nova Tech Solutions" />
-            </div>
-            <div className="field-group">
-              <label>Business Name <span style={{ color: "var(--muted)", fontWeight: "normal", fontSize: "0.8rem" }}>(Optional)</span></label>
-              <input className="field" value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="e.g. Nova Tech" />
-            </div>
-          </div>
-
-          <div className="field-group">
-            <label>Website Description</label>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", width: "100%" }}>
+          <div className="prompt-box-container">
             <textarea
-              className="field"
+              className="prompt-textarea"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g. Gaming content creator website focused on game reviews, walkthroughs, esports updates and tournaments."
-              rows={4}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                  e.preventDefault();
+                  handleNext();
+                }
+              }}
+              placeholder="Design a landing page for my "
+              rows={3}
             />
+            <div className="prompt-bottom-bar">
+              <span className="prompt-shortcut-text">
+                Press <kbd style={{ fontFamily: "inherit", background: "rgba(255,255,255,0.08)", padding: "0.1rem 0.3rem", borderRadius: "0.25rem", border: "1px solid rgba(255,255,255,0.15)", fontSize: "0.72rem" }}>⌘ Enter</kbd> to start
+              </span>
+              <button type="button" onClick={handleNext} className="prompt-go-btn">
+                Go <ArrowRight size={16} />
+              </button>
+            </div>
           </div>
 
-          <div className="field-group">
-            <label>Keywords (comma separated)</label>
-            <input className="field" value={keywords} onChange={(e) => setKeywords(e.target.value)} placeholder="e.g. Gaming, YouTube, Streaming, Reviews" />
+          {/* Suggestion Pills */}
+          <div className="suggestion-pills">
+            {suggestions.map((item, idx) => (
+              <button
+                key={idx}
+                type="button"
+                className="pill-btn"
+                onClick={() => setPrompt(item.text)}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
-
-          <button onClick={handleNext} className="primary-action" style={{ width: "100%", justifyContent: "center", marginTop: "1rem" }}>
-            Next: Branding Style <ArrowRight size={16} />
-          </button>
         </div>
       )}
 

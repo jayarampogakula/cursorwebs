@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@webbing/db";
 import GeneratorForm from "./GeneratorForm";
 import MarketingHeader from "./components/MarketingHeader";
-import { CheckCircle2, Compass, Globe2, Layers3, Mail, ShieldCheck, Sparkles, Zap, ShoppingCart, MessageSquare, Code, DollarSign } from "lucide-react";
+import { CheckCircle2, Compass, Globe, Globe2, Layers3, Mail, ShieldCheck, Sparkles, Zap, ShoppingCart, MessageSquare, Code, DollarSign, Eye, Download, LayoutGrid } from "lucide-react";
 import PricingSection from "./components/PricingSection";
 import { getSystemSettings } from "@/lib/settings";
 import * as Icons from "lucide-react";
@@ -78,38 +78,97 @@ export default async function LandingPage() {
     <div className="app-shell">
       <MarketingHeader user={user} appName={settings.appName} appLogo={settings.appLogo} />
 
-      <main id="home">
+      <main id="home" style={{ position: "relative", zIndex: 10 }}>
         <section className="hero">
-          <div>
-            <span className="eyebrow"><Zap size={14} /> AI website SaaS</span>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
             <h1>{settings.landingHeroTitle}</h1>
-            <p>{settings.landingHeroSubtitle}</p>
-            <div className="hero-stats">
-              <div className="stat-tile"><strong>60s</strong><span>first draft</span></div>
-              <div className="stat-tile"><strong>6+</strong><span>LLM providers</span></div>
-              <div className="stat-tile"><strong>5</strong><span>core pages</span></div>
-            </div>
+            <p style={{ maxWidth: "600px", margin: "0 auto" }}>{settings.landingHeroSubtitle}</p>
           </div>
           <GeneratorForm user={user} />
+          
+          {/* Trusted Brands logos */}
+          <div className="trusted-by-section">
+            <span className="trusted-title">Trusted by teams at</span>
+            <div className="brands-container">
+              <div className="brand-pill">
+                <span className="brand-dot" style={{ background: "#3b82f6" }}>T</span>
+                <span>TechFlow</span>
+              </div>
+              <div className="brand-pill">
+                <span className="brand-dot" style={{ background: "#10b981" }}>B</span>
+                <span>BuildCorp</span>
+              </div>
+              <div className="brand-pill">
+                <span className="brand-dot" style={{ background: "#8b5cf6" }}>D</span>
+                <span>DataSync</span>
+              </div>
+              <div className="brand-pill">
+                <span className="brand-dot" style={{ background: "#f59e0b" }}>C</span>
+                <span>CloudBase</span>
+              </div>
+              <div className="brand-pill">
+                <span className="brand-dot" style={{ background: "#ec4899" }}>S</span>
+                <span>DevStack</span>
+              </div>
+            </div>
+          </div>
         </section>
 
-        <section id="features" className="section-band">
-          <div className="section-copy">
-            <span className="eyebrow">Features</span>
+        <section id="features" className="section-band" style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+          <div className="section-copy" style={{ textAlign: "center", margin: "0 auto 1.5rem auto" }}>
+            <span className="eyebrow" style={{ margin: "0 auto" }}>Features</span>
             <h2>Everything feels connected now.</h2>
             <p>The builder, pricing, account pages, generated websites, and LLM settings share one restrained product interface.</p>
           </div>
-          <div className="feature-grid">
-            {parsedFeatures.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <article className="feature-card" key={feature.title}>
-                  <span className="icon-box"><Icon size={22} /></span>
-                  <h3>{feature.title}</h3>
-                  <p>{feature.text}</p>
+
+          <div style={{ width: "100%", maxWidth: "1180px", margin: "0 auto" }}>
+            {/* Bento Grid Top Row (Large + 2 Medium Stacked) */}
+            <div className="bento-container-top">
+              {/* Large Bento Card */}
+              <article className="bento-card large">
+                <span className="icon-box"><Sparkles size={24} /></span>
+                <h3>AI-Powered Development</h3>
+                <p>Describe what you want, and watch it come to life. Our AI understands context and builds complete applications.</p>
+              </article>
+
+              {/* Stack of 2 Medium Bento Cards */}
+              <div className="bento-medium-stack">
+                <article className="bento-card medium">
+                  <span className="icon-box"><Eye size={20} /></span>
+                  <h3>Real-time Preview</h3>
+                  <p>See your changes instantly as the AI builds your project. No waiting, no refreshing.</p>
                 </article>
-              );
-            })}
+                <article className="bento-card medium">
+                  <span className="icon-box"><Code size={20} /></span>
+                  <h3>Built-in Code Editor</h3>
+                  <p>Full Monaco editor with syntax highlighting, file tree, and code completion.</p>
+                </article>
+              </div>
+            </div>
+
+            {/* Bento Grid Bottom Row (4 Small Cards) */}
+            <div className="bento-container-bottom">
+              <article className="bento-card small">
+                <span className="icon-box"><Download size={20} /></span>
+                <h3>Export & Deploy</h3>
+                <p>Host on our platform or export your code to deploy anywhere.</p>
+              </article>
+              <article className="bento-card small">
+                <span className="icon-box"><LayoutGrid size={20} /></span>
+                <h3>Smart Templates</h3>
+                <p>Start with AI-selected templates that match your project needs perfectly.</p>
+              </article>
+              <article className="bento-card small">
+                <span className="icon-box"><MessageSquare size={20} /></span>
+                <h3>Iterative Refinement</h3>
+                <p>Keep chatting to refine and improve your creation until it's perfect.</p>
+              </article>
+              <article className="bento-card small">
+                <span className="icon-box"><Globe size={20} /></span>
+                <h3>Custom Subdomains</h3>
+                <p>Publish your project to a custom subdomain and share it with the world.</p>
+              </article>
+            </div>
           </div>
         </section>
 
