@@ -303,7 +303,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [splitLayout, setSplitLayout] = useState<"split" | "editor-focus" | "preview-focus" | "editor-only" | "preview-only">("split");
   const [isMobile, setIsMobile] = useState(false);
-  const [editorWidth, setEditorWidth] = useState(50); // percentage (e.g. 50%)
+  const [editorWidth, setEditorWidth] = useState(30); // percentage (e.g. 30%)
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -2481,10 +2481,10 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#fff" }}><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.34 18.65a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.21 1.21 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>
               </div>
               <span style={{ fontSize: "1.35rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em" }}>
-                Cursor<span style={{ color: "#f43f5e" }}>Webs</span>
+                Cursor<span style={{ color: "#38bdf8" }}>Webs</span>
               </span>
             </div>
-            <span className="logo-tagline" style={{ fontSize: "0.55rem", color: "#f43f5e", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: "-2px", marginLeft: "2.5rem" }}>
+            <span className="logo-tagline" style={{ fontSize: "0.55rem", color: "#94a3b8", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: "-2px", marginLeft: "2.5rem" }}>
               Build your business online, instantly.
             </span>
           </a>
@@ -3303,10 +3303,10 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
               <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#fff" }}><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.34 18.65a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.21 1.21 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>
             </div>
             <span style={{ fontSize: "1.35rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em" }}>
-              Cursor<span style={{ color: "#f43f5e" }}>Webs</span>
+              Cursor<span style={{ color: "#38bdf8" }}>Webs</span>
             </span>
           </div>
-          <span className="logo-tagline" style={{ fontSize: "0.55rem", color: "#f43f5e", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: "-2px", marginLeft: "2.5rem" }}>
+          <span className="logo-tagline" style={{ fontSize: "0.55rem", color: "#94a3b8", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: "-2px", marginLeft: "2.5rem" }}>
             Build your business online, instantly.
           </span>
         </a>
@@ -5138,30 +5138,6 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                   </span>
                 </div>
               )}
-
-              {/* Quick icons */}
-              <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginLeft: "0.4rem", borderLeft: "1px solid rgba(255,255,255,0.08)", paddingLeft: "0.6rem" }}>
-                <button 
-                  onClick={() => setBuilderTab("settings")}
-                  style={{ background: "transparent", border: "none", color: "#9ca3af", cursor: "pointer", padding: "0.15rem", display: "flex", alignItems: "center" }}
-                  title="Project settings"
-                >
-                  <Settings size={12} />
-                </button>
-                <button 
-                  style={{ background: "transparent", border: "none", color: "#9ca3af", cursor: "pointer", padding: "0.15rem", display: "flex", alignItems: "center" }}
-                  title="Dark/Light Mode toggle"
-                >
-                  <Sun size={12} />
-                </button>
-                <button 
-                  onClick={() => setActiveView("homepage")}
-                  style={{ background: "transparent", border: "none", color: "#9ca3af", cursor: "pointer", padding: "0.15rem", display: "flex", alignItems: "center" }}
-                  title="Go to dashboard home"
-                >
-                  <Home size={12} />
-                </button>
-              </div>
             </div>
 
             {/* Center: Unified Capsule Tabs Selector */}
