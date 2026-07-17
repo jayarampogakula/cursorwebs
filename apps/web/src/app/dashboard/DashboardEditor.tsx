@@ -3337,7 +3337,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                 Cancel
               </button>
             </div>
-            <GeneratorForm user={user} tenantId={tenant.id} onSuccess={handleNewProjectGenerated} />
+            <GeneratorForm user={user} tenantId={tenant.id} onSuccess={handleNewProjectGenerated} showThemes={true} />
           </div>
         </div>
       ) : !currentProject ? (

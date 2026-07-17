@@ -11,9 +11,10 @@ interface GeneratorFormProps {
   user: any;
   tenantId?: string;
   onSuccess?: (projectId: string) => void;
+  showThemes?: boolean;
 }
 
-export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFormProps) {
+export default function GeneratorForm({ user, tenantId, onSuccess, showThemes = false }: GeneratorFormProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
 
@@ -85,19 +86,30 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
     }
   }, [success]);
 
-  const categories = ["All", "Real Estate", "Gaming", "E-commerce", "Digital Marketing", "Clinics"];
+  const categories = ["All", "Real Estate", "Gaming", "E-commerce", "Digital Marketing", "Clinics", "Fitness", "Education"];
 
   const themes = [
+    // Real Estate
     { id: "Aether Homes", name: "Aether Homes", category: "Real Estate", desc: "Sleek architecture portfolios and listings.", preset: "Modern Startup", image: "/images/themes/luxury.png" },
     { id: "Vanguard Realty", name: "Vanguard Realty", category: "Real Estate", desc: "High-contrast dark designs for premium agencies.", preset: "SaaS", image: "/images/themes/saas.png" },
+    // Gaming
     { id: "CyberPulse", name: "CyberPulse", category: "Gaming", desc: "Cyberpunk neon accents, bold tech aesthetics.", preset: "Gaming", image: "/images/themes/gaming.png" },
     { id: "Rift Esports", name: "Rift Esports", category: "Gaming", desc: "Dark, high-energy gaming pages and rosters.", preset: "Gaming", image: "/images/themes/gaming.png" },
+    // E-commerce
     { id: "Velvet Cart", name: "Velvet Cart", category: "E-commerce", desc: "Elegant minimal shop layouts for apparel brands.", preset: "Ecommerce", image: "/images/themes/ecommerce.png" },
     { id: "Nova Tech", name: "Nova Tech", category: "E-commerce", desc: "Clean grid layout for consumer electronics.", preset: "Ecommerce", image: "/images/themes/ecommerce.png" },
-    { id: "Apex Agency", name: "Apex Agency", category: "Digital Marketing", desc: "Modern startup B2B SaaS analytics and service presentations.", preset: "Modern Startup", image: "/images/themes/corporate.png" },
+    // Digital Marketing
+    { id: "Apex Agency", name: "Apex Agency", category: "Digital Marketing", desc: "Modern B2B startup SaaS and agency presentations.", preset: "Modern Startup", image: "/images/themes/corporate.png" },
     { id: "GrowthFlow", name: "GrowthFlow", category: "Digital Marketing", desc: "Vibrant gradient-focused page for consultancies.", preset: "Creator", image: "/images/themes/creator.png" },
+    { id: "SaaSify Metrics", name: "SaaSify Metrics", category: "Digital Marketing", desc: "Clean bento grids and SaaS statistics display.", preset: "SaaS", image: "/images/themes/saas.png" },
+    // Clinics
     { id: "MediCare Plus", name: "MediCare Plus", category: "Clinics", desc: "Clean design with simple scheduling components.", preset: "Modern Startup", image: "/images/themes/corporate.png" },
-    { id: "Aura Dental", name: "Aura Dental", category: "Clinics", desc: "Warm layout for dental & wellness practices.", preset: "Creator", image: "/images/themes/creator.png" }
+    { id: "Aura Dental", name: "Aura Dental", category: "Clinics", desc: "Warm layout for dental & wellness practices.", preset: "Creator", image: "/images/themes/creator.png" },
+    // Fitness
+    { id: "FitCore Studio", name: "FitCore Studio", category: "Fitness", desc: "Workout layouts, schedules, and trainer profiles.", preset: "Gaming", image: "/images/themes/fitness.png" },
+    // Education
+    { id: "SkillUp Academy", name: "SkillUp Academy", category: "Education", desc: "Grid listings for online courses and lessons.", preset: "Modern Startup", image: "/images/themes/education.png" },
+    { id: "EduPortal Hub", name: "EduPortal Hub", category: "Education", desc: "Structured resource center for schools & tutors.", preset: "SaaS", image: "/images/themes/education.png" }
   ];
 
   const activeTheme = themes.find(t => t.id === selectedThemeId) || themes[0];
@@ -176,7 +188,7 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
     { label: "Make an e-commerce store", text: "Make an e-commerce store with cart function..." },
     { label: "Design a dental clinic landing page", text: "Design a landing page for my dental clinic..." },
     { label: "build a task management app", text: "build a task management app with status columns..." },
-    { label: "Create a visual designer portfolio", text: "Create a portfolio website for a visual designer..." },
+    { label: "Create a portfolio website", text: "Create a portfolio website for a visual designer..." },
     { label: "Build a SaaS billing dashboard", text: "Build a SaaS billing dashboard with chart views..." }
   ];
 
@@ -233,26 +245,52 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
               <span className="prompt-shortcut-text">
                 Press <kbd style={{ fontFamily: "inherit", background: "rgba(255,255,255,0.08)", padding: "0.15rem 0.4rem", borderRadius: "0.25rem", border: "1px solid rgba(255,255,255,0.2)", fontSize: "0.72rem", color: "#fff", fontWeight: 600 }}>⌘ Enter</kbd> to start
               </span>
-              <button 
-                type="button" 
-                onClick={() => handleSubmit()} 
-                className="prompt-go-btn"
-                style={{ 
-                  borderRadius: "50%", 
-                  width: "2.25rem", 
-                  height: "2.25rem", 
-                  display: "grid", 
-                  placeItems: "center", 
-                  padding: 0,
-                  background: "#fff",
-                  color: "#000",
-                  border: "none",
-                  cursor: "pointer"
-                }}
-                title="Generate Website"
-              >
-                <ArrowRight size={16} />
-              </button>
+              
+              {showThemes ? (
+                // Inside Dashboard: Circular Send Icon Button (Generate Website Button at bottom is primary)
+                <button 
+                  type="button" 
+                  onClick={() => handleSubmit()} 
+                  className="prompt-go-btn"
+                  style={{ 
+                    borderRadius: "50%", 
+                    width: "2.25rem", 
+                    height: "2.25rem", 
+                    display: "grid", 
+                    placeItems: "center", 
+                    padding: 0,
+                    background: "#fff",
+                    color: "#000",
+                    border: "none",
+                    cursor: "pointer"
+                  }}
+                  title="Generate Website"
+                >
+                  <ArrowRight size={16} />
+                </button>
+              ) : (
+                // On Public Home Page: Clear, high-contrast action text button inside prompt box
+                <button 
+                  type="button" 
+                  onClick={() => handleSubmit()} 
+                  className="prompt-go-btn"
+                  style={{ 
+                    borderRadius: "2rem", 
+                    padding: "0.5rem 1.25rem",
+                    background: "#fff",
+                    color: "#000",
+                    border: "none",
+                    fontWeight: 700,
+                    fontSize: "0.85rem",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.4rem"
+                  }}
+                >
+                  Generate <ArrowRight size={14} />
+                </button>
+              )}
             </div>
           </div>
 
@@ -284,120 +322,124 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
             </div>
           </div>
 
-          {/* THEMES GRID & NICHE SELECTOR */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#fff" }}>Choose Website Theme</span>
-              <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Selected: <strong style={{ color: "#818cf8" }}>{activeTheme.name}</strong></span>
-            </div>
+          {/* THEMES GRID & NICHE SELECTOR - RENDER ONLY IF showThemes IS TRUE */}
+          {showThemes && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#fff" }}>Choose Website Theme</span>
+                <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Selected: <strong style={{ color: "#818cf8" }}>{activeTheme.name}</strong></span>
+              </div>
 
-            {/* Category Selector Tabs */}
-            <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap", background: "rgba(255,255,255,0.02)", padding: "0.25rem", borderRadius: "0.5rem", border: "1px solid rgba(255,255,255,0.05)" }}>
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setSelectedCategory(cat)}
-                  style={{
-                    background: selectedCategory === cat ? "rgba(255, 255, 255, 0.08)" : "transparent",
-                    color: selectedCategory === cat ? "#fff" : "#94a3b8",
-                    border: "none",
-                    borderRadius: "0.35rem",
-                    padding: "0.4rem 0.8rem",
-                    fontSize: "0.78rem",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    transition: "all 0.15s"
-                  }}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
+              {/* Category Selector Tabs */}
+              <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap", background: "rgba(255,255,255,0.02)", padding: "0.25rem", borderRadius: "0.5rem", border: "1px solid rgba(255,255,255,0.05)" }}>
+                {categories.map(cat => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setSelectedCategory(cat)}
+                    style={{
+                      background: selectedCategory === cat ? "rgba(255, 255, 255, 0.08)" : "transparent",
+                      color: selectedCategory === cat ? "#fff" : "#94a3b8",
+                      border: "none",
+                      borderRadius: "0.35rem",
+                      padding: "0.4rem 0.8rem",
+                      fontSize: "0.78rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      transition: "all 0.15s"
+                    }}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
 
-            {/* Themes Grid */}
-            <div 
-              style={{ 
-                display: "grid", 
-                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", 
-                gap: "0.75rem", 
-                maxHeight: "340px", 
-                overflowY: "auto", 
-                paddingRight: "0.25rem",
-                marginTop: "0.25rem"
+              {/* Themes Grid */}
+              <div 
+                style={{ 
+                  display: "grid", 
+                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", 
+                  gap: "0.75rem", 
+                  maxHeight: "340px", 
+                  overflowY: "auto", 
+                  paddingRight: "0.25rem",
+                  marginTop: "0.25rem"
+                }}
+              >
+                {filteredThemes.map(t => (
+                  <div
+                    key={t.id}
+                    onClick={() => setSelectedThemeId(t.id)}
+                    style={{
+                      background: selectedThemeId === t.id ? "rgba(99, 102, 241, 0.1)" : "rgba(255, 255, 255, 0.02)",
+                      border: selectedThemeId === t.id ? "2px solid #818cf8" : "1px solid rgba(255, 255, 255, 0.06)",
+                      borderRadius: "0.5rem",
+                      padding: "0.5rem",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.5rem",
+                      textAlign: "left"
+                    }}
+                  >
+                    {/* Theme Thumbnail Image */}
+                    <div style={{ width: "100%", height: "110px", borderRadius: "0.35rem", overflow: "hidden", background: "#0a0f1d" }}>
+                      <img 
+                        src={t.image} 
+                        alt={t.name} 
+                        style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} 
+                      />
+                    </div>
+
+                    {/* Text details */}
+                    <div style={{ padding: "0 0.25rem 0.25rem 0.25rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: "0.82rem", fontWeight: 700, color: selectedThemeId === t.id ? "#818cf8" : "#fff" }}>{t.name}</span>
+                        <span style={{ fontSize: "0.6rem", background: "rgba(255,255,255,0.06)", color: "#94a3b8", padding: "0.1rem 0.3rem", borderRadius: "0.25rem", fontWeight: 600 }}>{t.category}</span>
+                      </div>
+                      <span style={{ fontSize: "0.7rem", color: "#94a3b8", lineHeight: 1.4 }}>{t.desc}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Direct Website Generation Action Button (Only inside Dashboard flow) */}
+          {showThemes && (
+            <button
+              type="button"
+              onClick={() => handleSubmit()}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.5rem",
+                background: "linear-gradient(135deg, var(--blue), var(--teal))",
+                color: "#fff",
+                border: "none",
+                borderRadius: "0.5rem",
+                padding: "1rem",
+                fontSize: "0.95rem",
+                fontWeight: 700,
+                cursor: "pointer",
+                boxShadow: "0 4px 15px rgba(32, 199, 181, 0.2)",
+                transition: "transform 0.2s, box-shadow 0.2s",
+                marginTop: "0.5rem"
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.boxShadow = "0 6px 20px rgba(32, 199, 181, 0.3)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "none";
+                e.currentTarget.style.boxShadow = "0 4px 15px rgba(32, 199, 181, 0.2)";
               }}
             >
-              {filteredThemes.map(t => (
-                <div
-                  key={t.id}
-                  onClick={() => setSelectedThemeId(t.id)}
-                  style={{
-                    background: selectedThemeId === t.id ? "rgba(99, 102, 241, 0.1)" : "rgba(255, 255, 255, 0.02)",
-                    border: selectedThemeId === t.id ? "2px solid #818cf8" : "1px solid rgba(255, 255, 255, 0.06)",
-                    borderRadius: "0.5rem",
-                    padding: "0.5rem",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.5rem",
-                    textAlign: "left"
-                  }}
-                >
-                  {/* Theme Thumbnail Image */}
-                  <div style={{ width: "100%", height: "110px", borderRadius: "0.35rem", overflow: "hidden", background: "#0a0f1d" }}>
-                    <img 
-                      src={t.image} 
-                      alt={t.name} 
-                      style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} 
-                    />
-                  </div>
-
-                  {/* Text details */}
-                  <div style={{ padding: "0 0.25rem 0.25rem 0.25rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: "0.82rem", fontWeight: 700, color: selectedThemeId === t.id ? "#818cf8" : "#fff" }}>{t.name}</span>
-                      <span style={{ fontSize: "0.6rem", background: "rgba(255,255,255,0.06)", color: "#94a3b8", padding: "0.1rem 0.3rem", borderRadius: "0.25rem", fontWeight: 600 }}>{t.category}</span>
-                    </div>
-                    <span style={{ fontSize: "0.7rem", color: "#94a3b8", lineHeight: 1.4 }}>{t.desc}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Direct Website Generation Action Button */}
-          <button
-            type="button"
-            onClick={() => handleSubmit()}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.5rem",
-              background: "linear-gradient(135deg, var(--blue), var(--teal))",
-              color: "#fff",
-              border: "none",
-              borderRadius: "0.5rem",
-              padding: "1rem",
-              fontSize: "0.95rem",
-              fontWeight: 700,
-              cursor: "pointer",
-              boxShadow: "0 4px 15px rgba(32, 199, 181, 0.2)",
-              transition: "transform 0.2s, box-shadow 0.2s",
-              marginTop: "0.5rem"
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-1px)";
-              e.currentTarget.style.boxShadow = "0 6px 20px rgba(32, 199, 181, 0.3)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "none";
-              e.currentTarget.style.boxShadow = "0 4px 15px rgba(32, 199, 181, 0.2)";
-            }}
-          >
-            <Sparkles size={16} /> Generate Website
-          </button>
+              <Sparkles size={16} /> Generate Website
+            </button>
+          )}
         </div>
       )}
 
