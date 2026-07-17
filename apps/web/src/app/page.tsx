@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@webbing/db";
 import GeneratorForm from "./GeneratorForm";
 import MarketingHeader from "./components/MarketingHeader";
+import SeeItInAction from "./components/SeeItInAction";
 import { CheckCircle2, Compass, Globe, Globe2, Layers3, Mail, ShieldCheck, Sparkles, Zap, ShoppingCart, MessageSquare, Code, DollarSign, Eye, Download, LayoutGrid, Terminal, Rocket, Palette, Building } from "lucide-react";
 import PricingSection from "./components/PricingSection";
 import { getSystemSettings } from "@/lib/settings";
@@ -206,6 +207,9 @@ export default async function LandingPage() {
             </article>
           </div>
         </section>
+
+        {/* See It In Action Section */}
+        <SeeItInAction />
 
         <PricingSection initialPlans={dbPlans} />
 
