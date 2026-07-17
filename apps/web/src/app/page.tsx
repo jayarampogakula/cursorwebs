@@ -94,18 +94,18 @@ export default async function LandingPage() {
               <div className="brands-container">
                 {/* 12 New Premium Startups */}
                 {[
-                  { name: "Apex Labs", char: "A", color: "#38bdf8" },
-                  { name: "Vercel", char: "V", color: "#ffffff" },
-                  { name: "Supabase", char: "S", color: "#3eaf7c" },
-                  { name: "Stripe", char: "S", color: "#635bff" },
-                  { name: "Linear", char: "L", color: "#5e6ad2" },
-                  { name: "Figma", char: "F", color: "#f24e1e" },
-                  { name: "Loom", char: "L", color: "#625df5" },
-                  { name: "Raycast", char: "R", color: "#ff6363" },
-                  { name: "Resend", char: "R", color: "#24b47e" },
-                  { name: "Clerk", char: "C", color: "#2563eb" },
-                  { name: "Sentry", char: "S", color: "#f43f5e" },
-                  { name: "Neon", char: "N", color: "#00e5ff" }
+                  { name: "FlowState", char: "F", color: "#38bdf8" },
+                  { name: "Kognitiv", char: "K", color: "#818cf8" },
+                  { name: "Draftsmith", char: "D", color: "#34d399" },
+                  { name: "Stackly", char: "S", color: "#f59e0b" },
+                  { name: "Forma", char: "F", color: "#e11d48" },
+                  { name: "Zenith Dev", char: "Z", color: "#c084fc" },
+                  { name: "CodeSpark", char: "C", color: "#2563eb" },
+                  { name: "DevLink", char: "D", color: "#22c55e" },
+                  { name: "OmniPress", char: "O", color: "#a855f7" },
+                  { name: "Syntax Labs", char: "S", color: "#06b6d4" },
+                  { name: "ByteCraft", char: "B", color: "#f43f5e" },
+                  { name: "VectorBase", char: "V", color: "#00e5ff" }
                 ].map((b, i) => (
                   <div className="brand-pill" key={`b1-${i}`}>
                     <span className="brand-dot" style={{ background: b.color }}>{b.char}</span>
@@ -114,18 +114,18 @@ export default async function LandingPage() {
                 ))}
                 {/* Duplicated list to create infinite seamless loop */}
                 {[
-                  { name: "Apex Labs", char: "A", color: "#38bdf8" },
-                  { name: "Vercel", char: "V", color: "#ffffff" },
-                  { name: "Supabase", char: "S", color: "#3eaf7c" },
-                  { name: "Stripe", char: "S", color: "#635bff" },
-                  { name: "Linear", char: "L", color: "#5e6ad2" },
-                  { name: "Figma", char: "F", color: "#f24e1e" },
-                  { name: "Loom", char: "L", color: "#625df5" },
-                  { name: "Raycast", char: "R", color: "#ff6363" },
-                  { name: "Resend", char: "R", color: "#24b47e" },
-                  { name: "Clerk", char: "C", color: "#2563eb" },
-                  { name: "Sentry", char: "S", color: "#f43f5e" },
-                  { name: "Neon", char: "N", color: "#00e5ff" }
+                  { name: "FlowState", char: "F", color: "#38bdf8" },
+                  { name: "Kognitiv", char: "K", color: "#818cf8" },
+                  { name: "Draftsmith", char: "D", color: "#34d399" },
+                  { name: "Stackly", char: "S", color: "#f59e0b" },
+                  { name: "Forma", char: "F", color: "#e11d48" },
+                  { name: "Zenith Dev", char: "Z", color: "#c084fc" },
+                  { name: "CodeSpark", char: "C", color: "#2563eb" },
+                  { name: "DevLink", char: "D", color: "#22c55e" },
+                  { name: "OmniPress", char: "O", color: "#a855f7" },
+                  { name: "Syntax Labs", char: "S", color: "#06b6d4" },
+                  { name: "ByteCraft", char: "B", color: "#f43f5e" },
+                  { name: "VectorBase", char: "V", color: "#00e5ff" }
                 ].map((b, i) => (
                   <div className="brand-pill" key={`b2-${i}`}>
                     <span className="brand-dot" style={{ background: b.color }}>{b.char}</span>
