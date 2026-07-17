@@ -80,7 +80,7 @@ export default function MarketingHeader({ active, user, appName: propAppName, ap
         <nav className="nav-links">
           <a href="/#features" onClick={() => setIsOpen(false)}>Features</a>
           <a href="/#pricing" onClick={() => setIsOpen(false)}>Pricing</a>
-          <a href="/#features" onClick={() => setIsOpen(false)}>Use Cases</a>
+          <a href="/#use-cases" onClick={() => setIsOpen(false)}>Use Cases</a>
         </nav>
         <div className="nav-actions" style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
           {/* Flag and Device Preview Icons */}

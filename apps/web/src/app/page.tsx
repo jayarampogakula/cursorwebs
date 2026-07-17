@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@webbing/db";
 import GeneratorForm from "./GeneratorForm";
 import MarketingHeader from "./components/MarketingHeader";
-import { CheckCircle2, Compass, Globe, Globe2, Layers3, Mail, ShieldCheck, Sparkles, Zap, ShoppingCart, MessageSquare, Code, DollarSign, Eye, Download, LayoutGrid } from "lucide-react";
+import { CheckCircle2, Compass, Globe, Globe2, Layers3, Mail, ShieldCheck, Sparkles, Zap, ShoppingCart, MessageSquare, Code, DollarSign, Eye, Download, LayoutGrid, Terminal, Rocket, Palette, Building } from "lucide-react";
 import PricingSection from "./components/PricingSection";
 import { getSystemSettings } from "@/lib/settings";
 import * as Icons from "lucide-react";
@@ -81,8 +81,8 @@ export default async function LandingPage() {
       <main id="home" style={{ position: "relative", zIndex: 10 }}>
         <section className="hero">
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
-            <h1>{settings.landingHeroTitle}</h1>
-            <p style={{ maxWidth: "600px", margin: "0 auto" }}>{settings.landingHeroSubtitle}</p>
+            <h1>What will you build today?</h1>
+            <p style={{ maxWidth: "600px", margin: "0 auto" }}>Describe your vision and watch it come to life.</p>
           </div>
           <GeneratorForm user={user} />
           
@@ -160,8 +160,8 @@ export default async function LandingPage() {
               </article>
               <article className="bento-card small">
                 <span className="icon-box"><MessageSquare size={20} /></span>
-                <h3>Iterative Refinement</h3>
-                <p>Keep chatting to refine and improve your creation until it's perfect.</p>
+                <h3>Custom Subdomains</h3>
+                <p>Publish your project to a custom subdomain and share it with the world.</p>
               </article>
               <article className="bento-card small">
                 <span className="icon-box"><Globe size={20} /></span>
@@ -169,6 +169,41 @@ export default async function LandingPage() {
                 <p>Publish your project to a custom subdomain and share it with the world.</p>
               </article>
             </div>
+          </div>
+        </section>
+
+        {/* Use Cases Section */}
+        <section id="use-cases" className="section-band" style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+          <div className="section-copy" style={{ textAlign: "center", margin: "0 auto 1.5rem auto" }}>
+            <span className="eyebrow" style={{ margin: "0 auto" }}>Use Cases</span>
+            <h2>Built for everyone</h2>
+            <p>Whether you're a developer, designer, or entrepreneur, our platform helps you build faster and smarter.</p>
+          </div>
+
+          <div className="use-cases-grid">
+            <article className="bento-card" style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <span className="icon-box" style={{ borderRadius: "50%", background: "rgba(255, 255, 255, 0.04)", border: "1px solid var(--line)" }}><Terminal size={20} /></span>
+              <h3>Developers</h3>
+              <p>Accelerate your workflow with AI-assisted development. Focus on logic while AI handles boilerplate.</p>
+            </article>
+
+            <article className="bento-card" style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <span className="icon-box" style={{ borderRadius: "50%", background: "rgba(255, 255, 255, 0.04)", border: "1px solid var(--line)" }}><Rocket size={20} /></span>
+              <h3>Entrepreneurs</h3>
+              <p>Launch your MVP faster. Go from idea to working prototype in minutes, not weeks.</p>
+            </article>
+
+            <article className="bento-card" style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <span className="icon-box" style={{ borderRadius: "50%", background: "rgba(255, 255, 255, 0.04)", border: "1px solid var(--line)" }}><Palette size={20} /></span>
+              <h3>Designers</h3>
+              <p>Bring your designs to life without writing code. Describe your vision and see it built.</p>
+            </article>
+
+            <article className="bento-card" style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <span className="icon-box" style={{ borderRadius: "50%", background: "rgba(255, 255, 255, 0.04)", border: "1px solid var(--line)" }}><Building size={20} /></span>
+              <h3>Agencies</h3>
+              <p>Deliver more projects in less time. Scale your output without scaling your team.</p>
+            </article>
           </div>
         </section>
 

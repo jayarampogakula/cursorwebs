@@ -122,10 +122,10 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
   };
 
   const suggestions = [
+    { label: "build a task management app", text: "build a task management app with list creation, drag-and-drop tasks, and progress status tracking." },
     { label: "Create a portfolio website", text: "Create a portfolio website for a visual designer showcasing branding, mobile app designs, and case studies." },
-    { label: "Design a landing page", text: "Design a landing page for a modern B2B SaaS analytics platform showing charts, pricing, and sign up form." },
-    { label: "Make an e-commerce store", text: "Make an e-commerce store for an organic coffee brand with product catalog, cart, and brewing guides." },
-    { label: "Build a corporate website", text: "Build a corporate website for a renewable green energy consultant team showcasing solar projects." }
+    { label: "Design a landing page", text: "Design a landing page for a modern B2B SaaS analytics platform showing charts and pricing plans." },
+    { label: "Make an e-commerce store", text: "Make an e-commerce store for an organic coffee brand with product catalog and shopping cart." }
   ];
 
   return (
@@ -176,12 +176,12 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
                   handleNext();
                 }
               }}
-              placeholder="Design a landing page for my "
+              placeholder="Make an e-commerce store with cart func"
               rows={3}
             />
             <div className="prompt-bottom-bar">
               <span className="prompt-shortcut-text">
-                Press <kbd style={{ fontFamily: "inherit", background: "rgba(255,255,255,0.08)", padding: "0.15rem 0.4rem", borderRadius: "0.25rem", border: "1px solid rgba(255,255,255,0.15)", fontSize: "0.72rem", color: "#fff", fontWeight: 600 }}>Enter</kbd> to start
+                Press <kbd style={{ fontFamily: "inherit", background: "rgba(255,255,255,0.08)", padding: "0.15rem 0.4rem", borderRadius: "0.25rem", border: "1px solid rgba(255,255,255,0.15)", fontSize: "0.72rem", color: "#fff", fontWeight: 600 }}>⌘ Enter</kbd> to start
               </span>
               <button type="button" onClick={handleNext} className="prompt-go-btn">
                 Go <ArrowRight size={16} />
