@@ -170,25 +170,27 @@ export default function App() {
       </div>
 
       {/* Tabs Switcher */}
-      <div className="demo-tabs-container">
-        <button 
-          className={`demo-tab-btn ${activeTab === "preview" ? "active" : ""}`}
-          onClick={() => { setActiveTab("preview"); setSelectedElement(null); }}
-        >
-          Preview
-        </button>
-        <button 
-          className={`demo-tab-btn ${activeTab === "inspect" ? "active" : ""}`}
-          onClick={() => { setActiveTab("inspect"); }}
-        >
-          Inspect
-        </button>
-        <button 
-          className={`demo-tab-btn ${activeTab === "code" ? "active" : ""}`}
-          onClick={() => { setActiveTab("code"); setSelectedElement(null); }}
-        >
-          Code
-        </button>
+      <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+        <div className="demo-tabs-container">
+          <button 
+            className={`demo-tab-btn ${activeTab === "preview" ? "active" : ""}`}
+            onClick={() => { setActiveTab("preview"); setSelectedElement(null); }}
+          >
+            Preview
+          </button>
+          <button 
+            className={`demo-tab-btn ${activeTab === "inspect" ? "active" : ""}`}
+            onClick={() => { setActiveTab("inspect"); }}
+          >
+            Inspect
+          </button>
+          <button 
+            className={`demo-tab-btn ${activeTab === "code" ? "active" : ""}`}
+            onClick={() => { setActiveTab("code"); setSelectedElement(null); }}
+          >
+            Code
+          </button>
+        </div>
       </div>
 
       {/* Mock Browser Container */}

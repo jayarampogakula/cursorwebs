@@ -2,38 +2,31 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Globe, Sparkles, ArrowRight, ArrowLeft, Check, ShoppingBag, ShieldCheck } from "lucide-react";
+import { 
+  Sparkles, ArrowRight, Check, CornerDownLeft, 
+  Terminal, Rocket, Palette, Building, LayoutGrid, MessageSquare, Globe
+} from "lucide-react";
 
 interface GeneratorFormProps {
-  user: { userId: string; email: string; role: string; tenantId: string } | null;
+  user: any;
   tenantId?: string;
   onSuccess?: (projectId: string) => void;
 }
-
-const stylesList = [
-  { id: "Modern Startup", label: "Modern Startup", desc: "Sleek dark design with glowing highlights" },
-  { id: "Gaming", label: "Gaming", desc: "Cyberpunk neon accents, bold tech aesthetics" },
-  { id: "Creator", label: "Creator", desc: "Warm gradients, rounded friendly components" },
-  { id: "SaaS", label: "SaaS", desc: "Clean bento grids, code widgets, blue accents" },
-  { id: "Luxury", label: "Luxury", desc: "Refined gold, serif headlines, elegant layout" },
-  { id: "Fitness", label: "Fitness", desc: "High-contrast neon sports and fitness theme" },
-  { id: "Education", label: "Education", desc: "Structured slate, blue details, trusted layouts" },
-  { id: "Ecommerce", label: "Ecommerce", desc: "Clean card-based visual shopping interface" },
-  { id: "Corporate", label: "Corporate", desc: "Dark professional slate, clean geometric structure" },
-  { id: "Portfolio", label: "Portfolio", desc: "Glassmorphic details, custom bento portfolio blocks" }
-];
 
 export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFormProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
 
   // Form Fields
-  const [name, setName] = useState("");
-  const [businessName, setBusinessName] = useState("");
   const [prompt, setPrompt] = useState(""); // Description
-  const [keywords, setKeywords] = useState("");
-  const [style, setStyle] = useState("Modern Startup");
-  const [ecommerce, setEcommerce] = useState(false);
+  const [selectedThemeId, setSelectedThemeId] = useState("Aether Homes");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState<{ projectId: string; subdomain: string } | null>(null);
+  const [siteUrl, setSiteUrl] = useState("");
+  const [siteDisplay, setSiteDisplay] = useState("");
 
   // Dynamic typing placeholder prompts
   const placeholderPrompts = [
@@ -82,12 +75,6 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
     return () => clearTimeout(timer);
   }, [isDeleting, currentPlaceholderIndex]);
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState<{ projectId: string; subdomain: string } | null>(null);
-  const [siteUrl, setSiteUrl] = useState("");
-  const [siteDisplay, setSiteDisplay] = useState("");
-
   React.useEffect(() => {
     if (success && typeof window !== "undefined") {
       const host = window.location.host;
@@ -98,30 +85,41 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
     }
   }, [success]);
 
-  const validateStep1 = () => {
+  const categories = ["All", "Real Estate", "Gaming", "E-commerce", "Digital Marketing", "Clinics"];
+
+  const themes = [
+    { id: "Aether Homes", name: "Aether Homes", category: "Real Estate", desc: "Sleek, minimalist architecture portfolios and listings.", preset: "Modern Startup" },
+    { id: "Vanguard Realty", name: "Vanguard Realty", category: "Real Estate", desc: "High-contrast dark designs for premium agencies.", preset: "SaaS" },
+    { id: "CyberPulse", name: "CyberPulse", category: "Gaming", desc: "Cyberpunk neon accents, bold tech aesthetics for streams & teams.", preset: "Gaming" },
+    { id: "Rift Esports", name: "Rift Esports", category: "Gaming", desc: "Dark, high-energy gaming landing pages and rosters.", preset: "Gaming" },
+    { id: "Velvet Cart", name: "Velvet Cart", category: "E-commerce", desc: "Elegant minimal shop layouts for apparel & lifestyle brands.", preset: "Ecommerce" },
+    { id: "Nova Tech", name: "Nova Tech", category: "E-commerce", desc: "Clean grid layout for consumer electronics & gadgets.", preset: "Ecommerce" },
+    { id: "Apex Agency", name: "Apex Agency", category: "Digital Marketing", desc: "Modern startup B2B SaaS analytics and service presentation.", preset: "Modern Startup" },
+    { id: "GrowthFlow", name: "GrowthFlow", category: "Digital Marketing", desc: "Vibrant gradient-focused page for consultancies.", preset: "Creator" },
+    { id: "MediCare Plus", name: "MediCare Plus", category: "Clinics", desc: "Clean, reassuring design with simple scheduling components.", preset: "Modern Startup" },
+    { id: "Aura Dental", name: "Aura Dental", category: "Clinics", desc: "Warm, professional layout for dental & wellness practices.", preset: "Creator" }
+  ];
+
+  const activeTheme = themes.find(t => t.id === selectedThemeId) || themes[0];
+  const filteredThemes = selectedCategory === "All" 
+    ? themes 
+    : themes.filter(t => t.category === selectedCategory);
+
+  const validateInput = () => {
     if (prompt.trim().length < 5) return "Please write a brief description (at least 5 characters).";
     return "";
   };
 
-  const handleNext = () => {
-    const err = validateStep1();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setError("");
+    setSuccess(null);
+
+    const err = validateInput();
     if (err) {
       setError(err);
       return;
     }
-    setError("");
-    setStep(2);
-  };
-
-  const handleBack = () => {
-    setError("");
-    setStep(1);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setSuccess(null);
 
     if (!user) {
       setError("Sign in to generate and publish your website.");
@@ -129,22 +127,28 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
       return;
     }
 
+    // Determine if ecommerce shop components are required based on theme category or prompt contents
+    const isEcommerce = activeTheme.category === "E-commerce" || 
+      prompt.toLowerCase().includes("ecommerce") || 
+      prompt.toLowerCase().includes("shop") || 
+      prompt.toLowerCase().includes("cart");
+
     try {
       setLoading(true);
-      setStep(3); // Go to loading step
+      setStep(2); // Go directly to loading progress step
 
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: name.trim(),
-          businessName: businessName.trim(),
+          name: activeTheme.name,
+          businessName: activeTheme.name,
           prompt: prompt.trim(),
-          keywords: keywords.trim(),
-          niche: "",
+          keywords: activeTheme.category,
+          niche: activeTheme.category,
           targetAudience: "",
-          style,
-          ecommerce,
+          style: activeTheme.preset,
+          ecommerce: isEcommerce,
           tenantId,
         }),
       });
@@ -159,10 +163,10 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
     } catch (err: any) {
       let msg = err.message || "An unexpected error occurred.";
       if (msg.includes("Unexpected token") || msg.includes("is not valid JSON") || err instanceof SyntaxError) {
-        msg = "The server returned an invalid HTML response. This typically indicates a database connection failure, missing migrations, or that the Redis queue server is offline on your VPS. Please verify that Redis is running and database migrations are fully applied.";
+        msg = "The server returned an invalid HTML response. Please verify that database migrations are fully applied and Redis queue is active.";
       }
       setError(msg);
-      setStep(2); // return to configuration
+      setStep(1); // return to prompt grid
     } finally {
       setLoading(false);
     }
@@ -194,15 +198,13 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
       {step > 1 && (
         <div style={{ marginBottom: "2rem" }}>
           <span className="eyebrow" style={{ color: "#a78bfa", display: "inline-flex", gap: "0.4rem", alignItems: "center" }}>
-            <Sparkles size={14} /> Step {step} of 3
+            <Sparkles size={14} /> Step {step} of 2
           </span>
           <h2 style={{ fontSize: "1.75rem", color: "#fff", fontWeight: 800, margin: "0.25rem 0" }}>
-            {step === 2 && "Visual Branding"}
-            {step === 3 && "Building Project"}
+            Building Project
           </h2>
           <p style={{ color: "#9ca3af", fontSize: "0.85rem", margin: 0 }}>
-            {step === 2 && "Choose an interactive design direction and additional capabilities."}
-            {step === 3 && "Your AI website builder workspace is generating pages and writing styles."}
+            Your AI website builder workspace is generating pages and writing styles.
           </p>
         </div>
       )}
@@ -211,7 +213,7 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
 
       {/* STEP 1: PARAMETERS */}
       {step === 1 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", width: "100%" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", width: "100%" }}>
           <div className="prompt-box-container">
             <textarea
               className="prompt-textarea"
@@ -220,7 +222,7 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
               onKeyDown={(e) => {
                 if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                   e.preventDefault();
-                  handleNext();
+                  handleSubmit();
                 }
               }}
               placeholder={displayedPlaceholder || "Make an e-commerce store with cart func"}
@@ -228,9 +230,9 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
             />
             <div className="prompt-bottom-bar">
               <span className="prompt-shortcut-text">
-                Press <kbd style={{ fontFamily: "inherit", background: "rgba(255,255,255,0.08)", padding: "0.15rem 0.4rem", borderRadius: "0.25rem", border: "1px solid rgba(255,255,255,0.15)", fontSize: "0.72rem", color: "#fff", fontWeight: 600 }}>⌘ Enter</kbd> to start
+                Press <kbd style={{ fontFamily: "inherit", background: "rgba(255,255,255,0.08)", padding: "0.15rem 0.4rem", borderRadius: "0.25rem", border: "1px solid rgba(255,255,255,0.2)", fontSize: "0.72rem", color: "#fff", fontWeight: 600 }}>⌘ Enter</kbd> to start
               </span>
-              <button type="button" onClick={handleNext} className="prompt-go-btn">
+              <button type="button" onClick={() => handleSubmit()} className="prompt-go-btn">
                 Go <ArrowRight size={16} />
               </button>
             </div>
@@ -249,112 +251,114 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
               </button>
             ))}
           </div>
+
+          {/* THEMES GRID & NICHE SELECTOR */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginTop: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#fff" }}>Choose Website Theme</span>
+              <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Selected: <strong style={{ color: "#818cf8" }}>{activeTheme.name}</strong></span>
+            </div>
+
+            {/* Category Selector Tabs */}
+            <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap", background: "rgba(255,255,255,0.02)", padding: "0.25rem", borderRadius: "0.5rem", border: "1px solid rgba(255,255,255,0.05)" }}>
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  style={{
+                    background: selectedCategory === cat ? "rgba(255, 255, 255, 0.08)" : "transparent",
+                    color: selectedCategory === cat ? "#fff" : "#94a3b8",
+                    border: "none",
+                    borderRadius: "0.35rem",
+                    padding: "0.4rem 0.8rem",
+                    fontSize: "0.78rem",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 0.15s"
+                  }}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Themes Grid */}
+            <div 
+              style={{ 
+                display: "grid", 
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", 
+                gap: "0.75rem", 
+                maxHeight: "260px", 
+                overflowY: "auto", 
+                paddingRight: "0.25rem",
+                marginTop: "0.25rem"
+              }}
+            >
+              {filteredThemes.map(t => (
+                <div
+                  key={t.id}
+                  onClick={() => setSelectedThemeId(t.id)}
+                  style={{
+                    background: selectedThemeId === t.id ? "rgba(99, 102, 241, 0.1)" : "rgba(255, 255, 255, 0.02)",
+                    border: selectedThemeId === t.id ? "2px solid #818cf8" : "1px solid rgba(255, 255, 255, 0.06)",
+                    borderRadius: "0.5rem",
+                    padding: "0.8rem 1rem",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.25rem",
+                    textAlign: "left"
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: "0.82rem", fontWeight: 700, color: selectedThemeId === t.id ? "#818cf8" : "#fff" }}>{t.name}</span>
+                    <span style={{ fontSize: "0.6rem", background: "rgba(255,255,255,0.06)", color: "#94a3b8", padding: "0.1rem 0.3rem", borderRadius: "0.25rem", fontWeight: 600 }}>{t.category}</span>
+                  </div>
+                  <span style={{ fontSize: "0.7rem", color: "#94a3b8", lineHeight: 1.4 }}>{t.desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Direct Website Generation Action Button */}
+          <button
+            type="button"
+            onClick={() => handleSubmit()}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.5rem",
+              background: "linear-gradient(135deg, var(--blue), var(--teal))",
+              color: "#fff",
+              border: "none",
+              borderRadius: "0.5rem",
+              padding: "1rem",
+              fontSize: "0.95rem",
+              fontWeight: 700,
+              cursor: "pointer",
+              boxShadow: "0 4px 15px rgba(32, 199, 181, 0.2)",
+              transition: "transform 0.2s, box-shadow 0.2s",
+              marginTop: "0.5rem"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.boxShadow = "0 6px 20px rgba(32, 199, 181, 0.3)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "none";
+              e.currentTarget.style.boxShadow = "0 4px 15px rgba(32, 199, 181, 0.2)";
+            }}
+          >
+            <Sparkles size={16} /> Generate Website
+          </button>
         </div>
       )}
 
-      {/* STEP 2: DESIGN STYLE SELECTION */}
+      {/* STEP 2: GENERATING LAYOUT LOADING AND REDIRECTS */}
       {step === 2 && (
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem", marginBottom: "0.5rem" }}>
-            {/* Left Column: Style Selection */}
-            <div className="field-group" style={{ display: "flex", flexDirection: "column" }}>
-              <label>Select Design Direction</label>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", maxHeight: "290px", overflowY: "auto", paddingRight: "0.5rem" }}>
-                {stylesList.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => {
-                      setStyle(item.id);
-                      if (item.id === "Ecommerce") {
-                        setEcommerce(true);
-                      }
-                    }}
-                    style={{
-                      background: style === item.id ? "rgba(99, 102, 241, 0.12)" : "rgba(255, 255, 255, 0.02)",
-                      border: style === item.id ? "1.5px solid #818cf8" : "1px solid rgba(255, 255, 255, 0.06)",
-                      borderRadius: "0.5rem",
-                      padding: "0.75rem 1rem",
-                      cursor: "pointer",
-                      transition: "all 0.2s"
-                    }}
-                  >
-                    <strong style={{ color: style === item.id ? "#818cf8" : "#fff", display: "block", fontSize: "0.85rem" }}>{item.label}</strong>
-                    <span style={{ color: "#9ca3af", fontSize: "0.72rem" }}>{item.desc}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right Column: Theme Preview */}
-            <div className="field-group" style={{ display: "flex", flexDirection: "column", justifyContent: "flex-start" }}>
-              <label>Theme Preview</label>
-              <div 
-                style={{ 
-                  borderRadius: "0.5rem", 
-                  overflow: "hidden", 
-                  border: "1px solid rgba(255,255,255,0.08)", 
-                  background: "rgba(0,0,0,0.2)",
-                  height: "290px",
-                  display: "flex",
-                  flexDirection: "column",
-                  position: "relative"
-                }}
-              >
-                {/* Visual Thumbnail */}
-                <div style={{ flexGrow: 1, position: "relative", overflow: "hidden", background: "#0a0f1d" }}>
-                  <img 
-                    src={`/images/themes/${style === "Modern Startup" ? "startup" : style.toLowerCase().replace(" ", "")}.png`} 
-                    alt={`${style} Theme Preview`} 
-                    style={{ 
-                      width: "100%", 
-                      height: "100%", 
-                      objectFit: "cover",
-                      objectPosition: "top"
-                    }}
-                  />
-                  <div 
-                    style={{ 
-                      position: "absolute", 
-                      bottom: 0, 
-                      left: 0, 
-                      right: 0, 
-                      padding: "1rem", 
-                      background: "linear-gradient(to top, rgba(7, 11, 19, 0.95) 30%, rgba(7, 11, 19, 0))",
-                      display: "flex",
-                      flexDirection: "column"
-                    }}
-                  >
-                    <span style={{ fontSize: "0.7rem", color: "#818cf8", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>Interactive Theme</span>
-                    <strong style={{ fontSize: "1.1rem", color: "#fff", marginTop: "0.1rem" }}>{style} Preset</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="field-group">
-            <label className="secondary-action" style={{ justifyContent: "flex-start", width: "100%", padding: "0.8rem", border: ecommerce ? "1px solid rgba(99,102,241,0.4)" : "1px solid rgba(255,255,255,0.06)", background: ecommerce ? "rgba(99,102,241,0.05)" : "transparent", borderRadius: "0.5rem", cursor: "pointer", transition: "all 0.2s" }}>
-              <input type="checkbox" checked={ecommerce} onChange={(e) => setEcommerce(e.target.checked)} style={{ marginRight: "0.5rem" }} />
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <span style={{ fontSize: "0.85rem", fontWeight: 600, color: ecommerce ? "#818cf8" : "#fff" }}>Include e-commerce ready shop components</span>
-                <span style={{ fontSize: "0.75rem", color: ecommerce ? "#a5b4fc" : "#9ca3af", marginTop: "0.1rem" }}>Requires 25 credits. Creates products catalog, cart, checkout, customer accounts, and order settings.</span>
-              </div>
-            </label>
-          </div>
-
-          <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-            <button type="button" onClick={handleBack} className="secondary-action" style={{ flex: 1, justifyContent: "center" }}>
-              <ArrowLeft size={16} /> Back
-            </button>
-            <button type="submit" className="primary-action" style={{ flex: 1, justifyContent: "center" }}>
-              <Sparkles size={16} /> Generate Website
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* STEP 3: GENERATING LAYOUT LOADING AND REDIRECTS */}
-      {step === 3 && (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "3rem 1rem", gap: "1.5rem" }}>
           {loading ? (
             <>
@@ -390,7 +394,7 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
             <>
               <strong style={{ color: "#f87171" }}>Workspace Build Aborted</strong>
               <p style={{ color: "#9ca3af", fontSize: "0.85rem", textAlign: "center" }}>{error || "An error occurred during compilation."}</p>
-              <button onClick={() => setStep(2)} className="secondary-action">Go Back</button>
+              <button onClick={() => setStep(1)} className="secondary-action">Go Back</button>
             </>
           )}
         </div>
