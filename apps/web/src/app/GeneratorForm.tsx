@@ -88,16 +88,16 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
   const categories = ["All", "Real Estate", "Gaming", "E-commerce", "Digital Marketing", "Clinics"];
 
   const themes = [
-    { id: "Aether Homes", name: "Aether Homes", category: "Real Estate", desc: "Sleek, minimalist architecture portfolios and listings.", preset: "Modern Startup" },
-    { id: "Vanguard Realty", name: "Vanguard Realty", category: "Real Estate", desc: "High-contrast dark designs for premium agencies.", preset: "SaaS" },
-    { id: "CyberPulse", name: "CyberPulse", category: "Gaming", desc: "Cyberpunk neon accents, bold tech aesthetics for streams & teams.", preset: "Gaming" },
-    { id: "Rift Esports", name: "Rift Esports", category: "Gaming", desc: "Dark, high-energy gaming landing pages and rosters.", preset: "Gaming" },
-    { id: "Velvet Cart", name: "Velvet Cart", category: "E-commerce", desc: "Elegant minimal shop layouts for apparel & lifestyle brands.", preset: "Ecommerce" },
-    { id: "Nova Tech", name: "Nova Tech", category: "E-commerce", desc: "Clean grid layout for consumer electronics & gadgets.", preset: "Ecommerce" },
-    { id: "Apex Agency", name: "Apex Agency", category: "Digital Marketing", desc: "Modern startup B2B SaaS analytics and service presentation.", preset: "Modern Startup" },
-    { id: "GrowthFlow", name: "GrowthFlow", category: "Digital Marketing", desc: "Vibrant gradient-focused page for consultancies.", preset: "Creator" },
-    { id: "MediCare Plus", name: "MediCare Plus", category: "Clinics", desc: "Clean, reassuring design with simple scheduling components.", preset: "Modern Startup" },
-    { id: "Aura Dental", name: "Aura Dental", category: "Clinics", desc: "Warm, professional layout for dental & wellness practices.", preset: "Creator" }
+    { id: "Aether Homes", name: "Aether Homes", category: "Real Estate", desc: "Sleek architecture portfolios and listings.", preset: "Modern Startup", image: "/images/themes/luxury.png" },
+    { id: "Vanguard Realty", name: "Vanguard Realty", category: "Real Estate", desc: "High-contrast dark designs for premium agencies.", preset: "SaaS", image: "/images/themes/saas.png" },
+    { id: "CyberPulse", name: "CyberPulse", category: "Gaming", desc: "Cyberpunk neon accents, bold tech aesthetics.", preset: "Gaming", image: "/images/themes/gaming.png" },
+    { id: "Rift Esports", name: "Rift Esports", category: "Gaming", desc: "Dark, high-energy gaming pages and rosters.", preset: "Gaming", image: "/images/themes/gaming.png" },
+    { id: "Velvet Cart", name: "Velvet Cart", category: "E-commerce", desc: "Elegant minimal shop layouts for apparel brands.", preset: "Ecommerce", image: "/images/themes/ecommerce.png" },
+    { id: "Nova Tech", name: "Nova Tech", category: "E-commerce", desc: "Clean grid layout for consumer electronics.", preset: "Ecommerce", image: "/images/themes/ecommerce.png" },
+    { id: "Apex Agency", name: "Apex Agency", category: "Digital Marketing", desc: "Modern startup B2B SaaS analytics and service presentations.", preset: "Modern Startup", image: "/images/themes/corporate.png" },
+    { id: "GrowthFlow", name: "GrowthFlow", category: "Digital Marketing", desc: "Vibrant gradient-focused page for consultancies.", preset: "Creator", image: "/images/themes/creator.png" },
+    { id: "MediCare Plus", name: "MediCare Plus", category: "Clinics", desc: "Clean design with simple scheduling components.", preset: "Modern Startup", image: "/images/themes/corporate.png" },
+    { id: "Aura Dental", name: "Aura Dental", category: "Clinics", desc: "Warm layout for dental & wellness practices.", preset: "Creator", image: "/images/themes/creator.png" }
   ];
 
   const activeTheme = themes.find(t => t.id === selectedThemeId) || themes[0];
@@ -215,7 +215,7 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
       {/* STEP 1: PARAMETERS */}
       {step === 1 && (
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", width: "100%" }}>
-          <div className="prompt-box-container">
+          <div className="prompt-box-container" style={{ maxWidth: "800px" }}>
             <textarea
               className="prompt-textarea"
               value={prompt}
@@ -233,8 +233,25 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
               <span className="prompt-shortcut-text">
                 Press <kbd style={{ fontFamily: "inherit", background: "rgba(255,255,255,0.08)", padding: "0.15rem 0.4rem", borderRadius: "0.25rem", border: "1px solid rgba(255,255,255,0.2)", fontSize: "0.72rem", color: "#fff", fontWeight: 600 }}>⌘ Enter</kbd> to start
               </span>
-              <button type="button" onClick={() => handleSubmit()} className="prompt-go-btn">
-                Go <ArrowRight size={16} />
+              <button 
+                type="button" 
+                onClick={() => handleSubmit()} 
+                className="prompt-go-btn"
+                style={{ 
+                  borderRadius: "50%", 
+                  width: "2.25rem", 
+                  height: "2.25rem", 
+                  display: "grid", 
+                  placeItems: "center", 
+                  padding: 0,
+                  background: "#fff",
+                  color: "#000",
+                  border: "none",
+                  cursor: "pointer"
+                }}
+                title="Generate Website"
+              >
+                <ArrowRight size={16} />
               </button>
             </div>
           </div>
@@ -304,7 +321,7 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
                 display: "grid", 
                 gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", 
                 gap: "0.75rem", 
-                maxHeight: "260px", 
+                maxHeight: "340px", 
                 overflowY: "auto", 
                 paddingRight: "0.25rem",
                 marginTop: "0.25rem"
@@ -318,20 +335,32 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
                     background: selectedThemeId === t.id ? "rgba(99, 102, 241, 0.1)" : "rgba(255, 255, 255, 0.02)",
                     border: selectedThemeId === t.id ? "2px solid #818cf8" : "1px solid rgba(255, 255, 255, 0.06)",
                     borderRadius: "0.5rem",
-                    padding: "0.8rem 1rem",
+                    padding: "0.5rem",
                     cursor: "pointer",
                     transition: "all 0.15s",
                     display: "flex",
                     flexDirection: "column",
-                    gap: "0.25rem",
+                    gap: "0.5rem",
                     textAlign: "left"
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: "0.82rem", fontWeight: 700, color: selectedThemeId === t.id ? "#818cf8" : "#fff" }}>{t.name}</span>
-                    <span style={{ fontSize: "0.6rem", background: "rgba(255,255,255,0.06)", color: "#94a3b8", padding: "0.1rem 0.3rem", borderRadius: "0.25rem", fontWeight: 600 }}>{t.category}</span>
+                  {/* Theme Thumbnail Image */}
+                  <div style={{ width: "100%", height: "110px", borderRadius: "0.35rem", overflow: "hidden", background: "#0a0f1d" }}>
+                    <img 
+                      src={t.image} 
+                      alt={t.name} 
+                      style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} 
+                    />
                   </div>
-                  <span style={{ fontSize: "0.7rem", color: "#94a3b8", lineHeight: 1.4 }}>{t.desc}</span>
+
+                  {/* Text details */}
+                  <div style={{ padding: "0 0.25rem 0.25rem 0.25rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: "0.82rem", fontWeight: 700, color: selectedThemeId === t.id ? "#818cf8" : "#fff" }}>{t.name}</span>
+                      <span style={{ fontSize: "0.6rem", background: "rgba(255,255,255,0.06)", color: "#94a3b8", padding: "0.1rem 0.3rem", borderRadius: "0.25rem", fontWeight: 600 }}>{t.category}</span>
+                    </div>
+                    <span style={{ fontSize: "0.7rem", color: "#94a3b8", lineHeight: 1.4 }}>{t.desc}</span>
+                  </div>
                 </div>
               ))}
             </div>
