@@ -55,9 +55,9 @@ option {
   position: relative;
   background-color: var(--bg);
   background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-  background-size: 45px 45px;
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 60px 60px;
   background-position: center top;
 }
 .app-shell::before {
@@ -206,7 +206,7 @@ option {
 .hero h1 {
   max-width: 820px;
   margin: 1rem auto 0 auto;
-  font-size: clamp(2.65rem, 7vw, 5.8rem);
+  font-size: clamp(2.2rem, 5.2vw, 3.8rem);
   text-align: center;
 }
 
