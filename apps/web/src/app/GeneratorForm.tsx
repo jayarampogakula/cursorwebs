@@ -173,10 +173,11 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
   };
 
   const suggestions = [
-    { label: "build a task management app", text: "build a task management app with list creation, drag-and-drop tasks, and progress status tracking." },
-    { label: "Create a portfolio website", text: "Create a portfolio website for a visual designer showcasing branding, mobile app designs, and case studies." },
-    { label: "Design a landing page", text: "Design a landing page for a modern B2B SaaS analytics platform showing charts and pricing plans." },
-    { label: "Make an e-commerce store", text: "Make an e-commerce store for an organic coffee brand with product catalog and shopping cart." }
+    { label: "Make an e-commerce store", text: "Make an e-commerce store with cart function..." },
+    { label: "Design a dental clinic landing page", text: "Design a landing page for my dental clinic..." },
+    { label: "build a task management app", text: "build a task management app with status columns..." },
+    { label: "Create a visual designer portfolio", text: "Create a portfolio website for a visual designer..." },
+    { label: "Build a SaaS billing dashboard", text: "Build a SaaS billing dashboard with chart views..." }
   ];
 
   return (
@@ -238,18 +239,32 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
             </div>
           </div>
 
-          {/* Suggestion Pills */}
-          <div className="suggestion-pills">
-            {suggestions.map((item, idx) => (
-              <button
-                key={idx}
-                type="button"
-                className="pill-btn"
-                onClick={() => setPrompt(item.text)}
-              >
-                {item.label}
-              </button>
-            ))}
+          {/* Suggestion Pills Infinite Marquee */}
+          <div className="suggestion-pills-container">
+            <div className="suggestion-pills-track">
+              {/* First Set */}
+              {suggestions.map((item, idx) => (
+                <button
+                  key={`set1-${idx}`}
+                  type="button"
+                  className="pill-btn bright"
+                  onClick={() => setPrompt(item.text)}
+                >
+                  {item.label}
+                </button>
+              ))}
+              {/* Duplicate Set for Loop */}
+              {suggestions.map((item, idx) => (
+                <button
+                  key={`set2-${idx}`}
+                  type="button"
+                  className="pill-btn bright"
+                  onClick={() => setPrompt(item.text)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* THEMES GRID & NICHE SELECTOR */}
