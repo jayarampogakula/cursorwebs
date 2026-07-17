@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Settings, Check, Server, RefreshCw, Sparkles, Globe, Edit2, Play, Download, Layout, ArrowLeft, Plus, MessageSquare, Layers, Sliders, Image, LogOut, CheckCircle, AlertTriangle, ExternalLink, Shield, ArrowRight, Trash2, ChevronLeft, ChevronRight, PlusCircle, Home, Menu, Mail, Users, DollarSign, Percent, Lock, Eye, Code, Hammer, Sun, CornerDownLeft } from "lucide-react";
 import GeneratorForm from "../GeneratorForm";
-import LlmKeyManager, { LlmKeyView } from "../components/LlmKeyManager";
+
 
 interface Section {
   id: string;
@@ -406,7 +406,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
   const [customAssets, setCustomAssets] = useState<any[]>([]);
   const [uploadingAsset, setUploadingAsset] = useState(false);
   // Settings sub-tab
-  const [settingsTab, setSettingsTab] = useState<"general" | "domains" | "seo" | "analytics" | "keys" | "devkeys" | "policies" | "clients">("general");
+  const [settingsTab, setSettingsTab] = useState<"general" | "domains" | "seo" | "analytics" | "devkeys" | "policies" | "clients">("general");
 
   // Policies settings state
   const [privacyPolicyEnabled, setPrivacyPolicyEnabled] = useState(false);
@@ -924,8 +924,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
   const [preferredProvider, setPreferredProvider] = useState("gemini");
   
   // Custom API keys management
-  const [llmKeys, setLlmKeys] = useState<LlmKeyView[]>([]);
-  const [keysLoading, setKeysLoading] = useState(false);
+
 
   // Developer API keys management
   const [devKeys, setDevKeys] = useState<any[]>([]);
@@ -991,18 +990,8 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Load LLM Keys in settings
+  // Load Developer keys in settings
   useEffect(() => {
-    if (activeView === "builder" && builderTab === "settings" && settingsTab === "keys") {
-      setKeysLoading(true);
-      fetch("/api/llm-keys")
-        .then((res) => res.json())
-        .then((data) => {
-          setLlmKeys(data.keys || []);
-          setKeysLoading(false);
-        })
-        .catch(() => setKeysLoading(false));
-    }
     if (activeView === "builder" && builderTab === "settings" && settingsTab === "devkeys") {
       setDevKeysLoading(true);
       fetch("/api/developer/keys")
@@ -4522,7 +4511,6 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                       <button onClick={() => setSettingsTab("domains")} style={{ background: "none", border: "none", color: settingsTab === "domains" ? "#818cf8" : "#9ca3af", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>Domains</button>
                       <button onClick={() => setSettingsTab("seo")} style={{ background: "none", border: "none", color: settingsTab === "seo" ? "#818cf8" : "#9ca3af", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>SEO</button>
                       <button onClick={() => setSettingsTab("analytics")} style={{ background: "none", border: "none", color: settingsTab === "analytics" ? "#818cf8" : "#9ca3af", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>Analytics</button>
-                      <button onClick={() => setSettingsTab("keys")} style={{ background: "none", border: "none", color: settingsTab === "keys" ? "#818cf8" : "#9ca3af", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>AI Keys</button>
                       <button onClick={() => setSettingsTab("policies")} type="button" style={{ background: "none", border: "none", color: settingsTab === "policies" ? "#818cf8" : "#9ca3af", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>Policies</button>
                       {isProOrAgencyOrAdmin && (
                         <button onClick={() => setSettingsTab("clients")} type="button" style={{ background: "none", border: "none", color: settingsTab === "clients" ? "#818cf8" : "#9ca3af", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer" }}>Client Logins</button>
@@ -4742,58 +4730,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                         </>
                       )}
 
-                      {/* AI PROVIDERS BRING YOUR OWN KEYS */}
-                      {settingsTab === "keys" && (
-                        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                          <h4 style={{ color: "#fff", margin: 0 }}>AI Provider Key Configurations</h4>
-                          {!isAgencyOrAdmin ? (
-                            <div style={{ 
-                              background: "rgba(99, 102, 241, 0.05)", 
-                              border: "1px solid rgba(99, 102, 241, 0.15)", 
-                              borderRadius: "0.75rem", 
-                              padding: "1.5rem", 
-                              display: "flex", 
-                              flexDirection: "column", 
-                              gap: "0.75rem" 
-                            }}>
-                              <span style={{ color: "#fff", fontWeight: 700, fontSize: "0.85rem", display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                                🔒 Premium Feature: Bring Your Own API Keys
-                              </span>
-                              <p style={{ color: "#9ca3af", fontSize: "0.75rem", margin: 0, lineHeight: 1.5 }}>
-                                Route website edits, custom section text, and code generations using your personal OpenAI, Claude, or Gemini credentials. This feature is only available on the Agency plan.
-                              </p>
-                              <button
-                                type="button"
-                                onClick={() => setUpgradeModalOpen(true)}
-                                className="glow-btn"
-                                style={{
-                                  background: "linear-gradient(to right, #6366f1, #d946ef)",
-                                  color: "#ffffff",
-                                  padding: "0.5rem 1rem",
-                                  borderRadius: "0.5rem",
-                                  fontSize: "0.75rem",
-                                  fontWeight: 700,
-                                  border: "none",
-                                  cursor: "pointer",
-                                  alignSelf: "flex-start",
-                                }}
-                              >
-                                Upgrade Plan
-                              </button>
-                            </div>
-                          ) : keysLoading ? (
-                            <span style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Loading provider keys...</span>
-                          ) : (
-                            <div style={{ scale: "0.95", transformOrigin: "top left" }}>
-                              <LlmKeyManager
-                                initialKeys={llmKeys}
-                                title="Platform LLM Keys"
-                                description="Add OpenAI, Claude, or Gemini keys to route layout edits."
-                              />
-                            </div>
-                          )}
-                        </div>
-                      )}
+
 
                       {/* DEVELOPER API KEYS MANAGEMENT */}
                       {settingsTab === "devkeys" && (
@@ -5067,7 +5004,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                         </div>
                       )}
 
-                      {settingsTab !== "keys" && settingsTab !== "devkeys" && (
+                      {settingsTab !== "devkeys" && (
                         <button type="submit" className="primary-action" style={{ width: "100%", justifyContent: "center", marginTop: "0.5rem" }} disabled={loading}>
                           {loading ? "Applying Settings..." : "Save Settings Configuration"}
                         </button>

@@ -122,8 +122,15 @@ export default function PricingSection({ initialPlans }: { initialPlans?: any[] 
         ? `/signup?plan=${plan.id}`
         : (billingCycle === "monthly" ? `/signup?plan=${plan.id}` : `/signup?plan=${plan.id}-annual`);
 
-      // Clean and enrich plan items
-      let planItems: string[] = plan.features.split(",").map((item: string) => item.trim());
+      // Clean and enrich plan items (filter out credit limits first to prevent comma split bugs on numbers like 1,000)
+      let cleanFeatures = plan.features;
+      cleanFeatures = cleanFeatures.replace(/(?:\d{1,3}(?:,\d{3})*|\d+)\s*(?:Free\s*)?Credits(?:\/month)?/gi, "");
+      cleanFeatures = cleanFeatures.replace(/,\s*,/g, ",");
+      cleanFeatures = cleanFeatures.trim().replace(/^,|,$/g, "").trim();
+
+      let planItems: string[] = cleanFeatures.split(",")
+        .map((item: string) => item.trim())
+        .filter((item: string) => item.length > 0);
       
       const isStarter = plan.id === "starter" || plan.name.toLowerCase().includes("starter") || plan.price === 0;
       if (isStarter) {
@@ -147,7 +154,7 @@ export default function PricingSection({ initialPlans }: { initialPlans?: any[] 
         }
       }
 
-      // Filter out any existing credit entries from the features string
+      // Filter out any leftover credit entries
       planItems = planItems.filter(item => !item.toLowerCase().includes("credits") && !item.toLowerCase().includes("credit"));
       
       // Append the clean, formatted credit limit from database plan
