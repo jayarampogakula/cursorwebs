@@ -15,8 +15,9 @@ export default function PricingSection({ initialPlans }: { initialPlans?: any[] 
       text: "For trying the builder",
       items: [
         "30 Days Duration",
-        "1 subdomain website",
-        "10 free credits"
+        "1 Website (Download Only)",
+        "1,000 AI Credits/month",
+        "No hosting included"
       ],
       featured: false,
       buttonText: "Choose Free",
@@ -25,60 +26,61 @@ export default function PricingSection({ initialPlans }: { initialPlans?: any[] 
     {
       id: "individual",
       name: "Individual Plan",
-      priceDisplay: billingCycle === "monthly" ? "₹159" : "₹1,812",
+      priceDisplay: billingCycle === "monthly" ? "₹199" : "₹2,269",
       period: billingCycle === "monthly" ? "/ month" : "/ year",
       text: "For personal use",
       items: [
-        "2 active websites",
+        "3 Published Subdomains",
         "Custom domain support",
-        "20 credits per month"
+        "2,000 AI Credits/month"
       ],
       featured: false,
       buttonText: "Choose Individual",
       signUpUrl: billingCycle === "monthly" ? "/signup?plan=individual" : "/signup?plan=individual-annual",
       discountBadge: billingCycle === "annually" ? "Save 5%" : null,
-      subText: billingCycle === "annually" ? "Equivalent to ₹151/month" : null
+      subText: billingCycle === "annually" ? "Equivalent to ₹189/month" : null
     },
     {
       id: "pro-plan",
       name: "Pro Plan",
-      priceDisplay: billingCycle === "monthly" ? "₹599" : "₹6,468",
+      priceDisplay: billingCycle === "monthly" ? "₹799" : "₹8,629",
       period: billingCycle === "monthly" ? "/ month" : "/ year",
       text: "For creators and teams",
       items: [
-        "10 active websites",
-        "Custom domain support",
+        "15 Published Websites",
+        "Custom Domain Support",
         "Create ecommerce sites",
         "Logins for each site",
         "Priority support",
-        "100 credits per month"
+        "10,000 AI Credits/month"
       ],
       featured: true,
       buttonText: "Choose Pro",
       signUpUrl: billingCycle === "monthly" ? "/signup?plan=pro-plan" : "/signup?plan=pro-plan-annual",
       discountBadge: billingCycle === "annually" ? "Save 10%" : null,
-      subText: billingCycle === "annually" ? "Equivalent to ₹539/month" : null
+      subText: billingCycle === "annually" ? "Equivalent to ₹719/month" : null
     },
     {
       id: "agency",
       name: "Agency Plan",
-      priceDisplay: billingCycle === "monthly" ? "₹2,499" : "₹25,488",
+      priceDisplay: billingCycle === "monthly" ? "₹2,999" : "₹30,590",
       period: billingCycle === "monthly" ? "/ month" : "/ year",
       text: "For client production",
       items: [
-        "50 active websites",
+        "Unlimited Websites",
         "Custom domain support",
         "Create ecommerce sites",
         "Logins for each site",
         "Bring your own Key option",
         "Priority support",
-        "500 credits per month"
+        "White Label Support",
+        "50,000 AI Credits/month"
       ],
       featured: false,
       buttonText: "Choose Agency",
       signUpUrl: billingCycle === "monthly" ? "/signup?plan=agency" : "/signup?plan=agency-annual",
       discountBadge: billingCycle === "annually" ? "Save 15%" : null,
-      subText: billingCycle === "annually" ? "Equivalent to ₹2124/month" : null
+      subText: billingCycle === "annually" ? "Equivalent to ₹2,549/month" : null
     }
   ];
 

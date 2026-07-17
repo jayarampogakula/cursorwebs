@@ -442,9 +442,67 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
   // Iframe Refresh Key
   const [iframeKey, setIframeKey] = useState(0);
 
-  // Visual iframe inspector event hook
+  // Helper: find parent section type from a DOM element inside the iframe
+  const findSectionType = (el: HTMLElement, doc: Document): string | null => {
+    let element: HTMLElement | null = el;
+    while (element && element !== doc.body) {
+      const id = element.id?.toUpperCase() || "";
+      const cn = typeof element.className === "string" ? element.className.toUpperCase() : "";
+      const tag = element.tagName.toUpperCase();
+      if (id.includes("HERO") || cn.includes("HERO")) return "HERO";
+      if (id.includes("ABOUT") || cn.includes("ABOUT")) return "ABOUT";
+      if (id.includes("CONTACT") || cn.includes("CONTACT")) return "CONTACT";
+      if (id.includes("SERVICES") || cn.includes("SERVICES")) return "SERVICES";
+      if (id.includes("FEATURES") || cn.includes("FEATURES")) return "FEATURES";
+      if (id.includes("PRICING") || cn.includes("PRICING")) return "PRICING";
+      if (id.includes("TESTIMONIALS") || cn.includes("TESTIMONIALS")) return "TESTIMONIALS";
+      if (id.includes("FAQS") || cn.includes("FAQS") || id.includes("FAQ") || cn.includes("FAQ")) return "FAQS";
+      if (id.includes("CTA") || cn.includes("CTA")) return "CTA";
+      if (tag === "HEADER" || cn.includes("HEADER") || id.includes("HEADER") || cn.includes("NAV") || id.includes("NAV")) return "HEADER";
+      if (tag === "FOOTER" || cn.includes("FOOTER") || id.includes("FOOTER")) return "FOOTER";
+      element = element.parentElement;
+    }
+    return null;
+  };
+
+  // Helper: persist an inline edit for a section back to the DB
+  const persistInlineEdit = async (sectionType: string, contentPatch: Record<string, any>) => {
+    if (!currentProject) return;
+    const sec = currentProject.pages?.[0]?.sections?.find(s => s.type === sectionType);
+    if (!sec) return;
+    const mergedContent = { ...sec.content, ...contentPatch };
+    try {
+      const res = await fetch(`/api/projects/${currentProject.id}/edit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: currentProject.name, sectionId: sec.id, sectionContent: mergedContent }),
+      });
+      if (res.ok) {
+        // Update local state
+        setProjects((prev) =>
+          prev.map((p) => {
+            if (p.id !== currentProject.id) return p;
+            return {
+              ...p,
+              pages: p.pages.map((page) => ({
+                ...page,
+                sections: page.sections.map((s) => s.id === sec.id ? { ...s, content: mergedContent } : s),
+              })),
+            };
+          })
+        );
+        setSuccess("Inline edit saved!");
+        setTimeout(() => setSuccess(""), 2000);
+      }
+    } catch (e) {
+      console.warn("Failed to persist inline edit:", e);
+    }
+  };
+
+  // Visual iframe inspector + inline WYSIWYG editing hook
   useEffect(() => {
     if (activePreviewTab !== "inspect") return;
+    let cleanupFns: (() => void)[] = [];
     
     const setupInspector = () => {
       const iframe = iframeRef.current;
@@ -453,91 +511,256 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
       try {
         const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
         if (!iframeDoc) return;
-        
+
+        // Inject editing styles into the iframe
+        let styleEl = iframeDoc.getElementById("cursorwebs-inspect-styles");
+        if (!styleEl) {
+          styleEl = iframeDoc.createElement("style");
+          styleEl.id = "cursorwebs-inspect-styles";
+          styleEl.textContent = `
+            [data-cw-editing="true"] {
+              outline: 2.5px solid #818cf8 !important;
+              outline-offset: 2px !important;
+              background: rgba(99, 102, 241, 0.06) !important;
+              cursor: text !important;
+              min-width: 20px;
+              min-height: 1em;
+            }
+            .cw-hover-highlight {
+              outline: 2px dashed rgba(129, 140, 248, 0.6) !important;
+              outline-offset: 2px !important;
+              cursor: pointer !important;
+            }
+            .cw-link-popup {
+              position: fixed;
+              background: #1e1b4b;
+              border: 1px solid rgba(129, 140, 248, 0.4);
+              border-radius: 8px;
+              padding: 12px;
+              box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+              z-index: 999999;
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+              min-width: 280px;
+              font-family: Inter, sans-serif;
+            }
+            .cw-link-popup label {
+              font-size: 11px;
+              color: #a5b4fc;
+              font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            .cw-link-popup input {
+              background: rgba(255,255,255,0.06);
+              border: 1px solid rgba(255,255,255,0.1);
+              color: #fff;
+              padding: 6px 10px;
+              border-radius: 4px;
+              font-size: 13px;
+              outline: none;
+              width: 100%;
+              box-sizing: border-box;
+            }
+            .cw-link-popup input:focus {
+              border-color: #818cf8;
+            }
+            .cw-link-popup button {
+              background: linear-gradient(135deg, #6366f1, #818cf8);
+              color: #fff;
+              border: none;
+              border-radius: 4px;
+              padding: 6px 14px;
+              font-size: 12px;
+              font-weight: 700;
+              cursor: pointer;
+              align-self: flex-end;
+            }
+          `;
+          iframeDoc.head.appendChild(styleEl);
+        }
+
+        // Determine if element is text-editable
+        const isTextElement = (el: HTMLElement) => {
+          const tag = el.tagName.toUpperCase();
+          return ["H1","H2","H3","H4","H5","H6","P","SPAN","LI","LABEL","TD","TH","BLOCKQUOTE","STRONG","EM","B","I","SMALL"].includes(tag);
+        };
+        const isImageElement = (el: HTMLElement) => el.tagName.toUpperCase() === "IMG";
+        const isLinkOrButton = (el: HTMLElement) => {
+          const tag = el.tagName.toUpperCase();
+          return tag === "A" || tag === "BUTTON" || (el.getAttribute("role") === "button");
+        };
+
+        // Remove any existing popup
+        const removeLinkPopup = () => {
+          const existing = iframeDoc.querySelector(".cw-link-popup");
+          if (existing) existing.remove();
+        };
+
         const handleMouseOver = (e: MouseEvent) => {
           const target = e.target as HTMLElement;
           if (!target || target === iframeDoc.body || target === iframeDoc.documentElement) return;
-          
-          target.style.outline = "2.5px solid #818cf8";
-          target.style.outlineOffset = "-2.5px";
-          target.style.cursor = "pointer";
-          
-          target.setAttribute("title", `Click to edit ${target.tagName.toLowerCase()}`);
+          if (target.getAttribute("data-cw-editing") === "true") return;
+          if (target.closest(".cw-link-popup")) return;
+          target.classList.add("cw-hover-highlight");
         };
         
         const handleMouseOut = (e: MouseEvent) => {
           const target = e.target as HTMLElement;
-          if (target) {
-            target.style.outline = "";
-            target.style.outlineOffset = "";
-          }
+          if (target) target.classList.remove("cw-hover-highlight");
         };
-        
+
         const handleClick = (e: MouseEvent) => {
+          const target = e.target as HTMLElement;
+          if (!target || target === iframeDoc.body || target === iframeDoc.documentElement) return;
+          if (target.closest(".cw-link-popup")) return;
+
           e.preventDefault();
           e.stopPropagation();
-          const target = e.target as HTMLElement;
-          
-          let element: HTMLElement | null = target;
-          let sectionType = null;
-          while (element && element !== iframeDoc.body) {
-            const id = element.id?.toUpperCase() || "";
-            const className = typeof element.className === "string" ? element.className.toUpperCase() : "";
-            const tagName = element.tagName.toUpperCase();
+          target.classList.remove("cw-hover-highlight");
+          removeLinkPopup();
+
+          // TEXT EDITING: Make text elements contentEditable
+          if (isTextElement(target)) {
+            target.setAttribute("contenteditable", "true");
+            target.setAttribute("data-cw-editing", "true");
+            target.focus();
             
-            if (id.includes("HERO") || className.includes("HERO")) {
-              sectionType = "HERO";
-              break;
-            }
-            if (id.includes("ABOUT") || className.includes("ABOUT")) {
-              sectionType = "ABOUT";
-              break;
-            }
-            if (id.includes("CONTACT") || className.includes("CONTACT")) {
-              sectionType = "CONTACT";
-              break;
-            }
-            if (id.includes("SERVICES") || className.includes("SERVICES")) {
-              sectionType = "SERVICES";
-              break;
-            }
-            if (id.includes("FEATURES") || className.includes("FEATURES")) {
-              sectionType = "FEATURES";
-              break;
-            }
-            if (id.includes("PRICING") || className.includes("PRICING")) {
-              sectionType = "PRICING";
-              break;
-            }
-            if (id.includes("TESTIMONIALS") || className.includes("TESTIMONIALS")) {
-              sectionType = "TESTIMONIALS";
-              break;
-            }
-            if (id.includes("FAQS") || className.includes("FAQS") || id.includes("FAQ") || className.includes("FAQ")) {
-              sectionType = "FAQS";
-              break;
-            }
-            if (id.includes("CTA") || className.includes("CTA")) {
-              sectionType = "CTA";
-              break;
-            }
-            if (tagName === "HEADER" || className.includes("HEADER") || id.includes("HEADER") || className.includes("NAV") || id.includes("NAV")) {
-              sectionType = "HEADER";
-              break;
-            }
-            if (tagName === "FOOTER" || className.includes("FOOTER") || id.includes("FOOTER")) {
-              sectionType = "FOOTER";
-              break;
-            }
-            element = element.parentElement;
+            const onBlur = () => {
+              target.removeAttribute("contenteditable");
+              target.removeAttribute("data-cw-editing");
+              target.removeEventListener("blur", onBlur);
+              
+              const newText = target.textContent || "";
+              const sectionType = findSectionType(target, iframeDoc);
+              if (!sectionType) return;
+              
+              // Map back to section content fields
+              const tag = target.tagName.toUpperCase();
+              const sec = currentProject?.pages?.[0]?.sections?.find(s => s.type === sectionType);
+              if (!sec) return;
+              const patch: Record<string, any> = {};
+              if (sectionType === "HERO") {
+                if (tag === "H1" || tag === "H2") patch.heading = newText;
+                else if (tag === "P") patch.subheading = newText;
+              } else if (sectionType === "ABOUT") {
+                if (tag === "H1" || tag === "H2" || tag === "H3") patch.heading = newText;
+                else if (tag === "P") patch.body = newText;
+              } else if (sectionType === "CONTACT") {
+                if (tag === "H1" || tag === "H2" || tag === "H3") patch.heading = newText;
+              } else if (sectionType === "CTA") {
+                if (tag === "H1" || tag === "H2" || tag === "H3") patch.heading = newText;
+                else if (tag === "P") patch.subheading = newText;
+              } else {
+                // For other sections, try heading or body based on tag
+                if (["H1","H2","H3","H4"].includes(tag)) patch.heading = newText;
+                else if (tag === "P") patch.body = newText;
+              }
+              if (Object.keys(patch).length > 0) {
+                persistInlineEdit(sectionType, patch);
+              }
+            };
+            target.addEventListener("blur", onBlur);
+            
+            // Save on Enter key (for headings)
+            const onKeyDown = (ev: KeyboardEvent) => {
+              if (ev.key === "Enter" && !ev.shiftKey) {
+                ev.preventDefault();
+                target.blur();
+              }
+            };
+            target.addEventListener("keydown", onKeyDown);
+            return;
           }
-          
-          if (sectionType) {
-            const sec = currentProject?.pages?.[0]?.sections?.find(s => s.type === sectionType);
-            if (sec) {
-              setSelectedSection(sec);
-              setBuilderTab("layers");
-            }
+
+          // IMAGE EDITING: Click to replace image
+          if (isImageElement(target)) {
+            const fileInput = iframeDoc.createElement("input");
+            fileInput.type = "file";
+            fileInput.accept = "image/*";
+            fileInput.style.display = "none";
+            fileInput.onchange = async () => {
+              const file = fileInput.files?.[0];
+              if (!file) return;
+              // Convert to base64 data URL and set as src
+              const reader = new FileReader();
+              reader.onload = () => {
+                const dataUrl = reader.result as string;
+                (target as HTMLImageElement).src = dataUrl;
+                
+                const sectionType = findSectionType(target, iframeDoc);
+                if (sectionType) {
+                  persistInlineEdit(sectionType, { imageUrl: dataUrl });
+                }
+              };
+              reader.readAsDataURL(file);
+              fileInput.remove();
+            };
+            iframeDoc.body.appendChild(fileInput);
+            fileInput.click();
+            return;
+          }
+
+          // BUTTON/LINK EDITING: Show floating popup with text + URL fields
+          if (isLinkOrButton(target)) {
+            const rect = target.getBoundingClientRect();
+            const popup = iframeDoc.createElement("div");
+            popup.className = "cw-link-popup";
+            popup.style.top = `${Math.min(rect.bottom + 8, (iframeDoc.documentElement.clientHeight || 600) - 160)}px`;
+            popup.style.left = `${Math.max(8, Math.min(rect.left, (iframeDoc.documentElement.clientWidth || 800) - 300))}px`;
+            
+            const currentText = target.textContent || "";
+            const currentHref = target.getAttribute("href") || "";
+            
+            popup.innerHTML = `
+              <label>Button / Link Text</label>
+              <input type="text" class="cw-popup-text" value="${currentText.replace(/"/g, '&quot;')}" />
+              <label>URL / Link Destination</label>
+              <input type="text" class="cw-popup-url" value="${currentHref.replace(/"/g, '&quot;')}" placeholder="https://..." />
+              <button type="button" class="cw-popup-save">Save Changes</button>
+            `;
+            iframeDoc.body.appendChild(popup);
+            
+            const saveBtn = popup.querySelector(".cw-popup-save");
+            saveBtn?.addEventListener("click", () => {
+              const newText = (popup.querySelector(".cw-popup-text") as HTMLInputElement)?.value || "";
+              const newUrl = (popup.querySelector(".cw-popup-url") as HTMLInputElement)?.value || "#";
+              
+              target.textContent = newText;
+              if (target.tagName.toUpperCase() === "A") {
+                target.setAttribute("href", newUrl);
+              }
+              popup.remove();
+              
+              const sectionType = findSectionType(target, iframeDoc);
+              if (sectionType) {
+                persistInlineEdit(sectionType, { ctaText: newText, ctaUrl: newUrl });
+              }
+            });
+            
+            // Close popup when clicking outside
+            const closePopup = (ev: MouseEvent) => {
+              if (!popup.contains(ev.target as Node)) {
+                popup.remove();
+                iframeDoc.removeEventListener("click", closePopup, true);
+              }
+            };
+            setTimeout(() => iframeDoc.addEventListener("click", closePopup, true), 100);
+            return;
+          }
+
+          // Fallback: If the clicked element is none of the above, try making it editable anyway
+          if (target.children.length === 0 && target.textContent?.trim()) {
+            target.setAttribute("contenteditable", "true");
+            target.setAttribute("data-cw-editing", "true");
+            target.focus();
+            const onBlur = () => {
+              target.removeAttribute("contenteditable");
+              target.removeAttribute("data-cw-editing");
+              target.removeEventListener("blur", onBlur);
+            };
+            target.addEventListener("blur", onBlur);
           }
         };
         
@@ -545,13 +768,19 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
         iframeDoc.addEventListener("mouseout", handleMouseOut);
         iframeDoc.addEventListener("click", handleClick, true);
         
-        return () => {
+        cleanupFns.push(() => {
           try {
             iframeDoc.removeEventListener("mouseover", handleMouseOver);
             iframeDoc.removeEventListener("mouseout", handleMouseOut);
             iframeDoc.removeEventListener("click", handleClick, true);
+            removeLinkPopup();
+            // Remove contenteditable from all elements
+            iframeDoc.querySelectorAll("[data-cw-editing]").forEach((el) => {
+              (el as HTMLElement).removeAttribute("contenteditable");
+              (el as HTMLElement).removeAttribute("data-cw-editing");
+            });
           } catch (e) {}
-        };
+        });
       } catch (e) {
         console.warn("Could not access iframe document for inspection:", e);
       }
@@ -570,6 +799,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
       if (iframe) {
         iframe.removeEventListener("load", setupInspector);
       }
+      cleanupFns.forEach(fn => fn());
     };
   }, [activePreviewTab, selectedProjectId, iframeKey, currentProject]);
 
@@ -1842,10 +2072,10 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                             // Display Extra Credit Packs
                             <>
                               {[
-                                { id: "credits-10", name: "10 Credits Pack", creditsLimit: 10, price: 99, features: "Adds 10 AI generation credits to your account immediately" },
-                                { id: "credits-100", name: "100 Credits Pack", creditsLimit: 100, price: 499, features: "Adds 100 AI generation credits to your account immediately" },
-                                { id: "credits-500", name: "500 Credits Pack", creditsLimit: 500, price: 1999, features: "Adds 500 AI generation credits to your account immediately" },
-                                { id: "credits-1000", name: "1000 Credits Pack", creditsLimit: 1000, price: 3799, features: "Adds 1000 AI generation credits to your account immediately" },
+                                { id: "credits-1000", name: "1,000 Credits Pack", creditsLimit: 1000, price: 99, features: "Adds 1,000 AI generation credits to your account" },
+                                { id: "credits-5000", name: "5,000 Credits Pack", creditsLimit: 5000, price: 399, features: "Adds 5,000 AI generation credits to your account" },
+                                { id: "credits-25000", name: "25,000 Credits Pack", creditsLimit: 25000, price: 1499, features: "Adds 25,000 AI generation credits to your account" },
+                                { id: "credits-100000", name: "100,000 Credits Pack", creditsLimit: 100000, price: 4999, features: "Adds 100,000 AI generation credits to your account" },
                               ].map((pack) => (
                                 <div key={pack.id} style={{ padding: "1.25rem", background: "rgba(255,255,255,0.01)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "0.75rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                   <div>
@@ -3256,59 +3486,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                 {!sidebarCollapsed && <span>AI Chat</span>}
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setBuilderTab("layers");
-                  if (isMobile) setSidebarCollapsed(true);
-                }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                  width: "100%",
-                  padding: "0.6rem 0.8rem",
-                  borderRadius: "0.375rem",
-                  background: builderTab === "layers" ? "rgba(129, 140, 248, 0.08)" : "none",
-                  border: "none",
-                  color: builderTab === "layers" ? "#818cf8" : "#9ca3af",
-                  cursor: "pointer",
-                  fontSize: "0.85rem",
-                  fontWeight: 600,
-                  textAlign: "left",
-                  transition: "all 0.2s"
-                }}
-              >
-                <Layers size={16} />
-                {!sidebarCollapsed && <span>Sections</span>}
-              </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setBuilderTab("properties");
-                  if (isMobile) setSidebarCollapsed(true);
-                }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                  width: "100%",
-                  padding: "0.6rem 0.8rem",
-                  borderRadius: "0.375rem",
-                  background: builderTab === "properties" ? "rgba(129, 140, 248, 0.08)" : "none",
-                  border: "none",
-                  color: builderTab === "properties" ? "#818cf8" : "#9ca3af",
-                  cursor: "pointer",
-                  fontSize: "0.85rem",
-                  fontWeight: 600,
-                  textAlign: "left",
-                  transition: "all 0.2s"
-                }}
-              >
-                <Sliders size={16} />
-                {!sidebarCollapsed && <span>Manual Edit</span>}
-              </button>
 
               <button
                 type="button"
@@ -5153,7 +5331,7 @@ export default function DashboardEditor({ user, tenant, baseDomain, protocol, in
                       }}
                     />
                     <div style={{ position: "absolute", top: "1rem", left: "1rem", background: "rgba(99, 102, 241, 0.95)", color: "#fff", padding: "0.45rem 0.9rem", borderRadius: "0.35rem", fontSize: "0.72rem", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.35rem", pointerEvents: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
-                      <Sparkles size={11} /> Visual Inspect Mode Active &bull; Hover &amp; Click elements directly on page to edit
+                      <Sparkles size={11} /> Inline Edit Mode &bull; Click text to edit &bull; Click images to replace &bull; Click buttons to edit link
                     </div>
                   </div>
                 ) : (

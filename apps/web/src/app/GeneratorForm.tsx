@@ -107,41 +107,41 @@ export default function GeneratorForm({ user, tenantId, onSuccess, showThemes = 
     
     // Gaming
     { id: "CyberPulse", name: "CyberPulse", category: "Gaming", desc: "Cyberpunk neon accents, bold tech aesthetics.", preset: "Gaming", image: "/images/themes/gaming.png" },
-    { id: "Rift Esports", name: "Rift Esports", category: "Gaming", desc: "Dark, high-energy gaming pages and rosters.", preset: "Gaming", image: "/images/themes/gaming.png" },
-    { id: "PixelGuild", name: "PixelGuild", category: "Gaming", desc: "Retro arcade styles and stream schedule grids.", preset: "Gaming", image: "/images/themes/gaming.png" },
+    { id: "Rift Esports", name: "Rift Esports", category: "Gaming", desc: "Dark, high-energy gaming pages and rosters.", preset: "Gaming", image: "/images/themes/gaming_esports.png" },
+    { id: "PixelGuild", name: "PixelGuild", category: "Gaming", desc: "Retro arcade styles and stream schedule grids.", preset: "Gaming", image: "/images/themes/gaming_guild.png" },
     
     // E-commerce
     { id: "Velvet Cart", name: "Velvet Cart", category: "E-commerce", desc: "Elegant minimal shop layouts for apparel brands.", preset: "Ecommerce", image: "/images/themes/ecommerce.png" },
-    { id: "Nova Tech", name: "Nova Tech", category: "E-commerce", desc: "Clean grid layout for consumer electronics.", preset: "Ecommerce", image: "/images/themes/ecommerce.png" },
-    { id: "Aura Boutique", name: "Aura Boutique", category: "E-commerce", desc: "Chic minimalist cosmetics and apparel catalog.", preset: "Ecommerce", image: "/images/themes/ecommerce.png" },
+    { id: "Nova Tech", name: "Nova Tech", category: "E-commerce", desc: "Clean grid layout for consumer electronics.", preset: "Ecommerce", image: "/images/themes/ecommerce_tech.png" },
+    { id: "Aura Boutique", name: "Aura Boutique", category: "E-commerce", desc: "Chic minimalist cosmetics and apparel catalog.", preset: "Ecommerce", image: "/images/themes/ecommerce_boutique.png" },
     
     // Digital Marketing
     { id: "Apex Agency", name: "Apex Agency", category: "Digital Marketing", desc: "Modern B2B startup SaaS and agency presentations.", preset: "Modern Startup", image: "/images/themes/corporate.png" },
     { id: "GrowthFlow", name: "GrowthFlow", category: "Digital Marketing", desc: "Vibrant gradient-focused page for consultancies.", preset: "Creator", image: "/images/themes/creator.png" },
-    { id: "SaaSify Metrics", name: "SaaSify Metrics", category: "Digital Marketing", desc: "Clean bento grids and SaaS statistics display.", preset: "SaaS", image: "/images/themes/saas.png" },
-    { id: "LeadGen Pro", name: "LeadGen Pro", category: "Digital Marketing", desc: "High-conversion landing page for marketing firms.", preset: "SaaS", image: "/images/themes/saas.png" },
+    { id: "SaaSify Metrics", name: "SaaSify Metrics", category: "Digital Marketing", desc: "Clean bento grids and SaaS statistics display.", preset: "SaaS", image: "/images/themes/marketing_saas.png" },
+    { id: "LeadGen Pro", name: "LeadGen Pro", category: "Digital Marketing", desc: "High-conversion landing page for marketing firms.", preset: "SaaS", image: "/images/themes/marketing_leadgen.png" },
     
     // Clinics
-    { id: "MediCare Plus", name: "MediCare Plus", category: "Clinics", desc: "Clean design with simple scheduling components.", preset: "Modern Startup", image: "/images/themes/corporate.png" },
-    { id: "Aura Dental", name: "Aura Dental", category: "Clinics", desc: "Warm layout for dental & wellness practices.", preset: "Creator", image: "/images/themes/creator.png" },
-    { id: "PhysioHealth", name: "PhysioHealth", category: "Clinics", desc: "Professional clinic portal with therapy services.", preset: "Modern Startup", image: "/images/themes/corporate.png" },
+    { id: "MediCare Plus", name: "MediCare Plus", category: "Clinics", desc: "Clean design with simple scheduling components.", preset: "Modern Startup", image: "/images/themes/clinic_medical.png" },
+    { id: "Aura Dental", name: "Aura Dental", category: "Clinics", desc: "Warm layout for dental & wellness practices.", preset: "Creator", image: "/images/themes/clinic_dental.png" },
+    { id: "PhysioHealth", name: "PhysioHealth", category: "Clinics", desc: "Professional clinic portal with therapy services.", preset: "Modern Startup", image: "/images/themes/clinic_physio.png" },
     
     // Fitness
     { id: "FitCore Studio", name: "FitCore Studio", category: "Fitness", desc: "Workout layouts, schedules, and trainer profiles.", preset: "Gaming", image: "/images/themes/fitness.png" },
     { id: "ZenYoga", name: "ZenYoga", category: "Fitness", desc: "Calming minimalist space for yoga studios.", preset: "Creator", image: "/images/themes/creator.png" },
-    { id: "Apex Athletics", name: "Apex Athletics", category: "Fitness", desc: "High-performance gym and bodybuilding layouts.", preset: "Gaming", image: "/images/themes/fitness.png" },
+    { id: "Apex Athletics", name: "Apex Athletics", category: "Fitness", desc: "High-performance gym and bodybuilding layouts.", preset: "Gaming", image: "/images/themes/fitness_athletics.png" },
     
     // Education
     { id: "SkillUp Academy", name: "SkillUp Academy", category: "Education", desc: "Grid listings for online courses and lessons.", preset: "Modern Startup", image: "/images/themes/education.png" },
-    { id: "EduPortal Hub", name: "EduPortal Hub", category: "Education", desc: "Structured resource center for schools & tutors.", preset: "SaaS", image: "/images/themes/education.png" },
-    { id: "LearnLogic", name: "LearnLogic", category: "Education", desc: "Clean documentation and academy portal design.", preset: "SaaS", image: "/images/themes/education.png" },
+    { id: "EduPortal Hub", name: "EduPortal Hub", category: "Education", desc: "Structured resource center for schools & tutors.", preset: "SaaS", image: "/images/themes/education_portal.png" },
+    { id: "LearnLogic", name: "LearnLogic", category: "Education", desc: "Clean documentation and academy portal design.", preset: "SaaS", image: "/images/themes/education_logic.png" },
     
     // Corporate
     { id: "Summit Ventures", name: "Summit Ventures", category: "Corporate", desc: "Premium financial and venture capital profiles.", preset: "SaaS", image: "/images/themes/corporate.png" },
-    { id: "Nexus Corp", name: "Nexus Corp", category: "Corporate", desc: "Clean enterprise landing page with team rosters.", preset: "Modern Startup", image: "/images/themes/corporate.png" },
+    { id: "Nexus Corp", name: "Nexus Corp", category: "Corporate", desc: "Clean enterprise landing page with team rosters.", preset: "Modern Startup", image: "/images/themes/corporate_nexus.png" },
     
     // Creative Portfolio
-    { id: "Prism Studio", name: "Prism Studio", category: "Creative Portfolio", desc: "Bold design portfolio for branding agencies.", preset: "Creator", image: "/images/themes/creator.png" },
+    { id: "Prism Studio", name: "Prism Studio", category: "Creative Portfolio", desc: "Bold design portfolio for branding agencies.", preset: "Creator", image: "/images/themes/portfolio.png" },
     { id: "Studio Noir", name: "Studio Noir", category: "Creative Portfolio", desc: "Dark theme photography and art showcase.", preset: "Gaming", image: "/images/themes/luxury.png" }
   ];
 
