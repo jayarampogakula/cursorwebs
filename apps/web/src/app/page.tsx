@@ -87,29 +87,51 @@ export default async function LandingPage() {
           </div>
           <GeneratorForm user={user} />
           
-          {/* Trusted Brands logos */}
+          {/* Trusted Brands logos (Infinite Marquee) */}
           <div className="trusted-by-section">
             <span className="trusted-title">Trusted by teams at</span>
-            <div className="brands-container">
-              <div className="brand-pill">
-                <span className="brand-dot" style={{ background: "#3b82f6" }}>T</span>
-                <span>TechFlow</span>
-              </div>
-              <div className="brand-pill">
-                <span className="brand-dot" style={{ background: "#10b981" }}>B</span>
-                <span>BuildCorp</span>
-              </div>
-              <div className="brand-pill">
-                <span className="brand-dot" style={{ background: "#8b5cf6" }}>D</span>
-                <span>DataSync</span>
-              </div>
-              <div className="brand-pill">
-                <span className="brand-dot" style={{ background: "#f59e0b" }}>C</span>
-                <span>CloudBase</span>
-              </div>
-              <div className="brand-pill">
-                <span className="brand-dot" style={{ background: "#ec4899" }}>S</span>
-                <span>DevStack</span>
+            <div className="brands-slider-viewport">
+              <div className="brands-container">
+                {/* 12 New Premium Startups */}
+                {[
+                  { name: "Apex Labs", char: "A", color: "#38bdf8" },
+                  { name: "Vercel", char: "V", color: "#ffffff" },
+                  { name: "Supabase", char: "S", color: "#3eaf7c" },
+                  { name: "Stripe", char: "S", color: "#635bff" },
+                  { name: "Linear", char: "L", color: "#5e6ad2" },
+                  { name: "Figma", char: "F", color: "#f24e1e" },
+                  { name: "Loom", char: "L", color: "#625df5" },
+                  { name: "Raycast", char: "R", color: "#ff6363" },
+                  { name: "Resend", char: "R", color: "#24b47e" },
+                  { name: "Clerk", char: "C", color: "#2563eb" },
+                  { name: "Sentry", char: "S", color: "#f43f5e" },
+                  { name: "Neon", char: "N", color: "#00e5ff" }
+                ].map((b, i) => (
+                  <div className="brand-pill" key={`b1-${i}`}>
+                    <span className="brand-dot" style={{ background: b.color }}>{b.char}</span>
+                    <span>{b.name}</span>
+                  </div>
+                ))}
+                {/* Duplicated list to create infinite seamless loop */}
+                {[
+                  { name: "Apex Labs", char: "A", color: "#38bdf8" },
+                  { name: "Vercel", char: "V", color: "#ffffff" },
+                  { name: "Supabase", char: "S", color: "#3eaf7c" },
+                  { name: "Stripe", char: "S", color: "#635bff" },
+                  { name: "Linear", char: "L", color: "#5e6ad2" },
+                  { name: "Figma", char: "F", color: "#f24e1e" },
+                  { name: "Loom", char: "L", color: "#625df5" },
+                  { name: "Raycast", char: "R", color: "#ff6363" },
+                  { name: "Resend", char: "R", color: "#24b47e" },
+                  { name: "Clerk", char: "C", color: "#2563eb" },
+                  { name: "Sentry", char: "S", color: "#f43f5e" },
+                  { name: "Neon", char: "N", color: "#00e5ff" }
+                ].map((b, i) => (
+                  <div className="brand-pill" key={`b2-${i}`}>
+                    <span className="brand-dot" style={{ background: b.color }}>{b.char}</span>
+                    <span>{b.name}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

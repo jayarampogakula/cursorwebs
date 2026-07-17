@@ -1532,7 +1532,6 @@ option {
   transform: translateY(-2px);
 }
 
-/* Trusted brands block */
 .trusted-by-section {
   display: flex;
   flex-direction: column;
@@ -1540,6 +1539,34 @@ option {
   gap: 1.25rem;
   margin-top: 4.5rem;
   margin-bottom: 2rem;
+  width: 100%;
+  overflow: hidden;
+}
+
+.brands-slider-viewport {
+  width: 100%;
+  max-width: 800px;
+  overflow: hidden;
+  position: relative;
+  mask-image: linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
+}
+
+.brands-container {
+  display: flex;
+  align-items: center;
+  gap: 3.5rem;
+  width: max-content;
+  animation: logoScroll 24s linear infinite;
+}
+
+@keyframes logoScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-50% - 1.75rem));
+  }
 }
 
 .trusted-title {
@@ -1549,14 +1576,6 @@ option {
   color: var(--muted);
   font-weight: 700;
   opacity: 0.8;
-}
-
-.brands-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2.25rem;
-  flex-wrap: wrap;
 }
 
 .brand-pill {
