@@ -84,7 +84,7 @@ export async function POST(
 
     if (tenant.subscription && !hasUserKeys) {
       const { creditsLimit, creditsUsed } = tenant.subscription;
-      if (creditsUsed + 1 > creditsLimit) {
+      if (creditsUsed + 10 > creditsLimit) {
         return NextResponse.json(
           { error: "Insufficient AI credits. Please upgrade your plan to unlock more edits." },
           { status: 403 }
@@ -264,7 +264,7 @@ Choose an appropriate ID based on the niche:
       if (tenant.subscription && !hasUserKeys) {
         await tx.subscription.update({
           where: { tenantId: tenant.id },
-          data: { creditsUsed: { increment: 1 } }
+          data: { creditsUsed: { increment: 10 } }
         });
       }
     });

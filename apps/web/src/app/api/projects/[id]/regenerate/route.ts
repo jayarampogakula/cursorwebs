@@ -53,7 +53,7 @@ export async function POST(
       return NextResponse.json({ error: "Workspace not found." }, { status: 404 });
     }
 
-    const requiredCredits = validated.ecommerce ? 25 : 1;
+    const requiredCredits = validated.ecommerce ? 250 : 10;
 
     // Check if user has active custom keys
     const userKeysCount = await prisma.llmApiKey.count({
