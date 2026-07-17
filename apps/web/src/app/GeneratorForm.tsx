@@ -35,7 +35,7 @@ export default function GeneratorForm({ user, tenantId, onSuccess, showThemes = 
     "Design a landing page for my dental clinic",
     "build a task management app with status columns",
     "Create a portfolio website for a visual designer",
-    "Build a SaaS billing dashboard with chart views"
+    "Design a fitness club landing page with training schedules"
   ];
 
   const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0);
@@ -116,9 +116,9 @@ export default function GeneratorForm({ user, tenantId, onSuccess, showThemes = 
     { id: "Aura Boutique", name: "Aura Boutique", category: "E-commerce", desc: "Chic minimalist cosmetics and apparel catalog.", preset: "Ecommerce", image: "/images/themes/ecommerce_boutique.png" },
     
     // Digital Marketing
-    { id: "Apex Agency", name: "Apex Agency", category: "Digital Marketing", desc: "Modern B2B startup SaaS and agency presentations.", preset: "Modern Startup", image: "/images/themes/corporate.png" },
+    { id: "Apex Agency", name: "Apex Agency", category: "Digital Marketing", desc: "Modern B2B startup and agency presentations.", preset: "Modern Startup", image: "/images/themes/corporate.png" },
     { id: "GrowthFlow", name: "GrowthFlow", category: "Digital Marketing", desc: "Vibrant gradient-focused page for consultancies.", preset: "Creator", image: "/images/themes/creator.png" },
-    { id: "SaaSify Metrics", name: "SaaSify Metrics", category: "Digital Marketing", desc: "Clean bento grids and SaaS statistics display.", preset: "SaaS", image: "/images/themes/marketing_saas.png" },
+    { id: "Growth Metrics", name: "Growth Metrics", category: "Digital Marketing", desc: "Clean bento grids and business statistics display.", preset: "SaaS", image: "/images/themes/marketing_saas.png" },
     { id: "LeadGen Pro", name: "LeadGen Pro", category: "Digital Marketing", desc: "High-conversion landing page for marketing firms.", preset: "SaaS", image: "/images/themes/marketing_leadgen.png" },
     
     // Clinics
@@ -222,7 +222,7 @@ export default function GeneratorForm({ user, tenantId, onSuccess, showThemes = 
     { label: "Design a dental clinic landing page", text: "Design a landing page for my dental clinic..." },
     { label: "build a task management app", text: "build a task management app with status columns..." },
     { label: "Create a visual designer portfolio", text: "Create a portfolio website for a visual designer..." },
-    { label: "Build a SaaS billing dashboard", text: "Build a SaaS billing dashboard with chart views..." }
+    { label: "Design a gym fitness club landing page", text: "Design a fitness club landing page with training schedules..." }
   ];
 
   return (
