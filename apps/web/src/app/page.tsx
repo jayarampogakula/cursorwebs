@@ -166,8 +166,8 @@ export default async function LandingPage() {
               </article>
               <article className="bento-card small">
                 <span className="icon-box"><Globe size={20} /></span>
-                <h3>Custom Subdomains</h3>
-                <p>Publish your project to a custom subdomain and share it with the world.</p>
+                <h3>Custom Domains</h3>
+                <p>Connect your own custom domains or publish to a free cursorwebs.com subdomain.</p>
               </article>
             </div>
           </div>
