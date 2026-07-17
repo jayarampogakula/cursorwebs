@@ -86,30 +86,63 @@ export default function GeneratorForm({ user, tenantId, onSuccess, showThemes = 
     }
   }, [success]);
 
-  const categories = ["All", "Real Estate", "Gaming", "E-commerce", "Digital Marketing", "Clinics", "Fitness", "Education"];
+  const categories = [
+    "All", 
+    "Real Estate", 
+    "Gaming", 
+    "E-commerce", 
+    "Digital Marketing", 
+    "Clinics", 
+    "Fitness", 
+    "Education", 
+    "Corporate", 
+    "Creative Portfolio"
+  ];
 
   const themes = [
     // Real Estate
     { id: "Aether Homes", name: "Aether Homes", category: "Real Estate", desc: "Sleek architecture portfolios and listings.", preset: "Modern Startup", image: "/images/themes/luxury.png" },
     { id: "Vanguard Realty", name: "Vanguard Realty", category: "Real Estate", desc: "High-contrast dark designs for premium agencies.", preset: "SaaS", image: "/images/themes/saas.png" },
+    { id: "Horizon Estates", name: "Horizon Estates", category: "Real Estate", desc: "Elegant light layout for residential brokerages.", preset: "Modern Startup", image: "/images/themes/startup.png" },
+    
     // Gaming
     { id: "CyberPulse", name: "CyberPulse", category: "Gaming", desc: "Cyberpunk neon accents, bold tech aesthetics.", preset: "Gaming", image: "/images/themes/gaming.png" },
     { id: "Rift Esports", name: "Rift Esports", category: "Gaming", desc: "Dark, high-energy gaming pages and rosters.", preset: "Gaming", image: "/images/themes/gaming.png" },
+    { id: "PixelGuild", name: "PixelGuild", category: "Gaming", desc: "Retro arcade styles and stream schedule grids.", preset: "Gaming", image: "/images/themes/gaming.png" },
+    
     // E-commerce
     { id: "Velvet Cart", name: "Velvet Cart", category: "E-commerce", desc: "Elegant minimal shop layouts for apparel brands.", preset: "Ecommerce", image: "/images/themes/ecommerce.png" },
     { id: "Nova Tech", name: "Nova Tech", category: "E-commerce", desc: "Clean grid layout for consumer electronics.", preset: "Ecommerce", image: "/images/themes/ecommerce.png" },
+    { id: "Aura Boutique", name: "Aura Boutique", category: "E-commerce", desc: "Chic minimalist cosmetics and apparel catalog.", preset: "Ecommerce", image: "/images/themes/ecommerce.png" },
+    
     // Digital Marketing
     { id: "Apex Agency", name: "Apex Agency", category: "Digital Marketing", desc: "Modern B2B startup SaaS and agency presentations.", preset: "Modern Startup", image: "/images/themes/corporate.png" },
     { id: "GrowthFlow", name: "GrowthFlow", category: "Digital Marketing", desc: "Vibrant gradient-focused page for consultancies.", preset: "Creator", image: "/images/themes/creator.png" },
     { id: "SaaSify Metrics", name: "SaaSify Metrics", category: "Digital Marketing", desc: "Clean bento grids and SaaS statistics display.", preset: "SaaS", image: "/images/themes/saas.png" },
+    { id: "LeadGen Pro", name: "LeadGen Pro", category: "Digital Marketing", desc: "High-conversion landing page for marketing firms.", preset: "SaaS", image: "/images/themes/saas.png" },
+    
     // Clinics
     { id: "MediCare Plus", name: "MediCare Plus", category: "Clinics", desc: "Clean design with simple scheduling components.", preset: "Modern Startup", image: "/images/themes/corporate.png" },
     { id: "Aura Dental", name: "Aura Dental", category: "Clinics", desc: "Warm layout for dental & wellness practices.", preset: "Creator", image: "/images/themes/creator.png" },
+    { id: "PhysioHealth", name: "PhysioHealth", category: "Clinics", desc: "Professional clinic portal with therapy services.", preset: "Modern Startup", image: "/images/themes/corporate.png" },
+    
     // Fitness
     { id: "FitCore Studio", name: "FitCore Studio", category: "Fitness", desc: "Workout layouts, schedules, and trainer profiles.", preset: "Gaming", image: "/images/themes/fitness.png" },
+    { id: "ZenYoga", name: "ZenYoga", category: "Fitness", desc: "Calming minimalist space for yoga studios.", preset: "Creator", image: "/images/themes/creator.png" },
+    { id: "Apex Athletics", name: "Apex Athletics", category: "Fitness", desc: "High-performance gym and bodybuilding layouts.", preset: "Gaming", image: "/images/themes/fitness.png" },
+    
     // Education
     { id: "SkillUp Academy", name: "SkillUp Academy", category: "Education", desc: "Grid listings for online courses and lessons.", preset: "Modern Startup", image: "/images/themes/education.png" },
-    { id: "EduPortal Hub", name: "EduPortal Hub", category: "Education", desc: "Structured resource center for schools & tutors.", preset: "SaaS", image: "/images/themes/education.png" }
+    { id: "EduPortal Hub", name: "EduPortal Hub", category: "Education", desc: "Structured resource center for schools & tutors.", preset: "SaaS", image: "/images/themes/education.png" },
+    { id: "LearnLogic", name: "LearnLogic", category: "Education", desc: "Clean documentation and academy portal design.", preset: "SaaS", image: "/images/themes/education.png" },
+    
+    // Corporate
+    { id: "Summit Ventures", name: "Summit Ventures", category: "Corporate", desc: "Premium financial and venture capital profiles.", preset: "SaaS", image: "/images/themes/corporate.png" },
+    { id: "Nexus Corp", name: "Nexus Corp", category: "Corporate", desc: "Clean enterprise landing page with team rosters.", preset: "Modern Startup", image: "/images/themes/corporate.png" },
+    
+    // Creative Portfolio
+    { id: "Prism Studio", name: "Prism Studio", category: "Creative Portfolio", desc: "Bold design portfolio for branding agencies.", preset: "Creator", image: "/images/themes/creator.png" },
+    { id: "Studio Noir", name: "Studio Noir", category: "Creative Portfolio", desc: "Dark theme photography and art showcase.", preset: "Gaming", image: "/images/themes/luxury.png" }
   ];
 
   const activeTheme = themes.find(t => t.id === selectedThemeId) || themes[0];
@@ -188,7 +221,7 @@ export default function GeneratorForm({ user, tenantId, onSuccess, showThemes = 
     { label: "Make an e-commerce store", text: "Make an e-commerce store with cart function..." },
     { label: "Design a dental clinic landing page", text: "Design a landing page for my dental clinic..." },
     { label: "build a task management app", text: "build a task management app with status columns..." },
-    { label: "Create a portfolio website", text: "Create a portfolio website for a visual designer..." },
+    { label: "Create a visual designer portfolio", text: "Create a portfolio website for a visual designer..." },
     { label: "Build a SaaS billing dashboard", text: "Build a SaaS billing dashboard with chart views..." }
   ];
 
@@ -239,7 +272,7 @@ export default function GeneratorForm({ user, tenantId, onSuccess, showThemes = 
                 }
               }}
               placeholder={displayedPlaceholder || "Make an e-commerce store with cart func"}
-              rows={3}
+              rows={5}
             />
             <div className="prompt-bottom-bar">
               <span className="prompt-shortcut-text">
@@ -358,7 +391,7 @@ export default function GeneratorForm({ user, tenantId, onSuccess, showThemes = 
               <div 
                 style={{ 
                   display: "grid", 
-                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", 
+                  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", 
                   gap: "0.75rem", 
                   maxHeight: "340px", 
                   overflowY: "auto", 
