@@ -181,7 +181,7 @@ export default function GeneratorForm({ user, tenantId, onSuccess }: GeneratorFo
             />
             <div className="prompt-bottom-bar">
               <span className="prompt-shortcut-text">
-                Press <kbd style={{ fontFamily: "inherit", background: "rgba(255,255,255,0.08)", padding: "0.1rem 0.3rem", borderRadius: "0.25rem", border: "1px solid rgba(255,255,255,0.15)", fontSize: "0.72rem" }}>⌘ Enter</kbd> to start
+                Press <kbd style={{ fontFamily: "inherit", background: "rgba(255,255,255,0.08)", padding: "0.15rem 0.4rem", borderRadius: "0.25rem", border: "1px solid rgba(255,255,255,0.15)", fontSize: "0.72rem", color: "#fff", fontWeight: 600 }}>Enter</kbd> to start
               </span>
               <button type="button" onClick={handleNext} className="prompt-go-btn">
                 Go <ArrowRight size={16} />

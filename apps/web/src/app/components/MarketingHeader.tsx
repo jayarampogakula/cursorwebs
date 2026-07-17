@@ -49,7 +49,7 @@ export default function MarketingHeader({ active, user, appName: propAppName, ap
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#fff" }}><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.34 18.65a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.21 1.21 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>
             </div>
             <span style={{ fontSize: "1.45rem", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em" }}>
-              Simpl<span style={{ color: "var(--rose)" }}>A</span>Web
+              Cursor<span style={{ color: "var(--rose)" }}>Webs</span>
             </span>
           </div>
           <span className="logo-tagline" style={{ fontSize: "0.58rem", color: "var(--rose)", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", marginTop: "-2px", marginLeft: "2.75rem" }}>
@@ -85,7 +85,7 @@ export default function MarketingHeader({ active, user, appName: propAppName, ap
         <div className="nav-actions" style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
           {/* Flag and Device Preview Icons */}
           <div className="header-previews" style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginRight: "0.5rem" }}>
-            <span style={{ cursor: "pointer", fontSize: "1.1rem" }} title="English (US)">🇺🇸</span>
+            <span style={{ cursor: "pointer", fontSize: "0.85rem", fontWeight: 700, color: "#94a3b8" }} title="English (US)">US</span>
             <span style={{ display: "inline-flex", cursor: "pointer" }} title="Desktop Preview">
               <Monitor size={18} style={{ color: "#9ca3af" }} />
             </span>
