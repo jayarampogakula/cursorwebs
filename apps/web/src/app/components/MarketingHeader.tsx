@@ -83,13 +83,7 @@ export default function MarketingHeader({ active, user, appName: propAppName, ap
           <a href="/#use-cases" onClick={() => setIsOpen(false)}>Use Cases</a>
         </nav>
         <div className="nav-actions" style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
-          {/* Flag and Device Preview Icons */}
-          <div className="header-previews" style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginRight: "0.5rem" }}>
-            <span style={{ cursor: "pointer", fontSize: "0.85rem", fontWeight: 700, color: "#94a3b8" }} title="English (US)">US</span>
-            <span style={{ display: "inline-flex", cursor: "pointer" }} title="Desktop Preview">
-              <Monitor size={18} style={{ color: "#9ca3af" }} />
-            </span>
-          </div>
+
           {user ? (
             <>
               <span style={{ color: "#9aa7bd", fontSize: "0.85rem" }}>{user.email}</span>

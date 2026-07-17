@@ -1281,29 +1281,29 @@ option {
 .hero::before {
   content: "";
   position: absolute;
-  top: 0%;
-  left: 10%;
-  width: 45%;
-  height: 55%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--blue) 16%, transparent) 0%, transparent 70%);
-  filter: blur(90px);
+  top: -10%;
+  left: 5%;
+  width: 50%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, rgba(129, 140, 248, 0.05) 50%, transparent 70%);
+  filter: blur(120px);
   z-index: -1;
   pointer-events: none;
-  animation: pulseGlow 10s ease-in-out infinite alternate;
+  animation: pulseGlow 12s ease-in-out infinite alternate;
 }
 
 .hero::after {
   content: "";
   position: absolute;
-  bottom: 0%;
-  right: 10%;
-  width: 45%;
-  height: 55%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--teal) 14%, transparent) 0%, transparent 70%);
-  filter: blur(90px);
+  bottom: -5%;
+  right: -5%;
+  width: 55%;
+  height: 65%;
+  background: radial-gradient(circle, rgba(32, 199, 181, 0.2) 0%, rgba(56, 189, 248, 0.04) 50%, transparent 70%);
+  filter: blur(120px);
   z-index: -1;
   pointer-events: none;
-  animation: pulseGlow 14s ease-in-out infinite alternate-reverse;
+  animation: pulseGlow 16s ease-in-out infinite alternate-reverse;
 }
 
 @keyframes pulseGlow {
