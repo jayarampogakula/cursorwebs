@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Sparkles, Menu, X, Monitor } from "lucide-react";
+import { Sparkles, Menu, X, Monitor, LayoutDashboard } from "lucide-react";
 
 interface MarketingHeaderProps {
   active?: "signin" | "signup";
@@ -86,6 +86,26 @@ export default function MarketingHeader({ active, user, appName: propAppName, ap
 
           {user ? (
             <>
+              <a
+                href="/dashboard"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.4rem",
+                  background: "linear-gradient(135deg, #6366f1, #a855f7)",
+                  color: "#fff",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "0.5rem",
+                  fontWeight: 700,
+                  fontSize: "0.85rem",
+                  textDecoration: "none",
+                  transition: "all 0.2s",
+                  boxShadow: "0 2px 8px rgba(99, 102, 241, 0.3)",
+                }}
+              >
+                <LayoutDashboard size={16} />
+                Dashboard
+              </a>
               <span style={{ color: "#9aa7bd", fontSize: "0.85rem" }}>{user.email}</span>
               <a className="danger-action" href="/api/auth/signout">Sign out</a>
             </>

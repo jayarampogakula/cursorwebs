@@ -10,4 +10,13 @@ export const redisConnection = new IORedis(redisUrl, {
 // Initialize the BullMQ Website Generation Queue
 export const websiteGenerationQueue = new Queue("website-generation", {
   connection: redisConnection as any,
+  defaultJobOptions: {
+    attempts: 2,
+    backoff: {
+      type: "exponential",
+      delay: 10000,
+    },
+    removeOnComplete: 100,
+    removeOnFail: 200,
+  },
 });

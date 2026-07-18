@@ -95,6 +95,7 @@ export class GeminiProvider implements AIProvider {
   name = "gemini";
   private client: any;
   private modelName: string;
+  private maxRetries = 3;
 
   constructor(apiKey?: string, model?: string) {
     const key = apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
@@ -104,33 +105,75 @@ export class GeminiProvider implements AIProvider {
     this.modelName = model || "gemini-2.5-flash";
   }
 
+  private isTransientError(err: any): boolean {
+    const msg = (err?.message || "").toLowerCase();
+    const status = err?.status || err?.code || err?.statusCode;
+    return (
+      status === 503 || status === 429 || status === 500 ||
+      msg.includes("unavailable") ||
+      msg.includes("high demand") ||
+      msg.includes("overloaded") ||
+      msg.includes("temporarily") ||
+      msg.includes("rate limit") ||
+      msg.includes("resource exhausted") ||
+      msg.includes("internal error") ||
+      msg.includes("service unavailable")
+    );
+  }
+
+  private isQuotaOrNotFound(err: any): boolean {
+    const msg = (err?.message || "").toLowerCase();
+    return (
+      msg.includes("quota") ||
+      msg.includes("not found") ||
+      msg.includes("not_found") ||
+      msg.includes("limit")
+    );
+  }
+
+  private async sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   async generateText(params: GenerationParams): Promise<string> {
     if (!this.client) {
       throw new Error("Gemini API key is not configured.");
     }
-    try {
-      const response = await this.client.models.generateContent({
-        model: this.modelName,
-        contents: params.prompt,
-        config: params.systemPrompt ? { systemInstruction: params.systemPrompt } : undefined
-      });
-      return response.text || "";
-    } catch (err: any) {
-      const isQuotaOrNotFound = err?.message?.toLowerCase().includes("quota") || 
-                              err?.message?.toLowerCase().includes("not found") || 
-                              err?.message?.toLowerCase().includes("not_found") || 
-                              err?.message?.toLowerCase().includes("limit");
-      if (this.modelName.toLowerCase().includes("pro") && isQuotaOrNotFound) {
-        console.warn(`Gemini Pro model text generation failed. Falling back to gemini-2.5-flash. Error: ${err.message}`);
-        const fallbackResponse = await this.client.models.generateContent({
-          model: "gemini-2.5-flash",
+
+    let lastError: any = null;
+    for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+      try {
+        if (attempt > 0) {
+          const delay = Math.min(2000 * Math.pow(2, attempt - 1), 16000);
+          console.warn(`[Gemini] Retry attempt ${attempt}/${this.maxRetries} for generateText after ${delay}ms...`);
+          await this.sleep(delay);
+        }
+        const response = await this.client.models.generateContent({
+          model: this.modelName,
           contents: params.prompt,
           config: params.systemPrompt ? { systemInstruction: params.systemPrompt } : undefined
         });
-        return fallbackResponse.text || "";
+        return response.text || "";
+      } catch (err: any) {
+        lastError = err;
+        if (this.isTransientError(err) && attempt < this.maxRetries) {
+          console.warn(`[Gemini] Transient error on generateText attempt ${attempt + 1}: ${err.message}`);
+          continue;
+        }
+        // Model fallback for quota errors on Pro models
+        if (this.modelName.toLowerCase().includes("pro") && this.isQuotaOrNotFound(err)) {
+          console.warn(`Gemini Pro model text generation failed. Falling back to gemini-2.5-flash. Error: ${err.message}`);
+          const fallbackResponse = await this.client.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: params.prompt,
+            config: params.systemPrompt ? { systemInstruction: params.systemPrompt } : undefined
+          });
+          return fallbackResponse.text || "";
+        }
+        throw err;
       }
-      throw err;
     }
+    throw lastError;
   }
 
   async generateJson<T>(params: GenerationParams): Promise<T> {
@@ -141,46 +184,56 @@ export class GeminiProvider implements AIProvider {
     // Default to the requested model. If no pro model was explicitly chosen, use gemini-2.5-flash to preserve quotas.
     const targetModel = this.modelName.toLowerCase().includes("pro") ? this.modelName : "gemini-2.5-flash";
     
-    try {
-      const response = await this.client.models.generateContent({
-        model: targetModel,
-        contents: params.prompt,
-        config: {
-          systemInstruction: params.systemPrompt,
-          responseMimeType: "application/json",
+    let lastError: any = null;
+    for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+      try {
+        if (attempt > 0) {
+          const delay = Math.min(2000 * Math.pow(2, attempt - 1), 16000);
+          console.warn(`[Gemini] Retry attempt ${attempt}/${this.maxRetries} for generateJson after ${delay}ms...`);
+          await this.sleep(delay);
         }
-      });
-      let text = response.text || "{}";
-      // Sanitize markdown code blocks if present
-      if (text.includes("```")) {
-        const startIdx = text.indexOf("{");
-        const endIdx = text.lastIndexOf("}");
-        if (startIdx !== -1 && endIdx !== -1) {
-          text = text.substring(startIdx, endIdx + 1);
-        }
-      }
-      return JSON.parse(text) as T;
-    } catch (err: any) {
-      const isQuotaOrNotFound = err?.message?.toLowerCase().includes("quota") || 
-                              err?.message?.toLowerCase().includes("not found") || 
-                              err?.message?.toLowerCase().includes("not_found") || 
-                              err?.message?.toLowerCase().includes("limit");
-      
-      if (isQuotaOrNotFound && targetModel !== "gemini-2.5-flash") {
-        console.warn(`Gemini JSON generation failed on ${targetModel}. Falling back to gemini-2.5-flash. Error: ${err.message}`);
-        const fallbackResponse = await this.client.models.generateContent({
-          model: "gemini-2.5-flash",
+        const response = await this.client.models.generateContent({
+          model: targetModel,
           contents: params.prompt,
           config: {
             systemInstruction: params.systemPrompt,
             responseMimeType: "application/json",
           }
         });
-        const text = fallbackResponse.text || "{}";
+        let text = response.text || "{}";
+        // Sanitize markdown code blocks if present
+        if (text.includes("```")) {
+          const startIdx = text.indexOf("{");
+          const endIdx = text.lastIndexOf("}");
+          if (startIdx !== -1 && endIdx !== -1) {
+            text = text.substring(startIdx, endIdx + 1);
+          }
+        }
         return JSON.parse(text) as T;
+      } catch (err: any) {
+        lastError = err;
+        if (this.isTransientError(err) && attempt < this.maxRetries) {
+          console.warn(`[Gemini] Transient error on generateJson attempt ${attempt + 1}: ${err.message}`);
+          continue;
+        }
+        // Model fallback for quota errors
+        if (this.isQuotaOrNotFound(err) && targetModel !== "gemini-2.5-flash") {
+          console.warn(`Gemini JSON generation failed on ${targetModel}. Falling back to gemini-2.5-flash. Error: ${err.message}`);
+          const fallbackResponse = await this.client.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: params.prompt,
+            config: {
+              systemInstruction: params.systemPrompt,
+              responseMimeType: "application/json",
+            }
+          });
+          const text = fallbackResponse.text || "{}";
+          return JSON.parse(text) as T;
+        }
+        throw err;
       }
-      throw err;
     }
+    throw lastError;
   }
 }
 
